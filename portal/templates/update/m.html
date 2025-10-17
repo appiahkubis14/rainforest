@@ -1,0 +1,2969 @@
+{% extends 'update/base.html' %}
+{% block map %} active {% endblock %}
+{% block tree_reg %} menu-open {% endblock %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style type="text/css">
+
+    #fullscreen-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.fullscreen-content {
+    height: 100%;
+    margin: 0;
+}
+
+.fullscreen-card {
+    height: 100%;
+    border: none;
+    border-radius: 0;
+}
+
+
+/* Fix for fullscreen mode */
+body.fullscreen-mode .modal {
+    z-index: 99999 !important;
+    position: fixed !important;
+}
+
+body.fullscreen-mode .modal-backdrop {
+    z-index: 99998 !important;
+    position: fixed !important;
+}
+
+/* Full Screen Mode */
+body.fullscreen-mode {
+    overflow: hidden;
+}
+
+.fullscreen-active {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+}
+  /* Map Container */
+  #map { 
+    height: 100vh; 
+    width: 100%; 
+    z-index: 1;
+  }
+  
+  /* Floating Controls Panel */
+  .map-controls-panel { 
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    z-index: 1000; 
+    background: rgba(255, 255, 255, 0.95); 
+    border-radius: 12px; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 380px;
+    max-height: 90vh;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+  
+  .map-controls-panel.collapsed {
+    width: 50px;
+  }
+  
+  .map-controls-panel.collapsed .panel-content {
+    display: none;
+  }
+  
+  .map-controls-panel.collapsed .panel-header h6 {
+    display: none;
+  }
+  
+  .map-controls-panel.collapsed .panel-header {
+    justify-content: center;
+  }
+  
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #4A7C3A, #288541);
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .panel-header h6 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .panel-content {
+    padding: 15px;
+    max-height: calc(90vh - 60px);
+    overflow-y: auto;
+  }
+  
+  .control-section {
+    margin-bottom: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+  }
+  
+  .control-section:hover {
+    border-color: rgba(47, 125, 156, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: rgba(248, 249, 250, 0.8);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+  }
+  
+  .section-header:hover {
+    background-color: rgba(233, 236, 239, 0.8);
+  }
+  
+  .section-header i:first-child {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+    color: #2f7d9c;
+  }
+  
+  .section-header span {
+    flex-grow: 1;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #495057;
+  }
+  
+  .toggle-icon {
+    transition: transform 0.3s ease;
+    color: #6c757d;
+  }
+  
+  .section-header.active .toggle-icon {
+    transform: rotate(180deg);
+  }
+  
+  .section-content {
+    padding: 15px;
+    background-color: white;
+    display: none;
+  }
+  
+  .section-content.active {
+    display: block;
+  }
+  
+  /* Layer Cards */
+  .layer-control-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .layer-card {
+    position: relative;
+    margin-bottom: 8px;
+  }
+  
+  .layer-radio {
+    display: none;
+  }
+  
+  .layer-card-content {
+    display: block;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+  }
+  
+  .layer-card-content:hover {
+    border-color: #2f7d9c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .layer-radio:checked + .layer-card-content {
+    border-color: #2f7d9c;
+    background-color: rgba(47, 125, 156, 0.05);
+  }
+  
+  .layer-preview {
+    position: relative;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  
+  .layer-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .layer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  .layer-radio:checked + .layer-card-content .layer-overlay {
+    opacity: 1;
+  }
+  
+  .selected-icon {
+    color: white;
+    font-size: 1.2rem;
+  }
+  
+  .layer-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .layer-icon {
+    margin-right: 6px;
+    color: #2f7d9c;
+    font-size: 0.8rem;
+  }
+  
+  .layer-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  /* Opacity Controls */
+  .opacity-control {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 12px;
+    margin-top: 12px;
+  }
+  
+  .opacity-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #495057;
+    display: flex;
+    align-items: center;
+  }
+  
+  .slider-container {
+    padding: 0 5px;
+  }
+  
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 0.7rem;
+    color: #6c757d;
+  }
+  
+  /* Form Controls */
+  .form-check {
+    margin-bottom: 8px;
+    padding-left: 0;
+  }
+  
+  .form-check-input {
+    margin-right: 8px;
+  }
+  
+  .form-check-label {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #495057;
+    cursor: pointer;
+  }
+  
+  /* Legend */
+  .legend-group {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .legend-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .legend-group-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #495057;
+    display: flex;
+    align-items: center;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .legend-item small {
+    font-size: 0.75rem;
+    color: #6c757d;
+  }
+  
+  /* Tools */
+  .tools-group {
+    border-left: 3px solid #2f7d9c;
+    padding-left: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .tools-group-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .btn-group {
+    margin-bottom: 8px;
+  }
+  
+  .btn {
+    border-radius: 6px !important;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+  
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+  
+  /* Search Container */
+  .search-top-container {
+    position: absolute;
+    top: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 400px;
+    max-width: 90%;
+  }
+  
+  .search-top-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  
+  .search-top-header {
+    background: linear-gradient(135deg, #4A7C3A, #288541);
+    color: white;
+    padding: 12px 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+  }
+  
+  .search-top-body {
+    padding: 16px;
+  }
+  
+  .search-top-body .input-group {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  .search-top-body .form-control {
+    border: 1px solid #e9ecef;
+    border-right: none;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .search-top-body .form-control:focus {
+    box-shadow: none;
+    border-color: #2f7d9c;
+  }
+  
+  .search-top-body .btn {
+    border: 1px solid #e9ecef;
+    border-left: none;
+    background: white;
+    color: #6c757d;
+    padding: 10px 12px;
+  }
+  
+  .search-top-body .btn:hover {
+    background: #f8f9fa;
+    color: #495057;
+  }
+  
+  /* Search Results */
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1001;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 8px;
+  }
+  
+  .search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .search-result-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .search-result-item:last-child {
+    border-bottom: none;
+  }
+  
+  .search-result-item.active {
+    background-color: rgba(47, 125, 156, 0.1);
+    border-left: 3px solid #2f7d9c;
+  }
+  
+  .farm-code {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9em;
+  }
+  
+  .farm-name {
+    color: #495057;
+    font-size: 0.85em;
+    margin-top: 2px;
+  }
+  
+  .farm-farmer {
+    color: #6c757d;
+    font-size: 0.8em;
+    margin-top: 1px;
+  }
+  
+  .farm-status-badge {
+    font-size: 0.7em;
+    padding: 3px 8px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 500;
+    min-width: 60px;
+    text-align: center;
+  }
+  
+  .search-stats {
+    padding: 8px 0;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+  }
+  
+  .no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+  }
+  
+  .loading-results {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+  }
+  
+  .loading-results i {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Farm Popup */
+  .farm-popup-content {
+    min-width: 250px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .farm-header {
+    background: linear-gradient(135deg, #4A7C3A, #288541);
+    color: white;
+    border-radius: 8px 8px 0 0;
+    margin: -12px -12px 10px -12px;
+    padding: 12px;
+    text-align: center;
+  }
+  
+  .farm-header h6 {
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  
+  .detail-item {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .detail-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  
+  /* Farm Modal - Clean Styling */
+  #farmModal .modal-content {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: none;
+    overflow: hidden;
+  }
+  
+  #farmModal .modal-header {
+    background: linear-gradient(135deg, #4A7C3A, #288541);
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 15px 20px;
+  }
+  
+  #farmModal .modal-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  #farmModal .btn-close {
+    filter: invert(1);
+    opacity: 0.8;
+  }
+  
+  #farmModal .btn-close:hover {
+    opacity: 1;
+  }
+  
+  #farmModal .modal-body {
+    padding: 20px;
+    background-color: #f8f9fa;
+  }
+  
+  #farmModal .modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 15px 20px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  /* Farm Details Grid */
+  .farm-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .farm-details-section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .farm-details-section h6 {
+    margin-bottom: 12px;
+    color: #2f7d9c;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 8px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .detail-row {
+    display: flex;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .detail-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  .detail-label {
+    font-weight: 600;
+    min-width: 120px;
+    color: #495057;
+    font-size: 0.85rem;
+  }
+  
+  .detail-value {
+    flex-grow: 1;
+    color: #212529;
+    font-size: 0.85rem;
+  }
+  
+  /* Badge Styling */
+  .badge {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 6px;
+  }
+  
+  /* Button Styling */
+  .btn-primary {
+    background: linear-gradient(135deg, #4A7C3A, #288541);
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #266a87 0%, #3272a8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(47, 125, 156, 0.3);
+  }
+  
+  .btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    border: none;
+    color: #212529;
+  }
+  
+  .btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    border: none;
+  }
+  
+  .btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    border: none;
+  }
+  
+  .btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .map-controls-panel {
+      width: 300px;
+    }
+    
+    .farm-details-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .layer-control-group {
+      grid-template-columns: 1fr;
+    }
+    
+    .search-top-container {
+      width: 350px;
+      top: 110px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .map-controls-panel {
+      width: 280px;
+    }
+    
+    .search-top-container {
+      width: 300px;
+    }
+    
+    .panel-content {
+      padding: 10px;
+    }
+  }
+</style>
+{% endblock%}
+
+{% block body %}
+<!-- Full Screen Container -->
+<div id="fullscreen-container">
+    <div class="row fullscreen-content">
+        <div class="col-12">
+            <!-- Map Container -->
+            <div class="search-top-container">
+                <div class="search-top-card">
+                    <div class="search-top-body">
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Search by farm code, name, or farmer...">
+                            <button class="btn btn-outline-secondary" id="clearSearchBtn" type="button" title="Clear search">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="searchResults" class="search-results mt-1" style="display: none;"></div>
+                        
+                        <div id="searchStats" class="search-stats mt-2" style="display: none;">
+                            <small class="text-muted" id="matchesCount">0 matches</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card fullscreen-card">
+                <div class="card-body p-0 position-relative">
+                    <div id="map"></div>
+                    
+                    <!-- Floating Controls Panel -->
+                    <div class="map-controls-panel">
+                        <div class="panel-header">
+                            <h6>Map Controls</h6>
+                            <button id="togglePanel" class="btn btn-sm btn-light">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="panel-content">
+                            <!-- Base Maps Section -->
+                            <div class="control-section">
+                                <div class="section-header" data-toggle="base-maps-section" style="display: flex;gap: 8px;">
+                                    <i class="fas fa-map"></i>
+                                    <span>Base Maps</span>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </div>
+                                <div class="section-content" id="base-maps-section">
+                                    <div class="layer-control-group">
+                                        <!-- OpenStreetMap Layer Card -->
+                                        <div class="layer-card">
+                                            <input class="layer-radio" type="radio" name="baseMap" id="openstreetmapLayer" checked>
+                                            <label class="layer-card-content" for="openstreetmapLayer">
+                                                <div class="layer-preview">
+                                                    <img src="/static/dist/img/tiles/2.png" alt="OpenStreetMap" class="layer-image">
+                                                    <div class="layer-overlay">
+                                                        <i class="fas fa-check-circle selected-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="layer-info">
+                                                    <i class="fas fa-map layer-icon"></i>
+                                                    <span class="layer-name">OpenStreetMap</span>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- Satellite Layer Card -->
+                                        <div class="layer-card">
+                                            <input class="layer-radio" type="radio" name="baseMap" id="satelliteLayer">
+                                            <label class="layer-card-content" for="satelliteLayer">
+                                                <div class="layer-preview">
+                                                    <img src="/static/dist/img/tiles/3.png" alt="Satellite" class="layer-image">
+                                                    <div class="layer-overlay">
+                                                        <i class="fas fa-check-circle selected-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="layer-info">
+                                                    <i class="fas fa-satellite layer-icon"></i>
+                                                    <span class="layer-name">Satellite</span>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- Hybrid Layer Card -->
+                                        <div class="layer-card">
+                                            <input class="layer-radio" type="radio" name="baseMap" id="hybridLayer">
+                                            <label class="layer-card-content" for="hybridLayer">
+                                                <div class="layer-preview">
+                                                    <img src="/static/dist/img/tiles/4.png" alt="Hybrid" class="layer-image">
+                                                    <div class="layer-overlay">
+                                                        <i class="fas fa-check-circle selected-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="layer-info">
+                                                    <i class="fas fa-layer-group layer-icon"></i>
+                                                    <span class="layer-name">Hybrid</span>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- Terrain Layer Card -->
+                                        <div class="layer-card">
+                                            <input class="layer-radio" type="radio" name="baseMap" id="terrainLayer">
+                                            <label class="layer-card-content" for="terrainLayer">
+                                                <div class="layer-preview">
+                                                    <img src="/static/dist/img/tiles/5.png" alt="Terrain" class="layer-image">
+                                                    <div class="layer-overlay">
+                                                        <i class="fas fa-check-circle selected-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="layer-info">
+                                                    <i class="fas fa-mountain layer-icon"></i>
+                                                    <span class="layer-name">Terrain</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Base Map Opacity -->
+                                    <div class="opacity-control mt-4">
+                                        <h6 class="opacity-title">
+                                            <i class="fas fa-adjust me-2"></i>Base Map Opacity
+                                        </h6>
+                                        <div class="slider-container">
+                                            <input type="range" class="form-range base-opacity-slider" id="baseOpacitySlider" min="0" max="100" value="100">
+                                            <div class="slider-labels">
+                                                <span>0%</span>
+                                                <span id="baseOpacityValue">100%</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Administrative Boundaries Section -->
+                            <div class="control-section">
+                                <div class="section-header" data-toggle="admin-boundaries-section" style="display: flex;gap: 8px;">
+                                    <i class="fas fa-landmark"></i>
+                                    <span>Administrative Boundaries</span>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </div>
+                                <div class="section-content" id="admin-boundaries-section">
+                                    <div class="layer-control-group">
+                                        <!-- District Boundaries -->
+                                        <div class="layer-card">
+                                            <input class="layer-radio" type="checkbox" id="districtBoundariesLayer">
+                                            <label class="layer-card-content" for="districtBoundariesLayer">
+                                                <div class="layer-preview">
+                                                    <img src="/static/dist/img/tiles/dis.jpeg" alt="District Boundaries" class="layer-image">
+                                                    <div class="layer-overlay">
+                                                        <i class="fas fa-check-circle selected-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="layer-info">
+                                                    <i class="fas fa-map-marked layer-icon"></i>
+                                                    <span class="layer-name">District Boundaries</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Administrative Boundaries Opacity -->
+                                    <div class="opacity-control mt-4">
+                                        <h6 class="opacity-title">
+                                            <i class="fas fa-adjust me-2"></i>Boundaries Opacity
+                                        </h6>
+                                        <div class="slider-container">
+                                            <input type="range" class="form-range boundaries-opacity-slider" id="boundariesOpacitySlider" min="0" max="100" value="70">
+                                            <div class="slider-labels">
+                                                <span>0%</span>
+                                                <span id="boundariesOpacityValue">70%</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Boundary Style Options -->
+                                    <div class="style-controls mt-3">
+                                        <h6 class="style-title">
+                                            <i class="fas fa-palette me-2"></i>Boundary Styles
+                                        </h6>
+                                        
+                                        <!-- Color Picker for Districts -->
+                                        <div class="color-picker-group mb-2">
+                                            <label class="color-label">District Color:</label>
+                                            <input type="color" class="form-control form-control-color" id="districtColorPicker" value="#004E89" title="Choose district boundary color">
+                                        </div>
+
+                                        <!-- Line Weight Control -->
+                                        <div class="weight-control">
+                                            <label class="weight-label">Line Weight:</label>
+                                            <input type="range" class="form-range line-weight-slider" id="lineWeightSlider" min="1" max="8" value="3">
+                                            <div class="slider-labels">
+                                                <span>Thin</span>
+                                                <span id="lineWeightValue">3px</span>
+                                                <span>Thick</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Farm Data Layers Section -->
+                            <div class="control-section">
+                                <div class="section-header" data-toggle="farm-data-section" style="display: flex;gap: 8px;">
+                                    <i class="fas fa-tractor"></i>
+                                    <span>Farm Data Layers</span>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </div>
+                                <div class="section-content" id="farm-data-section">
+                                    <div class="layer-control-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="farmLayer" checked>
+                                            <label class="form-check-label" for="farmLayer">
+                                                <i class="fas fa-tractor me-1"></i>Farm Boundaries
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="treeLayer">
+                                            <label class="form-check-label" for="treeLayer">
+                                                <i class="fas fa-tree me-1"></i>Trees
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Farm Layers Opacity -->
+                                    <div class="opacity-control mt-3">
+                                        <h6 class="opacity-title">
+                                            <i class="fas fa-adjust me-1"></i>Farm Layers Opacity
+                                        </h6>
+                                        <input type="range" class="form-range farm-opacity-slider" id="farmOpacitySlider" min="0" max="100" value="70">
+                                        <small class="text-muted" id="farmOpacityValue">70%</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Legend Section -->
+                            <div class="control-section">
+                                <div class="section-header" data-toggle="legend-section" style="display: flex;gap: 8px;">
+                                    <i class="fas fa-map"></i>
+                                    <span>Map Legend</span>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </div>
+                                <div class="section-content" id="legend-section">
+                                    <!-- Tree Density Legend -->
+                                    <div class="legend-group mb-3">
+                                        <h6 class="legend-group-title">
+                                            <i class="fas fa-tree me-1"></i>Tree Density
+                                        </h6>
+                                        <div class="legend-item d-flex align-items-center mb-1">
+                                            <div class="legend-color" style="background-color: #006400;"></div>
+                                            <small>High (150+ trees/ha)</small>
+                                        </div>
+                                        <div class="legend-item d-flex align-items-center mb-1">
+                                            <div class="legend-color" style="background-color: #32CD32;"></div>
+                                            <small>Medium (100-149 trees/ha)</small>
+                                        </div>
+                                        <div class="legend-item d-flex align-items-center">
+                                            <div class="legend-color" style="background-color: #90EE90;"></div>
+                                            <small>Low (&lt;100 trees/ha)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Tools Section -->
+                            <div class="control-section">
+                                <div class="section-header" data-toggle="tools-section" style="display: flex;gap: 8px;">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Tools</span>
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </div>
+                                <div class="section-content" id="tools-section">
+                                    <!-- Measurement Tools -->
+                                    <div class="tools-group mb-3">
+                                        <h6 class="tools-group-title">
+                                            <i class="fas fa-ruler-combined me-1"></i>Measurement Tools
+                                        </h6>
+                                        <div class="btn-group w-100 mb-2" role="group">
+                                            <button type="button" class="btn btn-outline-success btn-sm" id="measureDistanceTool" title="Measure Distance">
+                                                <i class="fas fa-ruler"></i> Distance
+                                            </button>
+                                            <button type="button" class="btn btn-outline-info btn-sm" id="measureAreaTool" title="Measure Area">
+                                                <i class="fas fa-draw-polygon"></i> Area
+                                            </button>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger btn-sm w-100" id="clearMeasureTool" title="Clear All Measurements">
+                                            <i class="fas fa-trash"></i> Clear Measurements
+                                        </button>
+                                    </div>
+
+                                    <!-- Map Tools -->
+                                    <div class="tools-group mb-3">
+                                        <h6 class="tools-group-title">
+                                            <i class="fas fa-map me-1"></i>Map Tools
+                                        </h6>
+                                        <button id="refreshMap" class="btn btn-outline-primary btn-sm w-100 mb-1">
+                                            <i class="fas fa-sync-alt"></i> Refresh Map
+                                        </button>
+                                        <button id="fitToBounds" class="btn btn-outline-secondary btn-sm w-100 mb-1">
+                                            <i class="fas fa-expand"></i> Fit to Farms
+                                        </button>
+                                        <button id="clearSelection" class="btn btn-outline-warning btn-sm w-100 mb-1">
+                                            <i class="fas fa-times"></i> Clear Selection
+                                        </button>
+                                        <button id="fullScreenBtn" class="btn btn-outline-info btn-sm w-100">
+                                            <i class="fas fa-expand-arrows-alt"></i> Full Screen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Farm Details Modal -->
+            <div class="modal fade" id="farmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header draggable-handle" style="cursor: move;">
+                            <h5 class="modal-title">Farm Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="farmDetails">
+                            <!-- Farm details will be loaded here -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-warning" id="editBoundaryBtn">
+                                <i class="fas fa-edit"></i> Edit Boundary
+                            </button>
+                            <button type="button" class="btn btn-info" id="saveBoundaryBtn">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <!-- <button type="button" class="btn btn-success" id="validateBoundaryBtn">
+                                <i class="fas fa-check"></i> Validate
+                            </button> -->
+                           
+                            <button type="button" class="btn btn-danger" id="cancelEditBtn" style="display: none;">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<script src="/static/app/js/leaflet-measure.js"></script>
+<script src="https://unpkg.com/geojson-vt@3.2.0/geojson-vt.js"></script>
+<script src="/static/dist/js/leaflet-geojson-vt.js"></script> -->
+<script type="text/javascript">
+    // Global variables
+    let map;
+    let farmLayers = L.featureGroup();
+    let farmsData = [];
+    let currentFarmId = null;
+    let editingLayer = null;
+    let isFullScreen = false;
+    let originalMapPosition = null;
+    let drawControl;
+    let isEditingMode = false;
+    let originalBoundaryLayer = null;
+    let editedLayer = null;
+    let originalFarmData = null;
+
+    // Tile layers
+    let satelliteLayer, streetLayer, hybridLayer, terrainLayer, openstreetmapLayer;
+
+    // Other layers
+    let treeLayer = L.featureGroup();
+    let treeIconsLayer = L.layerGroup();
+    let districtBoundariesLayer = L.layerGroup();
+
+    // Boundary styles
+    let boundaryStyles = {
+        districts: {
+            color: '#004E89',
+            weight: 2,
+            opacity: 0.7,
+            fill: false,
+            fillOpacity: 0
+        }
+    };
+
+    // Farm status colors
+    const statusColors = {
+        'active': '#28a745',
+        'delayed': '#ffc107',
+        'critical': '#dc3545',
+        'completed': '#17a2b8',
+        'abandoned': '#6c757d'
+    };
+
+    // Initialize map when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeMap();
+        setupPopupEventHandlers();
+    });
+
+    // ==================== INITIALIZATION FUNCTIONS ====================
+
+    function initializeMap() {
+        // Create map centered on Ghana
+        map = L.map('map').setView([6.088, -2.063], 9);
+
+        // Initialize tile layers
+        initializeTileLayers();
+        
+        // Add default layers
+        openstreetmapLayer.addTo(map);
+
+        // Initialize all layer groups
+        farmLayers.addTo(map);
+        treeIconsLayer.addTo(map);
+        treeLayer.addTo(map);
+
+        // Hide tree layer by default
+        treeLayer.removeFrom(map);
+
+        // Add scale control
+        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+
+        // Initialize components
+        initMeasurement();
+        initDrawControl();
+        loadFarmData();
+        initializeAdministrativeBoundaries();
+        setupEventListeners();
+        setupDrawEventListeners();
+        initializePanelSections();
+        initializeOpacityControls();
+    }
+
+    function initializeTileLayers() {
+        openstreetmapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        });
+
+        satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Satellite'
+        });
+
+        hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Satellite'
+        });
+
+        terrainLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
+        });
+    }
+
+    function initDrawControl() {
+        drawControl = new L.Control.Draw({
+            position: 'topright',
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    drawError: {
+                        color: '#e1e100',
+                        message: '<strong>Error:</strong> Polygon edges cannot cross!'
+                    },
+                    shapeOptions: {
+                        color: '#9700ff',
+                        fillOpacity: 0.3
+                    },
+                    showArea: true,
+                    metric: true,
+                    guideLines: true
+                },
+                polyline: false,
+                rectangle: false,
+                circle: false,
+                circlemarker: false,
+                marker: false
+            },
+            edit: {
+                featureGroup: farmLayers,
+                remove: false
+            }
+        });
+    }
+
+    function initializePanelSections() {
+        document.querySelectorAll('.section-header').forEach(header => {
+            const targetId = header.getAttribute('data-toggle');
+            if (!targetId) return;
+            
+            const sectionContent = document.getElementById(targetId);
+            if (!sectionContent) return;
+
+            header.addEventListener('click', function () {
+                const isActive = sectionContent.classList.contains('active');
+                this.classList.toggle('active');
+                sectionContent.classList.toggle('active');
+            });
+        });
+
+        const togglePanelBtn = document.getElementById('togglePanel');
+        if (togglePanelBtn) {
+            togglePanelBtn.addEventListener('click', function () {
+                const panel = document.querySelector('.map-controls-panel');
+                if (panel) {
+                    panel.classList.toggle('collapsed');
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        if (panel.classList.contains('collapsed')) {
+                            icon.classList.remove('fa-chevron-left');
+                            icon.classList.add('fa-chevron-right');
+                        } else {
+                            icon.classList.remove('fa-chevron-right');
+                            icon.classList.add('fa-chevron-left');
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function initializeOpacityControls() {
+        document.getElementById('baseOpacitySlider').addEventListener('input', function(e) {
+            const opacity = e.target.value / 100;
+            document.getElementById('baseOpacityValue').textContent = `${e.target.value}%`;
+            setBaseMapOpacity(opacity);
+        });
+
+        document.getElementById('farmOpacitySlider').addEventListener('input', function(e) {
+            const opacity = e.target.value / 100;
+            document.getElementById('farmOpacityValue').textContent = `${e.target.value}%`;
+            setFarmLayersOpacity(opacity);
+        });
+    }
+
+    // ==================== EVENT LISTENERS SETUP ====================
+
+    function setupEventListeners() {
+        setupSearchListeners();
+        setupBaseMapListeners();
+        setupLayerToggleListeners();
+        setupBoundaryControlListeners();
+        setupToolListeners();
+        setupEditBoundaryListeners();
+        setupMeasurementListeners();
+        setupWindowResizeListener();
+    }
+
+    function setupSearchListeners() {
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const searchInput = document.getElementById('searchInput');
+        
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', clearSearch);
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearchInput);
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') performSearch();
+                if (e.key === 'Escape') clearSearch();
+            });
+        }
+    }
+
+    function setupBaseMapListeners() {
+        const baseMapRadios = [
+            'openstreetmapLayer', 'satelliteLayer', 'hybridLayer', 'terrainLayer'
+        ];
+        
+        baseMapRadios.forEach(radioId => {
+            const radio = document.getElementById(radioId);
+            if (radio) {
+                radio.addEventListener('change', function() {
+                    if (this.checked) switchBaseMap(this.id);
+                });
+            }
+        });
+    }
+
+    function setupLayerToggleListeners() {
+        const farmLayerCheckbox = document.getElementById('farmLayer');
+        const treeLayerCheckbox = document.getElementById('treeLayer');
+        
+        if (farmLayerCheckbox) {
+            farmLayerCheckbox.addEventListener('change', toggleFarmLayer);
+        }
+        
+        if (treeLayerCheckbox) {
+            treeLayerCheckbox.addEventListener('change', toggleTreeLayer);
+        }
+    }
+
+    function setupBoundaryControlListeners() {
+        const districtBoundariesCheckbox = document.getElementById('districtBoundariesLayer');
+        if (districtBoundariesCheckbox) {
+            districtBoundariesCheckbox.addEventListener('change', toggleDistrictBoundariesLayer);
+        }
+
+        const boundariesOpacitySlider = document.getElementById('boundariesOpacitySlider');
+        const districtColorPicker = document.getElementById('districtColorPicker');
+        const lineWeightSlider = document.getElementById('lineWeightSlider');
+        
+        if (boundariesOpacitySlider) {
+            boundariesOpacitySlider.addEventListener('input', updateBoundariesOpacity);
+        }
+        
+        if (districtColorPicker) {
+            districtColorPicker.addEventListener('change', updateDistrictBoundaryColor);
+        }
+        
+        if (lineWeightSlider) {
+            lineWeightSlider.addEventListener('input', updateBoundaryLineWeight);
+        }
+    }
+
+    function setupToolListeners() {
+        const refreshMapBtn = document.getElementById('refreshMap');
+        const fitToBoundsBtn = document.getElementById('fitToBounds');
+        const clearSelectionBtn = document.getElementById('clearSelection');
+        const fullScreenBtn = document.getElementById('fullScreenBtn');
+        
+        if (refreshMapBtn) {
+            refreshMapBtn.addEventListener('click', refreshMap);
+        }
+        
+        if (fitToBoundsBtn) {
+            fitToBoundsBtn.addEventListener('click', fitToBounds);
+        }
+        
+        if (clearSelectionBtn) {
+            clearSelectionBtn.addEventListener('click', clearSelection);
+        }
+        
+        if (fullScreenBtn) {
+            fullScreenBtn.addEventListener('click', toggleFullScreen);
+        }
+    }
+
+    function setupEditBoundaryListeners() {
+        const editBoundaryBtn = document.getElementById('editBoundaryBtn');
+        const saveBoundaryBtn = document.getElementById('saveBoundaryBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        
+        if (editBoundaryBtn) {
+            editBoundaryBtn.addEventListener('click', startEditingBoundary);
+        }
+        
+        if (saveBoundaryBtn) {
+            saveBoundaryBtn.addEventListener('click', saveBoundaryChanges);
+        }
+        
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', cancelEditing);
+        }
+    }
+
+    function setupMeasurementListeners() {
+        const measureDistanceTool = document.getElementById('measureDistanceTool');
+        const measureAreaTool = document.getElementById('measureAreaTool');
+        const clearMeasureTool = document.getElementById('clearMeasureTool');
+        
+        if (measureDistanceTool) {
+            measureDistanceTool.addEventListener('click', startDistanceMeasurement);
+        }
+        
+        if (measureAreaTool) {
+            measureAreaTool.addEventListener('click', startAreaMeasurement);
+        }
+        
+        if (clearMeasureTool) {
+            clearMeasureTool.addEventListener('click', clearAllMeasurements);
+        }
+    }
+
+    function setupWindowResizeListener() {
+        window.addEventListener('resize', function () {
+            setTimeout(() => {
+                map.invalidateSize(true);
+            }, 100);
+        });
+    }
+
+    function setupDrawEventListeners() {
+        map.on(L.Draw.Event.CREATED, function(e) {
+            const layer = e.layer;
+            showToast('New polygon created', 'info');
+        });
+
+        map.on(L.Draw.Event.EDITED, function(e) {
+            const layers = e.layers;
+            let count = 0;
+            
+            layers.eachLayer(function(layer) {
+                count++;
+            });
+            
+            showToast(`Boundary updated - ${count} change(s) made`, 'info');
+        });
+
+        map.on(L.Draw.Event.DELETED, function(e) {
+            const layers = e.layers;
+            let count = 0;
+            
+            layers.eachLayer(function(layer) {
+                count++;
+            });
+            
+            showToast(`Deleted ${count} layer(s)`, 'info');
+        });
+    }
+
+    function setupPopupEventHandlers() {
+        console.log('Setting up popup event handlers...');
+        
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.view-details-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const farmId = e.target.closest('.view-details-btn').getAttribute('onclick').match(/\d+/)[0];
+                if (farmId) {
+                    console.log('View details clicked for farm:', farmId);
+                    showFarmDetails(parseInt(farmId));
+                }
+            }
+        });
+        
+        console.log('Popup event handlers setup complete');
+    }
+
+    // ==================== MAP LAYER FUNCTIONS ====================
+
+    function switchBaseMap(selectedMapId) {
+        [openstreetmapLayer, satelliteLayer, hybridLayer, terrainLayer].forEach(layer => {
+            if (layer && map.hasLayer(layer)) {
+                map.removeLayer(layer);
+            }
+        });
+        
+        switch(selectedMapId) {
+            case 'openstreetmapLayer':
+                openstreetmapLayer.addTo(map);
+                break;
+            case 'satelliteLayer':
+                satelliteLayer.addTo(map);
+                break;
+            case 'hybridLayer':
+                hybridLayer.addTo(map);
+                break;
+            case 'terrainLayer':
+                terrainLayer.addTo(map);
+                break;
+        }
+        
+        const opacity = document.getElementById('baseOpacitySlider').value / 100;
+        setBaseMapOpacity(opacity);
+    }
+
+    function toggleFarmLayer() {
+        const checked = document.getElementById('farmLayer').checked;
+        if (checked) {
+            map.addLayer(farmLayers);
+        } else {
+            map.removeLayer(farmLayers);
+        }
+    }
+
+    function toggleTreeLayer() {
+        const checked = document.getElementById('treeLayer').checked;
+        if (checked) {
+            map.addLayer(treeLayer);
+            map.addLayer(treeIconsLayer);
+        } else {
+            map.removeLayer(treeLayer);
+            map.removeLayer(treeIconsLayer);
+        }
+    }
+
+    function setBaseMapOpacity(opacity) {
+        if (openstreetmapLayer) openstreetmapLayer.setOpacity(opacity);
+        if (satelliteLayer) satelliteLayer.setOpacity(opacity);
+        if (hybridLayer) hybridLayer.setOpacity(opacity);
+        if (terrainLayer) terrainLayer.setOpacity(opacity);
+    }
+
+    function setFarmLayersOpacity(opacity) {
+        farmLayers.eachLayer(layer => {
+            if (layer instanceof L.Polygon) {
+                layer.setStyle({ fillOpacity: opacity * 0.6 });
+            } else if (layer instanceof L.CircleMarker) {
+                layer.setStyle({ fillOpacity: opacity * 0.8 });
+            }
+        });
+        
+        treeLayer.eachLayer(layer => {
+            if (layer instanceof L.CircleMarker) {
+                layer.setStyle({ fillOpacity: opacity * 0.8 });
+            }
+        });
+    }
+
+    // ==================== FARM DATA FUNCTIONS ====================
+
+    function loadFarmData() {
+        showLoading('Loading farm data...');
+
+        {% if code %}
+        // Load specific farm data
+        Promise.all([
+            fetch('/farmboundarylayer/?code={{code}}').then(response => response.json()),
+            fetch('/gettrees/{{code}}/').then(response => response.json())
+        ]).then(([farmData, treeData]) => {
+            hideLoading();
+            processFarmData(farmData, treeData);
+            showToast('Farm data loaded successfully', 'success');
+        }).catch(error => {
+            hideLoading();
+            console.error('Error loading farm data:', error);
+            showToast('Error loading farm data', 'error');
+        });
+        {% else %}
+        // Load all farm data
+        Promise.all([
+            fetch('/farmboundarylayer/').then(response => response.json()),
+            fetch('/gettrees/').then(response => response.json())
+        ]).then(([farmData, treeData]) => {
+            hideLoading();
+            processFarmData(farmData, treeData);
+            showToast('Farm data loaded successfully', 'success');
+        }).catch(error => {
+            hideLoading();
+            console.error('Error loading farm data:', error);
+            showToast('Error loading farm data', 'error');
+        });
+        {% endif %}
+    }
+
+    function processFarmData(farmData, treeData) {
+        console.log('Raw farm data:', farmData);
+        console.log('Raw tree data:', treeData);
+        
+        farmsData = [];
+        
+        if (farmData && farmData.features) {
+            console.log('Farm data has features array, length:', farmData.features.length);
+            
+            farmData.features.forEach((feature, index) => {
+                if (!feature.geometry || !feature.geometry.coordinates) {
+                    console.warn(`Feature ${index} missing geometry:`, feature);
+                    return;
+                }
+                
+                const farm = {
+                    id: feature.properties.id || Math.random(),
+                    farm_code: feature.properties.farm_code,
+                    name: feature.properties.name,
+                    farmer_name: feature.properties.beneficiary,
+                    status: 'active',
+                    area_hectares: feature.properties.area,
+                    boundary: feature.geometry,
+                    has_boundary: true,
+                    validation_status: false,
+                    type_beneficiary: feature.properties.type_beneficiary,
+                    indvi_gender: feature.properties.indvi_gender,
+                    indvi_dob: feature.properties.indvi_dob,
+                    indvi_phone_no: feature.properties.indvi_phone_no,
+                    establishment_type: feature.properties.establishment_type,
+                    total_tree: feature.properties.total_tree,
+                    treespecies: feature.properties.treespecies,
+                    image: feature.properties.image
+                };
+                farmsData.push(farm);
+            });
+        } else {
+            console.error('Farm data is not in expected GeoJSON format:', farmData);
+        }
+        
+        // Process tree data
+        if (treeData && treeData.features) {
+            console.log('Tree data features:', treeData.features.length);
+            treeData.features.forEach(feature => {
+                const treeMarker = L.circleMarker([
+                    feature.geometry.coordinates[1],
+                    feature.geometry.coordinates[0]
+                ], {
+                    radius: 6,
+                    fillColor: "green",
+                    color: "white",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).bindPopup(`
+                    <div class="tree-popup">
+                        <strong>Tree Information</strong><br>
+                        <strong>Species:</strong> ${feature.properties.ptn_species}<br>
+                    </div>
+                `);
+                treeLayer.addLayer(treeMarker);
+            });
+        } else {
+            console.warn('Tree data not in expected format:', treeData);
+        }
+        
+        renderFarmsOnMap();
+    }
+
+    function renderFarmsOnMap() {
+        farmLayers.clearLayers();
+        treeIconsLayer.clearLayers();
+
+        let validatedCount = 0;
+        let nonValidatedCount = 0;
+
+        farmsData.forEach((farm, index) => {
+            if (farm.boundary && farm.boundary.coordinates) {
+                try {
+                    let coordinates = farm.boundary.coordinates[0];
+                    const leafletCoords = coordinates.map(coord => {
+                        if (Array.isArray(coord) && coord.length >= 2) {
+                            return [coord[1], coord[0]];
+                        } else {
+                            console.warn(`Invalid coordinate format for farm ${farm.id}:`, coord);
+                            return [0, 0];
+                        }
+                    });
+
+                    if (leafletCoords.length >= 3) {
+                        const farmStyle = getFarmStyle(farm);
+                        
+                        const layer = L.polygon(leafletCoords, {
+                            ...farmStyle,
+                            farmId: farm.id,
+                            farmData: farm
+                        });
+
+                        layer.bindPopup(createFarmPopup(farm));
+                        
+                        layer.on('mouseover', function (e) {
+                            this.setStyle({
+                                weight: farm.validation_status ? 4 : 3,
+                                fillOpacity: farm.validation_status ? 0.6 : 0.3
+                            });
+                        });
+
+                        layer.on('mouseout', function (e) {
+                            this.setStyle(getFarmStyle(farm));
+                        });
+
+                        if (farm.validation_status) {
+                            validatedCount++;
+                        } else {
+                            nonValidatedCount++;
+                        }
+
+                        farmLayers.addLayer(layer);
+                    } else {
+                        console.warn(`Farm ${farm.id} has insufficient coordinates:`, leafletCoords.length);
+                    }
+
+                } catch (error) {
+                    console.error('Error creating polygon for farm:', farm.id, error);
+                }
+            } else {
+                console.warn(`Farm ${farm.id} has no boundary data`);
+            }
+        });
+
+        updateValidationStats(validatedCount, nonValidatedCount);
+        
+        const layers = farmLayers.getLayers();
+        console.log('Total layers rendered:', layers.length);
+        
+        if (layers.length > 0) {
+            console.log('Rendered', layers.length, 'farm layers');
+            fitToBounds();
+        } else {
+            console.warn('No layers were created');
+            showToast('No farm boundaries could be displayed', 'warning');
+        }
+    }
+
+    function getFarmStyle(farm) {
+        const baseColor = statusColors[farm.status] || '#6c757d';
+        
+        return {
+            color: baseColor,
+            fillColor: baseColor,
+            fillOpacity: farm.validation_status ? 0.4 : 0.2,
+            weight: farm.validation_status ? 3 : 2,
+            opacity: farm.validation_status ? 1 : 0.8,
+            dashArray: farm.validation_status ? null : '5, 5'
+        };
+    }
+
+    function createFarmPopup(farm) {
+        return `
+            <div class="farm-popup-content" style="min-width: 250px;">
+                <div class="farm-header text-center mb-2 p-2" style="background: linear-gradient(135deg, #4A7C3A, #288541) color: white; border-radius: 6px 6px 0 0; margin: -10px -10px 10px -10px;">
+                    <h6 class="mb-1 fw-bold">${escapeHtml(farm.name || 'Unnamed Farm')}</h6>
+                    <span class="badge" style="background-color: ${statusColors[farm.status] || '#6c757d'}; font-size: 0.7rem;">
+                        ${(farm.status || 'active').toUpperCase()}
+                    </span>
+                </div>
+                
+                <div class="farm-details">
+                    <div class="detail-item mb-1">
+                        <small class="text-muted">Code:</small>
+                        <div class="fw-bold">${farm.farm_code || 'N/A'}</div>
+                    </div>
+                    <div class="detail-item mb-1">
+                        <small class="text-muted">Farmer:</small>
+                        <div class="fw-bold">${escapeHtml(farm.farmer_name || 'Unknown')}</div>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <small class="text-muted">Area:</small>
+                        <div class="fw-bold">${farm.area_hectares || 'N/A'} hectares</div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-2 pt-2 border-top">
+                    <button class="btn btn-primary btn-sm w-100 view-details-btn" onclick="window.showFarmDetails(${farm.id})">
+                        <i class="fas fa-info-circle me-1"></i>View Details
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ==================== FARM DETAILS & EDITING FUNCTIONS ====================
+
+    window.showFarmDetails = function(farmId) {
+        const farm = farmsData.find(f => f.id == farmId);
+        if (!farm) {
+            console.error('Farm not found with ID:', farmId);
+            showToast('Farm details not found', 'error');
+            return;
+        }
+
+        currentFarmId = farmId;
+
+        // If we're in editing mode, show the editing version
+        if (isEditingMode && farmId == currentFarmId) {
+            showFarmDetailsDuringEdit(farmId);
+            return;
+        }
+
+        // Cancel any active editing
+        if (isEditingMode) {
+            cancelEditing();
+        }
+
+        // Create modal content (regular view)
+        const modalContent = createFarmDetailsContent(farm);
+        
+        // Update modal content
+        const farmDetailsElement = document.getElementById('farmDetails');
+        if (farmDetailsElement) {
+            farmDetailsElement.innerHTML = modalContent;
+        } else {
+            console.error('Farm details element not found');
+            return;
+        }
+
+        // Update modal title
+        const modalTitle = document.querySelector('#farmModal .modal-title');
+        if (modalTitle) {
+            modalTitle.textContent = `Farm Details - ${farm.farm_code || 'Unknown Farm'}`;
+        }
+
+        // Show/hide edit button based on boundary availability
+        const editBtn = document.getElementById('editBoundaryBtn');
+        if (editBtn) {
+            editBtn.style.display = (farm.boundary && farm.boundary.coordinates) ? 'inline-block' : 'none';
+        }
+
+        // Reset other buttons to default state
+        updateEditButtons(false);
+
+        // Show the modal using Bootstrap
+        const modalElement = document.getElementById('farmModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+            modal.show();
+            console.log('Modal shown successfully');
+        } else {
+            console.error('Modal element not found');
+        }
+    }
+
+    function createFarmDetailsContent(farm) {
+        return `
+            <div class="farm-details-grid">
+                <div class="farm-details-section">
+                    <h6><i class="fas fa-tractor me-2"></i>Farm Information</h6>
+                    <div class="detail-row">
+                        <span class="detail-label">Farm Code:</span>
+                        <span class="detail-value">${farm.farm_code || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Farm Name:</span>
+                        <span class="detail-value">${escapeHtml(farm.name || 'Unnamed Farm')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="badge bg-${getStatusClass(farm.status)}">
+                                ${(farm.status || 'active').charAt(0).toUpperCase() + (farm.status || 'active').slice(1)}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Area:</span>
+                        <span class="detail-value">${farm.area_hectares || 'N/A'} hectares</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Validation:</span>
+                        <span class="detail-value">
+                            ${farm.validation_status ? 
+                                '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Validated</span>' : 
+                                '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pending Validation</span>'
+                            }
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="farm-details-section">
+                    <h6><i class="fas fa-user me-2"></i>Farmer Information</h6>
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value">${escapeHtml(farm.farmer_name || 'Unknown')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Gender:</span>
+                        <span class="detail-value">${farm.indvi_gender || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value">${farm.indvi_phone_no || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Type:</span>
+                        <span class="detail-value">${farm.type_beneficiary || 'N/A'}</span>
+                    </div>
+                </div>
+
+                <div class="farm-details-section">
+                    <h6><i class="fas fa-tree me-2"></i>Tree Information</h6>
+                    <div class="detail-row">
+                        <span class="detail-label">Total Trees:</span>
+                        <span class="detail-value">${farm.total_tree || '0'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Species:</span>
+                        <span class="detail-value">${farm.treespecies || 'No species data'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Establishment:</span>
+                        <span class="detail-value">${farm.establishment_type || 'N/A'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function startEditingBoundary() {
+        if (!currentFarmId) {
+            showToast('No farm selected for editing', 'error');
+            return;
+        }
+
+        const farm = farmsData.find(f => f.id == currentFarmId);
+        if (!farm) {
+            showToast('Farm not found', 'error');
+            return;
+        }
+
+        if (!farm.boundary || !farm.boundary.coordinates) {
+            showToast('No boundary data available for editing', 'error');
+            return;
+        }
+
+        // Enter editing mode
+        isEditingMode = true;
+
+        // Find the farm layer
+        const farmLayer = farmLayers.getLayers().find(layer => 
+            layer.options.farmId == currentFarmId
+        );
+
+        if (!farmLayer) {
+            showToast('Could not find farm boundary on map', 'error');
+            return;
+        }
+
+        // Store original data and layer
+        originalFarmData = JSON.parse(JSON.stringify(farm)); // Deep clone
+        originalBoundaryLayer = farmLayer;
+        
+        // Remove original layer from farmLayers group but keep reference
+        farmLayers.removeLayer(originalBoundaryLayer);
+
+        // Create a new editable layer with the farm data attached
+        const coordinates = farm.boundary.coordinates[0];
+        const leafletCoords = coordinates.map(coord => [coord[1], coord[0]]);
+        
+        editedLayer = L.polygon(leafletCoords, {
+            color: '#9700ff',
+            weight: 4,
+            fillColor: '#9700ff',
+            fillOpacity: 0.3,
+            draggable: true
+        }).addTo(map);
+
+        // Store farm data with the edited layer for easy access
+        editedLayer.farmData = farm;
+        editedLayer.farmId = currentFarmId;
+
+        // Add draw control for editing
+        if (!drawControl) {
+            initDrawControl();
+        }
+        
+        map.addControl(drawControl);
+
+        // Enable editing on the layer
+        editedLayer.editing.enable();
+
+        // Add click handler to edited layer to show details
+        editedLayer.on('click', function(e) {
+            if (isEditingMode) {
+                showFarmDetailsDuringEdit(currentFarmId);
+            }
+        });
+
+        // Update UI buttons
+        updateEditButtons(true);
+
+        showToast('Editing mode activated. Drag vertices to edit boundary. Click on the polygon to view details.', 'info');
+        
+        // Fit map to edited boundary
+        map.fitBounds(editedLayer.getBounds(), { padding: [50, 50] });
+    }
+
+    function showFarmDetailsDuringEdit(farmId) {
+        const farm = farmsData.find(f => f.id == farmId);
+        if (!farm) {
+            console.error('Farm not found with ID:', farmId);
+            return;
+        }
+
+        // Calculate current area from edited layer
+        let currentArea = farm.area_hectares;
+        if (editedLayer) {
+            const latLngs = editedLayer.getLatLngs()[0];
+            const coordinates = latLngs.map(latlng => [latlng.lng, latlng.lat]);
+            currentArea = calculatePolygonArea(coordinates);
+        }
+
+        const modalContent = `
+            <div class="farm-details-grid">
+                <div class="farm-details-section">
+                    <h6><i class="fas fa-tractor me-2"></i>Farm Information</h6>
+                    <div class="detail-row">
+                        <span class="detail-label">Farm Code:</span>
+                        <span class="detail-value">${farm.farm_code || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Farm Name:</span>
+                        <span class="detail-value">${escapeHtml(farm.name || 'Unnamed Farm')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="badge bg-${getStatusClass(farm.status)}">
+                                ${(farm.status || 'active').charAt(0).toUpperCase() + (farm.status || 'active').slice(1)}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Current Area:</span>
+                        <span class="detail-value">${currentArea.toFixed(2)} hectares</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Original Area:</span>
+                        <span class="detail-value">${farm.area_hectares || 'N/A'} hectares</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Validation:</span>
+                        <span class="detail-value">
+                            ${farm.validation_status ? 
+                                '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Validated</span>' : 
+                                '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pending Validation</span>'
+                            }
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="farm-details-section">
+                    <h6><i class="fas fa-user me-2"></i>Farmer Information</h6>
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value">${escapeHtml(farm.farmer_name || 'Unknown')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Gender:</span>
+                        <span class="detail-value">${farm.indvi_gender || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value">${farm.indvi_phone_no || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Type:</span>
+                        <span class="detail-value">${farm.type_beneficiary || 'N/A'}</span>
+                    </div>
+                </div>
+
+                <div class="farm-details-section">
+                    <h6><i class="fas fa-tree me-2"></i>Tree Information</h6>
+                    <div class="detail-row">
+                        <span class="detail-label">Total Trees:</span>
+                        <span class="detail-value">${farm.total_tree || '0'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Species:</span>
+                        <span class="detail-value">${farm.treespecies || 'No species data'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Establishment:</span>
+                        <span class="detail-value">${farm.establishment_type || 'N/A'}</span>
+                    </div>
+                </div>
+
+                <!-- Editing Instructions -->
+                <div class="farm-details-section" style="grid-column: 1 / -1;">
+                    <h6><i class="fas fa-edit me-2"></i>Editing Instructions</h6>
+                    <div class="alert alert-info">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            <strong>How to edit:</strong> Drag the vertices (white circles) to reshape the boundary. 
+                            The area will update automatically. Click "Save Changes" when done or "Cancel" to discard changes.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Update modal content
+        const farmDetailsElement = document.getElementById('farmDetails');
+        if (farmDetailsElement) {
+            farmDetailsElement.innerHTML = modalContent;
+        }
+
+        // Update modal title to indicate editing mode
+        const modalTitle = document.querySelector('#farmModal .modal-title');
+        if (modalTitle) {
+            modalTitle.textContent = `Editing Boundary - ${farm.farm_code || 'Unknown Farm'}`;
+        }
+
+        // Show editing buttons
+        updateEditButtons(true);
+
+        // Show the modal
+        const modalElement = document.getElementById('farmModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+    }
+
+    async function saveBoundaryChanges() {
+        if (!isEditingMode || !editedLayer || !currentFarmId) {
+            showToast('No changes to save', 'warning');
+            return;
+        }
+
+        try {
+            showLoading('Saving boundary changes...');
+
+            const farm = farmsData.find(f => f.id == currentFarmId);
+            if (!farm) {
+                throw new Error('Farm not found');
+            }
+
+            // Get the updated coordinates from the edited layer
+            const latLngs = editedLayer.getLatLngs()[0];
+            const coordinates = latLngs.map(latlng => [latlng.lng, latlng.lat]);
+            
+            // Close the polygon if not already closed
+            if (coordinates.length > 0 && 
+                (coordinates[0][0] !== coordinates[coordinates.length-1][0] || 
+                 coordinates[0][1] !== coordinates[coordinates.length-1][1])) {
+                coordinates.push([coordinates[0][0], coordinates[0][1]]);
+            }
+
+            // Calculate new area
+            const area = calculatePolygonArea(coordinates);
+
+            // Prepare the boundary data in GeoJSON format
+            const boundaryData = {
+                type: "Polygon",
+                coordinates: [coordinates]
+            };
+
+            // Send update to server
+            const updateData = {
+                farm_id: farm.id,
+                farm_code: farm.farm_code,
+                boundary: boundaryData,
+                area: area
+            };
+
+            // Use the endpoint with farm_id in URL
+            const response = await fetch(`/update-farm-boundary/${farm.id}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save changes to server');
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update farm data with new boundary and area
+                farm.boundary.coordinates = [coordinates];
+                farm.area_hectares = area;
+                
+                // Update the farm layer with new boundary
+                updateFarmLayerAfterEdit(farm);
+                
+                // Exit editing mode
+                cancelEditing();
+                
+                showToast('Boundary changes saved successfully!', 'success');
+                
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('farmModal'));
+                if (modal) {
+                    modal.hide();
+                }
+
+                // Show the updated farm details
+                setTimeout(() => {
+                    showFarmDetails(currentFarmId);
+                }, 500);
+                
+            } else {
+                throw new Error(result.message || 'Failed to save changes');
+            }
+
+        } catch (error) {
+            console.error('Error saving boundary changes:', error);
+            showToast('Error saving changes: ' + error.message, 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function cancelEditing() {
+        if (isEditingMode) {
+            // Remove edited layer from map
+            if (editedLayer) {
+                map.removeLayer(editedLayer);
+                editedLayer = null;
+            }
+            
+            // Restore original layer and data
+            if (originalBoundaryLayer && originalFarmData) {
+                // Restore the original farm data
+                const farm = farmsData.find(f => f.id == currentFarmId);
+                if (farm && originalFarmData) {
+                    Object.assign(farm, originalFarmData);
+                }
+                
+                // Add original layer back to farmLayers
+                farmLayers.addLayer(originalBoundaryLayer);
+                originalBoundaryLayer = null;
+                originalFarmData = null;
+            }
+            
+            // Remove draw control
+            if (drawControl) {
+                map.removeControl(drawControl);
+            }
+            
+            // Reset editing mode
+            isEditingMode = false;
+            
+            // Update UI buttons
+            updateEditButtons(false);
+            
+            showToast('Editing cancelled - changes discarded', 'info');
+        }
+    }
+
+    function updateFarmLayerAfterEdit(farm) {
+        // Remove old layer if it exists
+        const oldLayer = farmLayers.getLayers().find(layer => 
+            layer.options.farmId == farm.id
+        );
+        
+        if (oldLayer) {
+            farmLayers.removeLayer(oldLayer);
+        }
+        
+        // Create new layer with updated boundary
+        const coordinates = farm.boundary.coordinates[0];
+        const leafletCoords = coordinates.map(coord => [coord[1], coord[0]]);
+        
+        const newLayer = L.polygon(leafletCoords, {
+            ...getFarmStyle(farm),
+            farmId: farm.id,
+            farmData: farm
+        });
+        
+        // Add all the event handlers to the new layer
+        newLayer.bindPopup(createFarmPopup(farm));
+        
+        newLayer.on('click', function(e) {
+            showFarmDetails(farm.id);
+        });
+        
+        newLayer.on('mouseover', function(e) {
+            this.setStyle({
+                weight: farm.validation_status ? 4 : 3,
+                fillOpacity: farm.validation_status ? 0.6 : 0.3
+            });
+        });
+
+        newLayer.on('mouseout', function(e) {
+            this.setStyle(getFarmStyle(farm));
+        });
+        
+        farmLayers.addLayer(newLayer);
+        
+        // Update the farm in farmsData
+        const farmIndex = farmsData.findIndex(f => f.id == farm.id);
+        if (farmIndex !== -1) {
+            farmsData[farmIndex] = farm;
+        }
+    }
+
+    function updateEditButtons(isEditing) {
+        const editBtn = document.getElementById('editBoundaryBtn');
+        const saveBtn = document.getElementById('saveBoundaryBtn');
+        const cancelBtn = document.getElementById('cancelEditBtn');
+        const closeBtn = document.querySelector('#farmModal .btn-secondary');
+        
+        if (editBtn) editBtn.style.display = isEditing ? 'none' : 'inline-block';
+        if (saveBtn) saveBtn.style.display = isEditing ? 'inline-block' : 'none';
+        if (cancelBtn) cancelBtn.style.display = isEditing ? 'inline-block' : 'none';
+        if (closeBtn) closeBtn.style.display = isEditing ? 'none' : 'inline-block';
+    }
+
+    // ==================== ADMINISTRATIVE BOUNDARIES FUNCTIONS ====================
+
+    function initializeAdministrativeBoundaries() {
+        loadAdministrativeBoundaries();
+        document.getElementById('boundariesOpacityValue').textContent = '70%';
+        document.getElementById('lineWeightValue').textContent = '3px';
+        console.log('Administrative boundaries initialized');
+    }
+
+    async function loadAdministrativeBoundaries() {
+        try {
+            // Load District Boundaries
+            $.get("/districtboundaryapi/", function(data) {
+                const districtLayer = L.geoJSON(data, {
+                    style: {
+                        ...boundaryStyles.districts,
+                        fill: false,
+                        fillOpacity: 0,
+                        interactive: true,
+                        bubblingMouseEvents: true
+                    },
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties) {
+                            const districtName = feature.properties.district || 'N/A';
+                            
+                            const popupContent = `
+                                <div class="boundary-popup" style="min-width: 200px;">
+                                    <h6 style="margin: 0 0 10px 0; color: #004E89;">District Information</h6>
+                                    <div style="line-height: 1.6;">
+                                        <strong>District:</strong> ${districtName}<br>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            layer.bindPopup(popupContent, {
+                                className: 'boundary-popup-container',
+                                maxWidth: 300,
+                                minWidth: 200,
+                                autoPan: true,
+                                closeButton: true
+                            });
+                        }
+                    }
+                });
+                districtBoundariesLayer.addLayer(districtLayer);
+                console.log('Loaded district boundaries');
+            });
+
+        } catch (error) {
+            console.error('Error loading administrative boundaries:', error);
+        }
+    }
+
+    function toggleDistrictBoundariesLayer(e) {
+        if (e.target.checked) {
+            map.addLayer(districtBoundariesLayer);
+        } else {
+            map.removeLayer(districtBoundariesLayer);
+        }
+    }
+
+    function updateBoundariesOpacity(e) {
+        const opacity = e.target.value / 100;
+        document.getElementById('boundariesOpacityValue').textContent = e.target.value + '%';
+        boundaryStyles.districts.opacity = opacity;
+        updateBoundaryStyles();
+    }
+
+    function updateDistrictBoundaryColor(e) {
+        boundaryStyles.districts.color = e.target.value;
+        updateBoundaryStyles();
+    }
+
+    function updateBoundaryLineWeight(e) {
+        const weight = parseInt(e.target.value);
+        document.getElementById('lineWeightValue').textContent = weight + 'px';
+        boundaryStyles.districts.weight = Math.max(1, weight - 1);
+        updateBoundaryStyles();
+    }
+
+    function updateBoundaryStyles() {
+        districtBoundariesLayer.eachLayer(layer => {
+            if (layer.setStyle) {
+                layer.setStyle(boundaryStyles.districts);
+            }
+        });
+    }
+
+    // ==================== MEASUREMENT TOOLS FUNCTIONS ====================
+
+    function initMeasurement() {
+        if (typeof L.Control.Measure !== 'undefined') {
+            const measureControl = new L.Control.Measure({
+                position: 'topright',
+                primaryLengthUnit: 'meters',
+                secondaryLengthUnit: 'kilometers',
+                primaryAreaUnit: 'hectares',
+                secondaryAreaUnit: 'sqmeters',
+                activeColor: '#4A7C3A',
+                completedColor: '#288541'
+            });
+            measureControl.addTo(map);
+            console.log('Measurement tools initialized');
+        } else {
+            console.warn('Leaflet Measure not available, using basic measurement');
+            initBasicMeasurement();
+        }
+    }
+
+    function initBasicMeasurement() {
+        let currentMeasureTool = null;
+
+        function startDistanceMeasurement() {
+            if (currentMeasureTool === 'distance') {
+                showToast('Distance measurement already active', 'info');
+                return;
+            }
+            
+            clearAllMeasurements();
+            
+            currentMeasureTool = 'distance';
+            showToast('Click on map to start measuring distance. Double-click to finish.', 'info');
+            
+            let polyline = null;
+            let points = [];
+            
+            function onMapClick(e) {
+                points.push(e.latlng);
+                
+                if (points.length === 1) {
+                    polyline = L.polyline([points[0]], {
+                        color: '#4A7C3A',
+                        weight: 3,
+                        dashArray: '5, 10'
+                    }).addTo(map);
+                } else {
+                    polyline.setLatLngs(points);
+                    const distance = calculateDistance(points);
+                    showToast(`Current distance: ${distance.toFixed(2)} meters`, 'info');
+                }
+            }
+            
+            function onMapDblClick(e) {
+                if (points.length >= 2) {
+                    const totalDistance = calculateDistance(points);
+                    showToast(`Total distance: ${totalDistance.toFixed(2)} meters`, 'success');
+                    polyline.setStyle({ dashArray: null });
+                    polyline.bindPopup(`Distance: ${totalDistance.toFixed(2)} meters`);
+                    window.currentMeasurements = window.currentMeasurements || [];
+                    window.currentMeasurements.push(polyline);
+                }
+                
+                map.off('click', onMapClick);
+                map.off('dblclick', onMapDblClick);
+                currentMeasureTool = null;
+            }
+            
+            map.on('click', onMapClick);
+            map.on('dblclick', onMapDblClick);
+        }
+
+        function startAreaMeasurement() {
+            if (currentMeasureTool === 'area') {
+                showToast('Area measurement already active', 'info');
+                return;
+            }
+            
+            clearAllMeasurements();
+            
+            currentMeasureTool = 'area';
+            showToast('Click on map to draw polygon for area measurement. Double-click to finish.', 'info');
+            
+            let polygon = null;
+            let points = [];
+            
+            function onMapClick(e) {
+                points.push(e.latlng);
+                
+                if (points.length === 1) {
+                    polygon = L.polygon([points[0]], {
+                        color: '#288541',
+                        weight: 2,
+                        fillColor: '#4A7C3A',
+                        fillOpacity: 0.3,
+                        dashArray: '5, 10'
+                    }).addTo(map);
+                } else {
+                    if (points.length >= 3) {
+                        polygon.setLatLngs([points]);
+                        const area = calculatePolygonAreaLatLng(points);
+                        showToast(`Current area: ${area.toFixed(2)} hectares`, 'info');
+                    }
+                }
+            }
+            
+            function onMapDblClick(e) {
+                if (points.length >= 3) {
+                    const totalArea = calculatePolygonAreaLatLng(points);
+                    showToast(`Total area: ${totalArea.toFixed(2)} hectares`, 'success');
+                    polygon.setStyle({ dashArray: null });
+                    polygon.bindPopup(`Area: ${totalArea.toFixed(2)} hectares`);
+                    window.currentMeasurements = window.currentMeasurements || [];
+                    window.currentMeasurements.push(polygon);
+                }
+                
+                map.off('click', onMapClick);
+                map.off('dblclick', onMapDblClick);
+                currentMeasureTool = null;
+            }
+            
+            map.on('click', onMapClick);
+            map.on('dblclick', onMapDblClick);
+        }
+
+        window.startDistanceMeasurement = startDistanceMeasurement;
+        window.startAreaMeasurement = startAreaMeasurement;
+    }
+
+    function calculateDistance(points) {
+        let totalDistance = 0;
+        for (let i = 1; i < points.length; i++) {
+            totalDistance += points[i-1].distanceTo(points[i]);
+        }
+        return totalDistance;
+    }
+
+    function calculatePolygonAreaLatLng(latlngs) {
+        const coordinates = latlngs.map(latlng => [latlng.lng, latlng.lat]);
+        return calculatePolygonArea(coordinates);
+    }
+
+    function calculatePolygonArea(coordinates) {
+        if (!coordinates || coordinates.length < 3) {
+            return 0;
+        }
+
+        if (typeof turf !== 'undefined') {
+            try {
+                const polygon = turf.polygon([coordinates]);
+                const area = turf.area(polygon);
+                return area / 10000;
+            } catch (error) {
+                console.warn('Turf.js area calculation failed, using shoelace formula:', error);
+            }
+        }
+
+        let area = 0;
+        const n = coordinates.length;
+        
+        for (let i = 0; i < n; i++) {
+            const j = (i + 1) % n;
+            area += coordinates[i][0] * coordinates[j][1];
+            area -= coordinates[j][0] * coordinates[i][1];
+        }
+        
+        area = Math.abs(area) / 2;
+        const areaHectares = area * 10000;
+        return Math.round(areaHectares * 100) / 100;
+    }
+
+    function clearAllMeasurements() {
+        if (window.currentMeasurements) {
+            window.currentMeasurements.forEach(layer => {
+                map.removeLayer(layer);
+            });
+            window.currentMeasurements = [];
+        }
+        
+        if (window.measureControl) {
+            window.measureControl._layer && map.removeLayer(window.measureControl._layer);
+        }
+        
+        showToast('All measurements cleared', 'info');
+    }
+
+    // ==================== FULLSCREEN FUNCTIONS ====================
+
+    function toggleFullScreen() {
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        const mapElement = document.getElementById('map');
+        const body = document.body;
+
+        if (!isFullScreen) {
+            enterFullScreen(fullscreenContainer, mapElement, body);
+        } else {
+            exitFullScreen(fullscreenContainer, mapElement, body);
+        }
+    }
+
+    function enterFullScreen(fullscreenContainer, mapElement, body) {
+        originalMapPosition = {
+            center: map.getCenter(),
+            zoom: map.getZoom()
+        };
+
+        fullscreenContainer.classList.add('fullscreen-active');
+        body.classList.add('fullscreen-mode');
+        mapElement.classList.add('fullscreen-map');
+        
+        const controlsPanel = document.querySelector('.map-controls-panel');
+        if (controlsPanel) {
+            controlsPanel.style.zIndex = '10000';
+        }
+
+        isFullScreen = true;
+        showToast('Full screen mode activated', 'success');
+        
+        setTimeout(() => {
+            map.invalidateSize(true);
+            map.setView(originalMapPosition.center, originalMapPosition.zoom);
+        }, 300);
+    }
+
+    function exitFullScreen(fullscreenContainer, mapElement, body) {
+        fullscreenContainer.classList.remove('fullscreen-active');
+        body.classList.remove('fullscreen-mode');
+        mapElement.classList.remove('fullscreen-map');
+        
+        const controlsPanel = document.querySelector('.map-controls-panel');
+        if (controlsPanel) {
+            controlsPanel.style.zIndex = '1000';
+        }
+
+        isFullScreen = false;
+        showToast('Full screen mode deactivated', 'info');
+        
+        setTimeout(() => {
+            map.invalidateSize(true);
+            if (originalMapPosition) {
+                map.setView(originalMapPosition.center, originalMapPosition.zoom);
+            }
+        }, 300);
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+
+    function fitToBounds() {
+        const layers = farmLayers.getLayers();
+        if (layers.length > 0) {
+            const bounds = L.latLngBounds();
+            let hasValidBounds = false;
+
+            layers.forEach(layer => {
+                try {
+                    if (layer instanceof L.Polygon || layer instanceof L.Polyline || layer instanceof L.Marker) {
+                        const layerBounds = layer.getBounds ? layer.getBounds() : L.latLngBounds([layer.getLatLng()]);
+                        if (layerBounds.isValid()) {
+                            bounds.extend(layerBounds);
+                            hasValidBounds = true;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error extending bounds for layer:', error);
+                }
+            });
+
+            if (hasValidBounds && bounds.isValid()) {
+                map.fitBounds(bounds, { 
+                    padding: [20, 20],
+                    maxZoom: 16
+                });
+                showToast('Map fitted to all farm boundaries', 'success');
+            } else {
+                showToast('Could not fit map to farm boundaries', 'warning');
+            }
+        } else {
+            showToast('No farms to display', 'info');
+            const ghanaBounds = L.latLngBounds(
+                [4.7, -3.3],
+                [11.2, 1.2]
+            );
+            map.fitBounds(ghanaBounds);
+        }
+    }
+
+    function clearSelection() {
+        map.closePopup();
+        clearSearch();
+        
+        if (isEditingMode) {
+            cancelEditing();
+        }
+        
+        clearAllMeasurements();
+        
+        if (farmsData.length === 0) {
+            map.setView([6.088, -2.063], 9);
+        } else {
+            fitToBounds();
+        }
+        
+        showToast('Selection cleared', 'info');
+    }
+
+    function refreshMap() {
+        showLoading('Refreshing map data...');
+        
+        farmLayers.clearLayers();
+        treeLayer.clearLayers();
+        treeIconsLayer.clearLayers();
+        farmsData = [];
+        
+        loadFarmData();
+        initializeAdministrativeBoundaries();
+        
+        showToast('Map refreshed successfully', 'success');
+    }
+
+    function clearSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const searchStats = document.getElementById('searchStats');
+        
+        if (searchInput) searchInput.value = '';
+        if (searchResults) searchResults.style.display = 'none';
+        if (searchStats) searchStats.style.display = 'none';
+        
+        map.closePopup();
+        showToast('Search cleared', 'info');
+    }
+
+    function handleSearchInput(e) {
+        const query = e.target.value.trim();
+        const resultsContainer = document.getElementById('searchResults');
+        const statsContainer = document.getElementById('searchStats');
+        const matchesCount = document.getElementById('matchesCount');
+        
+        if (!query) {
+            clearSearch();
+            return;
+        }
+        
+        if (query.length < 2) {
+            resultsContainer.style.display = 'none';
+            statsContainer.style.display = 'none';
+            return;
+        }
+        
+        const results = searchFarms(query);
+        
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="no-results">No farms found matching your search</div>';
+            matchesCount.textContent = '0 matches';
+        } else {
+            resultsContainer.innerHTML = results.map(farm => `
+                <div class="search-result-item" onclick="selectSearchResult(${farm.id})">
+                    <div class="farm-info">
+                        <div class="farm-code">${farm.farm_code || 'N/A'}</div>
+                        <div class="farm-name">${escapeHtml(farm.name || 'Unnamed Farm')}</div>
+                        <div class="farm-farmer">${escapeHtml(farm.farmer_name || 'Unknown Farmer')}</div>
+                    </div>
+                    <div class="farm-status">
+                        <span class="farm-status-badge" style="background-color: ${statusColors[farm.status] || '#6c757d'}">
+                            ${(farm.status || 'active').toUpperCase()}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            matchesCount.textContent = `${results.length} match${results.length !== 1 ? 'es' : ''} found`;
+        }
+        
+        resultsContainer.style.display = 'block';
+        statsContainer.style.display = 'block';
+    }
+
+    function performSearch(query) {
+        if (!query || !query.trim()) {
+            clearSearch();
+            return;
+        }
+        
+        const searchTerm = query.trim();
+        const results = searchFarms(searchTerm);
+        const resultsContainer = document.getElementById('searchResults');
+        const statsContainer = document.getElementById('searchStats');
+        const matchesCount = document.getElementById('matchesCount');
+        
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="no-results">No farms found matching "' + escapeHtml(searchTerm) + '"</div>';
+            matchesCount.textContent = '0 matches';
+        } else {
+            resultsContainer.innerHTML = results.map(farm => `
+                <div class="search-result-item" onclick="selectSearchResult(${farm.id})">
+                    <div class="farm-info">
+                        <div class="farm-code">${farm.farm_code || 'N/A'}</div>
+                        <div class="farm-name">${escapeHtml(farm.name || 'Unnamed Farm')}</div>
+                        <div class="farm-farmer">${escapeHtml(farm.farmer_name || 'Unknown Farmer')}</div>
+                    </div>
+                    <div class="farm-status">
+                        <span class="farm-status-badge" style="background-color: ${statusColors[farm.status] || '#6c757d'}">
+                            ${(farm.status || 'active').toUpperCase()}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            matchesCount.textContent = `${results.length} match${results.length !== 1 ? 'es' : ''} found for "${escapeHtml(searchTerm)}"`;
+            
+            if (results.length === 1) {
+                setTimeout(() => {
+                    selectSearchResult(results[0].id);
+                }, 100);
+            }
+        }
+        
+        resultsContainer.style.display = 'block';
+        statsContainer.style.display = 'block';
+    }
+
+    function selectSearchResult(farmId) {
+        const farm = farmsData.find(f => f.id === farmId);
+        if (farm) {
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('searchStats').style.display = 'none';
+            document.getElementById('searchInput').value = farm.farm_code;
+            zoomToFarm(farmId);
+            showFarmDetails(farmId);
+            showToast(`Selected farm: ${farm.farm_code}`, 'success');
+        }
+    }
+
+    function updateValidationStats(validated, nonValidated) {
+        const statsElement = document.getElementById('validationStats');
+        if (statsElement) {
+            statsElement.innerHTML = `
+                <div class="validation-stats">
+                    <span class="badge bg-success">✓ ${validated} Validated</span>
+                    <span class="badge bg-danger ms-2">✗ ${nonValidated} Pending</span>
+                </div>
+            `;
+        }
+    }
+
+    function getStatusClass(status) {
+        const classes = {
+            'active': 'success',
+            'delayed': 'warning',
+            'critical': 'danger',
+            'completed': 'info',
+            'abandoned': 'secondary'
+        };
+        return classes[status] || 'secondary';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+        document.querySelectorAll('.alert-toast').forEach(toast => toast.remove());
+        
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} alert-dismissible fade show alert-toast`;
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.zIndex = '99999';
+        toast.style.minWidth = '300px';
+        toast.style.textAlign = 'center';
+        toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 3000);
+    }
+
+    function showLoading(message) {
+        console.log('Loading:', message);
+    }
+
+    function hideLoading() {
+        console.log('Loading complete');
+    }
+
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        
+        if (!cookieValue) {
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+            if (csrfTokenMeta) {
+                cookieValue = csrfTokenMeta.getAttribute('content');
+            }
+        }
+        
+        if (!cookieValue) {
+            const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (csrfInput) {
+                cookieValue = csrfInput.value;
+            }
+        }
+        
+        return cookieValue;
+    }
+
+    // Placeholder functions that need to be implemented
+    function searchFarms(query) {
+        // Implementation needed
+        return [];
+    }
+
+    function zoomToFarm(farmId) {
+        // Implementation needed
+    }
+
+    window.loader = function() { 
+        $.blockUI({ 
+            message: '<img src="/static/rootApp/img/eok.gif" style="width:40%" />',  
+            css: { 
+                backgroundColor: 'transparent', 
+                color: 'transparent',
+                border: "transparent"
+            }
+        });
+    }
+
+</script>
+{% endblock%}

@@ -1,0 +1,973 @@
+{% extends 'update/base.html' %}
+{% block map %} active {% endblock %}
+{% block tree_reg %} menu-open {% endblock %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    .btn-gradient-primary {
+        background: linear-gradient(135deg, #4A7C3A, #288541);
+        color: white;
+        border: none;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+    .btn-gradient-primary:hover {
+        background: linear-gradient(135deg, #3a6c2a, #187531);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(74, 124, 58, 0.3);
+    }
+    .survey-card {
+        border: 1px solid #e9ecef;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    .survey-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        border-bottom: 3px solid #4A7C3A;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .map-container {
+        height: 500px;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .survey-detail-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+    }
+    .detail-label {
+        font-weight: 600;
+        color: #4A7C3A;
+    }
+    .stats-card {
+        background: linear-gradient(135deg, #4A7C3A, #288541);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .status-high { background-color: #d1fae5; color: #065f46; }
+    .status-medium { background-color: #fef3c7; color: #92400e; }
+    .status-low { background-color: #fee2e2; color: #b91c1c; }
+    .status-unknown { background-color: #e5e7eb; color: #374151; }
+    
+    .species-badge {
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin: 2px;
+        display: inline-block;
+    }
+    
+    .environmental-factor {
+        background: #f8f9fa;
+        border-left: 4px solid #4A7C3A;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 0 4px 4px 0;
+    }
+    
+    .data-table th {
+        background-color: #4A7C3A;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="action-buttons">
+                    <a href="/seedling-map/" class="btn btn-gradient-primary">
+                        <i class="fas fa-map-marked-alt me-2"></i>View Map
+                    </a>
+                    <!-- <button class="btn btn-gradient-primary" data-bs-toggle="modal" data-bs-target="#addSurveyModal">
+                        <i class="fas fa-clipboard-list me-2"></i>Add New Survey
+                    </button> -->
+                </div>
+                <ul class="nav nav-tabs" id="surveyTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="true">
+                            <i class="fas fa-list me-2"></i>All Surveys
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">
+                            <i class="fas fa-chart-pie me-2"></i>Statistics
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="detail-tab" data-bs-toggle="tab" data-bs-target="#detail" type="button" role="tab" aria-controls="detail" aria-selected="false">
+                            <i class="fas fa-info-circle me-2"></i>Survey Details
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content" id="surveyTabContent">
+    <!-- List Tab -->
+    <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <select id="communityFilter" class="form-select">
+                    <option value="">All Communities</option>
+                    <!-- Communities will be loaded via AJAX -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="survivalFilter" class="form-select">
+                    <option value="">All Survival Rates</option>
+                    <option value="high">High (&gt;80%)</option>
+                    <option value="medium">Medium (50-80%)</option>
+                    <option value="low">Low (&lt;50%)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="date" id="dateFromFilter" class="form-control" placeholder="From Date">
+            </div>
+            <div class="col-md-3">
+                <input type="date" id="dateToFilter" class="form-control" placeholder="To Date">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="surveyTable" class="table table-striped table-bordered datatable data-table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>FARMER ID</th>
+                        <th>FARMER NAME</th>
+                        <th>COMMUNITY</th>
+                        <th>SURVEY DATE</th>
+                        <th>SURVEYOR</th>
+                        <th>PLANTATION TYPE</th>
+                        <th>SEEDLINGS ALIVE</th>
+                        <th>SURVIVAL RATE</th>
+                        <th>SPECIES COUNT</th>
+                        <th>BOUNDARY</th>
+                        <th>CREATED</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be loaded via AJAX -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Statistics Tab -->
+    <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+        <div class="row" id="statsContainer">
+            <!-- Statistics will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Detail Tab -->
+    <div class="tab-pane fade" id="detail" role="tabpanel" aria-labelledby="detail-tab">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Select Survey</h5>
+                    </div>
+                    <div class="card-body">
+                        <select id="surveySelect" class="form-select mb-3">
+                            <option value="">Select a survey...</option>
+                            <!-- Surveys will be loaded via AJAX -->
+                        </select>
+                        <div id="surveyDetailContainer" class="survey-detail-card" style="display: none;">
+                            <h4 id="surveyFarmerName" class="mb-3"></h4>
+                            <div class="row">
+                                <div class="col-12">
+                                    <p><span class="detail-label">Farmer ID:</span> <span id="surveyFarmerId"></span></p>
+                                    <p><span class="detail-label">Community:</span> <span id="surveyCommunity"></span></p>
+                                    <p><span class="detail-label">Survey Date:</span> <span id="surveyDate"></span></p>
+                                    <p><span class="detail-label">Surveyor:</span> <span id="surveySurveyor"></span></p>
+                                    <p><span class="detail-label">Plantation Type:</span> <span id="surveyPlantationType"></span></p>
+                                    <p><span class="detail-label">Seedlings Alive:</span> <span id="surveySeedlingsAlive"></span></p>
+                                    <p><span class="detail-label">Survival Rate:</span> <span id="surveySurvivalRate"></span></p>
+                                    <p><span class="detail-label">Has Boundary:</span> <span id="surveyHasBoundary"></span></p>
+                                    <p><span class="detail-label">Created:</span> <span id="surveyCreated"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Survey Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="surveyDetailTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="species-tab" data-bs-toggle="tab" data-bs-target="#species" type="button" role="tab" aria-controls="species" aria-selected="true">
+                                    Species Data
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="environmental-tab" data-bs-toggle="tab" data-bs-target="#environmental" type="button" role="tab" aria-controls="environmental" aria-selected="false">
+                                    Environmental Factors
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pests-tab" data-bs-toggle="tab" data-bs-target="#pests" type="button" role="tab" aria-controls="pests" aria-selected="false">
+                                    Pests & Diseases
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="treatments-tab" data-bs-toggle="tab" data-bs-target="#treatments" type="button" role="tab" aria-controls="treatments" aria-selected="false">
+                                    Treatments
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content mt-3" id="surveyDetailTabContent">
+                            <!-- Species Data Tab -->
+                            <div class="tab-pane fade show active" id="species" role="tabpanel" aria-labelledby="species-tab">
+                                <div id="speciesDataContent">
+                                    <!-- Species data will be loaded here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Environmental Factors Tab -->
+                            <div class="tab-pane fade" id="environmental" role="tabpanel" aria-labelledby="environmental-tab">
+                                <div id="environmentalDataContent">
+                                    <!-- Environmental data will be loaded here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Pests & Diseases Tab -->
+                            <div class="tab-pane fade" id="pests" role="tabpanel" aria-labelledby="pests-tab">
+                                <div id="pestsDataContent">
+                                    <!-- Pests and diseases data will be loaded here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Treatments Tab -->
+                            <div class="tab-pane fade" id="treatments" role="tabpanel" aria-labelledby="treatments-tab">
+                                <div id="treatmentsDataContent">
+                                    <!-- Treatments data will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this survey? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script>
+// Global variables
+let surveyMap = null;
+let surveyMarkers = [];
+
+$(document).ready(function() {
+    // Initialize DataTables
+    var surveyTable = $('#surveyTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "/api/seedling-surveys/datatable/",
+            type: "GET",
+            data: function(d) {
+                d.community = $('#communityFilter').val();
+                d.survival = $('#survivalFilter').val();
+                d.date_from = $('#dateFromFilter').val();
+                d.date_to = $('#dateToFilter').val();
+            }
+        },
+        columns: [
+            { 
+                "data": "farmer_id_number",
+                "render": function(data) {
+                    return `<strong>${data}</strong>`;
+                }
+            },
+            { "data": "name_of_farmer" },
+            { "data": "name_of_community" },
+            { "data": "date_of_survey" },
+            { "data": "name_of_surveyor" },
+            { "data": "type_of_plantation" },
+            { 
+                "data": "total_seedlings_alive",
+                "render": function(data) {
+                    return `<strong>${data}</strong>`;
+                }
+            },
+            {
+                "data": "survival_rate",
+                "render": function(data, type, row) {
+                    let statusClass = 'status-unknown';
+                    let statusText = 'Unknown';
+                    
+                    if (data >= 80) {
+                        statusClass = 'status-high';
+                        statusText = 'High';
+                    } else if (data >= 50) {
+                        statusClass = 'status-medium';
+                        statusText = 'Medium';
+                    } else if (data > 0) {
+                        statusClass = 'status-low';
+                        statusText = 'Low';
+                    }
+                    
+                    return `
+                        <div class="d-flex align-items-center">
+                            <span class="status-badge ${statusClass} me-2">${statusText}</span>
+                            <span>${data}%</span>
+                        </div>
+                    `;
+                }
+            },
+            { 
+                "data": "species_count",
+                "render": function(data) {
+                    return `<span class="badge bg-primary">${data}</span>`;
+                }
+            },
+            {
+                "data": "has_boundary",
+                "render": function(data) {
+                    return data ? 
+                        '<span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>' :
+                        '<span class="badge bg-secondary"><i class="fas fa-times"></i> No</span>';
+                }
+            },
+            { "data": "created_at" },
+            {
+                "data": "id",
+                "render": function(data, type, row) {
+                    return `
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-primary view-btn" data-id="${data}" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info map-btn" data-id="${data}" title="View on Map">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${data}" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        ],
+        order: [[3, 'desc']], // Sort by survey date descending
+        dom: 'Bfrtip',
+        pageLength: 12,
+        buttons: [
+            {
+                extend: "copy",
+                text: '<i class="fas fa-copy"></i> Copy',
+                className: "btn btn-sm btn-outline-secondary",
+            },
+            {
+                extend: "csv",
+                text: '<i class="fas fa-file-csv"></i> CSV',
+                className: "btn btn-sm btn-outline-success",
+            },
+            {
+                extend: "excel",
+                text: '<i class="fas fa-file-excel"></i> Excel',
+                className: "btn btn-sm btn-outline-primary",
+            },
+            {
+                extend: "pdf",
+                text: '<i class="fas fa-file-pdf"></i> PDF',
+                className: "btn btn-sm btn-outline-danger",
+            },
+            {
+                text: '<i class="fas fa-sync-alt"></i> Refresh',
+                className: "btn btn-sm btn-outline-info",
+                action: function (e, dt, node, config) {
+                    dt.ajax.reload();
+                }
+            }
+        ]
+    });
+
+    // Load communities for filter
+    // function loadCommunitiesForFilter() {
+    //     $.ajax({
+    //         url: "",
+    //         type: "GET",
+    //         data: { length: 1000 }, // Get all surveys to extract communities
+    //         success: function(response) {
+    //             const communities = [...new Set(response.data.map(survey => survey.name_of_community))].filter(Boolean);
+    //             const communityFilter = $('#communityFilter');
+                
+    //             communities.forEach(function(community) {
+    //                 communityFilter.append(
+    //                     $('<option>', {
+    //                         value: community,
+    //                         text: community
+    //                     })
+    //                 );
+    //             });
+    //         }
+    //     });
+    // }
+
+    // Load survey statistics
+    function loadSurveyStats() {
+        $.ajax({
+            url: "/api/seedling-surveys/stats/",
+            type: "GET",
+            success: function(response) {
+                if (response.success) {
+                    const stats = response.stats;
+                    const statsContainer = $('#statsContainer');
+                    
+                    statsContainer.empty();
+                    
+                    // Create stats cards
+                    const statsCards = [
+                        {
+                            title: 'Total Surveys',
+                            value: stats.total_surveys,
+                            icon: 'fas fa-clipboard-list',
+                            color: 'primary'
+                        },
+                        {
+                            title: 'Total Seedlings Alive',
+                            value: stats.total_seedlings_alive.toLocaleString(),
+                            icon: 'fas fa-seedling',
+                            color: 'success'
+                        },
+                        {
+                            title: 'Avg Survival Rate',
+                            value: stats.avg_survival_rate + '%',
+                            icon: 'fas fa-chart-line',
+                            color: 'info'
+                        },
+                        {
+                            title: 'Recent Surveys (30 days)',
+                            value: stats.recent_surveys,
+                            icon: 'fas fa-calendar-plus',
+                            color: 'warning'
+                        }
+                    ];
+                    
+                    statsCards.forEach(function(card) {
+                        statsContainer.append(`
+                            <div class="col-md-3 mb-3">
+                                <div class="stats-card">
+                                    <i class="${card.icon} fa-2x mb-2"></i>
+                                    <h3 class="stats-number">${card.value}</h3>
+                                    <p>${card.title}</p>
+                                </div>
+                            </div>
+                        `);
+                    });
+                    
+                    // Add community distribution
+                    if (stats.surveys_by_community.length > 0) {
+                        let communityHtml = `
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">Surveys by Community</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Community</th>
+                                                        <th>Surveys</th>
+                                                        <th>Seedlings Alive</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                        `;
+                        
+                        stats.surveys_by_community.forEach(function(item) {
+                            communityHtml += `
+                                <tr>
+                                    <td>${item.name_of_community}</td>
+                                    <td>${item.count}</td>
+                                    <td>${item.total_seedlings.toLocaleString()}</td>
+                                </tr>
+                            `;
+                        });
+                        
+                        communityHtml += `
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        statsContainer.append(communityHtml);
+                    }
+                    
+                    // Add survival rate distribution (placeholder)
+                    let survivalHtml = `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">Survival Rate Distribution</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">Detailed survival rate analysis would be displayed here.</p>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-success" style="width: 40%">High (&gt;80%)</div>
+                                        <div class="progress-bar bg-warning" style="width: 35%">Medium (50-80%)</div>
+                                        <div class="progress-bar bg-danger" style="width: 25%">Low (&lt;50%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    statsContainer.append(survivalHtml);
+                }
+            }
+        });
+    }
+
+    // Load surveys for detail tab dropdown
+    function loadSurveysForDropdown() {
+        $.ajax({
+            url: "/api/seedling-surveys/datatable/",
+            type: "GET",
+            data: { length: 1000 }, // Get all surveys
+            success: function(response) {
+                const surveySelect = $('#surveySelect');
+                surveySelect.empty().append('<option value="">Select a survey...</option>');
+                
+                response.data.forEach(function(survey) {
+                    surveySelect.append(
+                        $('<option>', {
+                            value: survey.id,
+                            text: `${survey.farmer_id_number} - ${survey.name_of_farmer} (${survey.date_of_survey})`
+                        })
+                    );
+                });
+            }
+        });
+    }
+
+    // Load survey details
+    function loadSurveyDetails(surveyId) {
+        $.ajax({
+            url: `/api/seedling-surveys/detail/${surveyId}/`,
+            type: "GET",
+            success: function(response) {
+                if (response.success) {
+                    const survey = response.survey;
+                    
+                    // Update basic info
+                    $('#surveyFarmerName').text(survey.name_of_farmer);
+                    $('#surveyFarmerId').text(survey.farmer_id_number);
+                    $('#surveyCommunity').text(survey.name_of_community);
+                    $('#surveyDate').text(survey.date_of_survey);
+                    $('#surveySurveyor').text(survey.name_of_surveyor);
+                    $('#surveyPlantationType').text(survey.type_of_plantation);
+                    $('#surveySeedlingsAlive').text(survey.total_seedlings_alive.toLocaleString());
+                    $('#surveySurvivalRate').html(`
+                        <span class="status-badge ${getSurvivalStatusClass(survey.survival_rate)}">
+                            ${survey.survival_rate}%
+                        </span>
+                    `);
+                    $('#surveyHasBoundary').html(
+                        survey.has_boundary ? 
+                        '<span class="badge bg-success">Yes</span>' : 
+                        '<span class="badge bg-secondary">No</span>'
+                    );
+                    $('#surveyCreated').text(survey.created_at);
+                    
+                    // Load species data
+                    loadSpeciesData(survey);
+                    
+                    // Load environmental factors
+                    loadEnvironmentalData(survey);
+                    
+                    // Load pests and diseases data
+                    loadPestsData(survey);
+                    
+                    // Load treatments data
+                    loadTreatmentsData(survey);
+                    
+                    // Show detail container
+                    $('#surveyDetailContainer').show();
+                }
+            }
+        });
+    }
+
+    // Load species data
+    function loadSpeciesData(survey) {
+        let speciesHtml = `
+            <h6>Species Provided & Planted</h6>
+            <div class="mb-3">
+        `;
+        
+        if (survey.species_provided_planted && survey.species_provided_planted.length > 0) {
+            survey.species_provided_planted.forEach(function(species) {
+                speciesHtml += `<span class="species-badge">${species}</span>`;
+            });
+        } else {
+            speciesHtml += '<p class="text-muted">No species data recorded</p>';
+        }
+        
+        speciesHtml += `</div>`;
+        
+        // Species alive
+        speciesHtml += `
+            <h6>Species Alive</h6>
+            <div class="mb-3">
+        `;
+        
+        if (survey.species_alive && survey.species_alive.length > 0) {
+            survey.species_alive.forEach(function(species) {
+                speciesHtml += `<span class="species-badge">${species}</span>`;
+            });
+        } else {
+            speciesHtml += '<p class="text-muted">No living species recorded</p>';
+        }
+        
+        speciesHtml += `</div>`;
+        
+        // Detailed species information
+        if (survey.species_details && survey.species_details.length > 0) {
+            speciesHtml += `
+                <h6>Detailed Species Information</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Species</th>
+                                <th>Received</th>
+                                <th>Planted</th>
+                                <th>Planting Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            survey.species_details.forEach(function(species) {
+                speciesHtml += `
+                    <tr>
+                        <td>${species.name}</td>
+                        <td>${species.received}</td>
+                        <td>${species.planted}</td>
+                        <td>${species.planting_date}</td>
+                    </tr>
+                `;
+            });
+            
+            speciesHtml += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        $('#speciesDataContent').html(speciesHtml);
+    }
+
+    // Load environmental factors
+    function loadEnvironmentalData(survey) {
+        let environmentalHtml = '';
+        
+        // Water sources
+        if (survey.source_of_water && survey.source_of_water.length > 0) {
+            environmentalHtml += `
+                <div class="environmental-factor">
+                    <strong>Water Sources:</strong> ${survey.source_of_water.join(', ')}
+                </div>
+            `;
+        }
+        
+        // Watering frequency
+        if (survey.avg_watering_frequency) {
+            environmentalHtml += `
+                <div class="environmental-factor">
+                    <strong>Watering Frequency:</strong> ${survey.avg_watering_frequency}
+                </div>
+            `;
+        }
+        
+        // Extreme weather
+        if (survey.any_extreme_weather) {
+            environmentalHtml += `
+                <div class="environmental-factor">
+                    <strong>Extreme Weather:</strong> Yes
+                    ${survey.extreme_weather_type && survey.extreme_weather_type.length > 0 ? 
+                        `(${survey.extreme_weather_type.join(', ')})` : ''}
+                </div>
+            `;
+        }
+        
+        // Reasons for death
+        if (survey.reason_for_death && survey.reason_for_death.length > 0) {
+            environmentalHtml += `
+                <div class="environmental-factor">
+                    <strong>Reasons for Death:</strong> ${survey.reason_for_death.join(', ')}
+                </div>
+            `;
+        }
+        
+        if (!environmentalHtml) {
+            environmentalHtml = '<p class="text-muted">No environmental factors recorded</p>';
+        }
+        
+        $('#environmentalDataContent').html(environmentalHtml);
+    }
+
+    // Load pests and diseases data
+    function loadPestsData(survey) {
+        let pestsHtml = '';
+        
+        // Pests
+        if (survey.any_pests_around) {
+            pestsHtml += `
+                <div class="environmental-factor">
+                    <strong>Pests Observed:</strong> Yes
+                    ${survey.pest_description ? `<br><em>${survey.pest_description}</em>` : ''}
+                </div>
+            `;
+        }
+        
+        // Diseases
+        if (survey.any_signs_of_disease) {
+            pestsHtml += `
+                <div class="environmental-factor">
+                    <strong>Diseases Observed:</strong> Yes
+                    ${survey.disease_signs_description ? `<br><em>${survey.disease_signs_description}</em>` : ''}
+                </div>
+            `;
+        }
+        
+        if (!pestsHtml) {
+            pestsHtml = '<p class="text-muted">No pests or diseases recorded</p>';
+        }
+        
+        $('#pestsDataContent').html(pestsHtml);
+    }
+
+    // Load treatments data
+    function loadTreatmentsData(survey) {
+        let treatmentsHtml = '';
+        
+        // Fertilizer
+        if (survey.any_fertiliser_applied) {
+            treatmentsHtml += `
+                <div class="environmental-factor">
+                    <strong>Fertilizer Applied:</strong> Yes
+                    ${survey.fertiliser_type ? `(${survey.fertiliser_type})` : ''}
+                </div>
+            `;
+        }
+        
+        // Pesticides/Herbicides
+        if (survey.any_pesticide_herbicide) {
+            treatmentsHtml += `
+                <div class="environmental-factor">
+                    <strong>Pesticides/Herbicides Applied:</strong> Yes
+                    ${survey.pesticide_herbicide_type ? `(${survey.pesticide_herbicide_type})` : ''}
+                </div>
+            `;
+        }
+        
+        // Additional observations
+        if (survey.additional_observations) {
+            treatmentsHtml += `
+                <div class="environmental-factor">
+                    <strong>Additional Observations:</strong><br>
+                    <em>${survey.additional_observations}</em>
+                </div>
+            `;
+        }
+        
+        if (!treatmentsHtml) {
+            treatmentsHtml = '<p class="text-muted">No treatments or additional observations recorded</p>';
+        }
+        
+        $('#treatmentsDataContent').html(treatmentsHtml);
+    }
+
+    // Helper function to get survival status class
+    function getSurvivalStatusClass(rate) {
+        if (rate >= 80) return 'status-high';
+        if (rate >= 50) return 'status-medium';
+        if (rate > 0) return 'status-low';
+        return 'status-unknown';
+    }
+
+    // Survey selection change handler
+    $('#surveySelect').change(function() {
+        const surveyId = $(this).val();
+        if (surveyId) {
+            loadSurveyDetails(surveyId);
+        } else {
+            $('#surveyDetailContainer').hide();
+        }
+    });
+
+    // Filter change handlers
+    $('#communityFilter, #survivalFilter, #dateFromFilter, #dateToFilter').change(function() {
+        surveyTable.ajax.reload();
+    });
+
+    // Tab change handler
+    $('#surveyTabs button').on('click', function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+        
+        if ($(this).attr('id') === 'stats-tab') {
+            loadSurveyStats();
+        } else if ($(this).attr('id') === 'detail-tab') {
+            loadSurveysForDropdown();
+        }
+    });
+
+    // View button click
+    $('#surveyTable').on('click', '.view-btn', function() {
+        const surveyId = $(this).data('id');
+        
+        // Switch to detail tab
+        $('#detail-tab').tab('show');
+        
+        // Update the dropdown selection and load details
+        $('#surveySelect').val(surveyId);
+        loadSurveyDetails(surveyId);
+    });
+
+    // Map button click
+    $('#surveyTable').on('click', '.map-btn', function() {
+        const surveyId = $(this).data('id');
+        // Redirect to map page with the specific survey
+        window.location.href = `/seedling-map/?survey=${surveyId}`;
+    });
+
+    // Delete button click
+    $('#surveyTable').on('click', '.delete-btn', function() {
+        const surveyId = $(this).data('id');
+        
+        // Store survey ID for deletion
+        $('#deleteModal').data('surveyId', surveyId);
+        $('#deleteModal').modal('show');
+    });
+
+    // Confirm delete
+    $('#confirmDeleteBtn').click(function() {
+        const surveyId = $('#deleteModal').data('surveyId');
+        
+        $.ajax({
+            url: "/api/seedling-surveys/delete/",
+            type: "POST",
+            data: JSON.stringify({ id: surveyId }),
+            contentType: "application/json",
+            headers: { "X-CSRFToken": getCSRFToken() },
+            success: function(response) {
+                if (response.success) {
+                    $('#deleteModal').modal('hide');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    surveyTable.ajax.reload();
+                    loadSurveysForDropdown();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: response.error
+                    });
+                }
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: xhr.responseJSON?.error || 'An error occurred while deleting the survey.'
+                });
+            }
+        });
+    });
+
+    // CSRF token helper function
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === ('csrftoken' + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Initial load
+    // loadCommunitiesForFilter();
+});
+</script>
+{% endblock %}

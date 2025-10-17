@@ -1,0 +1,557 @@
+{% extends 'update/base.html' %}
+{% block biomap %} active {% endblock %}
+{% load static %}
+{% load eok %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/plugins/daterangepicker/daterangepicker.css">
+<link rel="stylesheet" href="/static/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+<link rel="stylesheet" href="/static/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+<link rel="stylesheet" href="/static/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+<link rel="stylesheet" href="/static/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/static/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+<link rel="stylesheet" href="/static/plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
+<link rel="stylesheet" href="/static/plugins/bs-stepper/css/bs-stepper.min.css">
+<link rel="stylesheet" href="/static/plugins/dropzone/min/dropzone.min.css">
+<style type="text/css">
+
+.disabled { pointer-events: none; 
+            cursor: default;
+        }
+a.disabled { background:#298541;
+ color: #fff!important;
+ padding: 10px 30px; 
+ font-weight: 500;  
+ border-radius: 6px; 
+ margin:10px auto 20px ; 
+}
+  
+.eok{
+    background-color: #298541;
+    color: #fff;
+}
+</style>
+
+{% endblock %}
+
+
+
+{% block body %}
+<div class="content-wrapper">    
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-8 offset-2" id="printableArea">
+                    <div class="white_card card_height_100 mb_10">
+                        <div class="white_card_header">
+                            <div class="">
+                                <div class="row hidden_print">
+                                    <a onclick="printDiv('printableArea')" href="#" class="notification_btn red_btn print" style="font-size: 37px; position: absolute; top: 75px; right: 10px;color: #298541;"> <i class="fa fa-print"></i></a><br>
+                                </div>
+                            </div>
+                            <div class="main-title" style="text-align: center;">
+                                <!-- <img class="img_centre" src="/static/dist/img/fc.png" style="width: 200px"> -->
+                                <h3 class="m-0" style="text-align: center;">REGISTRATION OF FOREST TREES ON OFF RESERVE LANDS </h3>
+                                <br><br>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <div class="white_card_header">
+                                <div class="box_header pb-4 pt-5">
+                                    <div class="main-title">
+                                        <a class="disabled">Farmer Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group row pt-2 pb-2">
+                                                <label for="inputEmail3" class="col-sm-3 col-form-label">Farmer Reg No.</label>
+                                                <div class="col-sm-9">
+                                                    <input type="name" class="form-control" id="" placeholder="{{perdetails.farmercode}}" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group row pt-2 pb-2">
+                                                <label for="inputEmail3" class="col-sm-3 col-form-label">Farmer Name</label>
+                                                <div class="col-sm-9">
+                                                    <input type="name" class="form-control" id="" placeholder="{{perdetails.indvi_first_name}} {{perdetails.indvi_surname}} {{perdetails.indvi_other_names}}" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group row pt-2 pb-2">
+                                                <label for="inputEmail3" class="col-sm-6 col-form-label">Gender</label>
+                                                <div class="col-sm-6">
+                                                    <input type="text" class="form-control" id="inputEmail3" placeholder="{{perdetails.indvi_gender}}" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <div class="form-group row pt-2 pb-2">
+                                                <label for="inputEmail3" class="col-sm-4 col-form-label">Date of Birth </label>
+                                                <div class="col-sm-5">
+                                                    <input type="text" class="form-control" id="inputEmail3" placeholder="{{perdetails.indvi_dob}}">
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control" id="inputEmail3" placeholder="{{bene_age}}yrs">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4" style="padding-left: 5%;">
+                                    <img class="col-sm-12" src="/media/{{perdetails.beneficiary_pic}}" alt="Image description" style="border-radius:13px;width:100%; max-height:70% ">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Mobile No.</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" placeholder="{{perdetails.indvi_phone_no}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Email</label>
+                                        <div class="col-sm-8">
+                                            <input type="email" class="form-control" id="inputEmail3" placeholder="{{perdetails.indvi_email}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Postal Address </label>
+                                        <div class="col-sm-10">
+                                            <input type="name" class="form-control" id="" readonly placeholder="{{perdetails.indvi_address}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white_card card_height_100 mb_10">
+                        <div class="white_card_header">
+                            <div class="box_header pb-4 pt-5">
+                                <div class="main-title">
+                                    <a class="disabled">Next of Kins</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Next of Kin </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" placeholder="{{perdetails.indvi_next_of_kin}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Date of Birth </label>
+                                        <div class="col-sm-8">
+                                            <input type="email" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.indvi_next_of_kin_dob}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Gender</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.indvi_next_of_kin_gender}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Phone No. </label>
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.indvi_next_of_kin_phone_no}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Postal Address </label>
+                                        <div class="col-sm-10">
+                                            <input type="name" class="form-control" id="" readonly placeholder="{{perdetails.indvi_next_of_kin_address}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white_card card_height_100 mb_10">
+                        <div class="white_card_header">
+                            <div class="box_header pb-4 pt-5">
+                                <div class="main-title">
+                                    <a class="disabled">Farm Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <!-- <h6 class="card-subtitle mb-2"> ggg </h6> -->
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Region</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.mmdas.region}} ">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Forest District</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.forest_district| title}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Stool / Skin No.</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.stool_family | title}} ">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Location / Community</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.community | title}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">District Assembly </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{perdetails.mmdas.district | title}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">No. of Planted Trees</label>
+                                        <div class="col-sm-8">
+                                            <input type="email" class="form-control" id="inputEmail3" readonly placeholder="{{tree_count}} ">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Farm Size/Plantation Area (HA) </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{farmarea}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Type of Establishement</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{farmdetails.establishment_type | establish}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">No. of Planted Species </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{no_species}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">No. of Corners </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3" readonly placeholder="{{farmer_corners}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">No. of Planted Trees </label>
+                                        <div class="col-sm-10">
+                                            <input type="name" class="form-control" id="" readonly placeholder="{{farmdetails.farm_code}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white_card card_height_100 pge-break mb_10" style="">
+                        <div class="white_card_header">
+                            <div class="box_header pb-4 pt-5">
+                                <div class="main-title">
+                                    <a class="disabled">(C1) Plot /Farm information</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <!-- <h6 class="card-subtitle mb-2"> ggg </h6> -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="table-responsive m-b-30">
+                                        <table class="table table-striped">
+                                            <thead class="eok">
+                                                <tr>
+                                                    <th scope="col"> Date </th>
+                                                    <th scope="col"> Point ID </th>
+                                                    <th scope="col">Latitude</th>
+                                                    <th scope="col">Longitude</th>
+                                                    <th scope="col">Way Points </th>
+                                                    <th scope="col">Remarks </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for aa in farmdetails.coord %}
+                                                <tr>
+                                                    <td scope="row">{{farmdetails.created_date}} </td>
+                                                    <td> {{forloop.counter}} </td>
+                                                    <td>{{aa.1}} </td>
+                                                    <td>{{aa.0}} </td>
+                                                    <th>00{{forloop.counter}}</th>
+                                                    <th> </th>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white_card card_height_100 mb_10">
+                        <div class="white_card_header">
+                            <div class="box_header pb-4 pt-5">
+                                <div class="main-title">
+                                    <a class="disabled">(C2) Tree Information on Planted Species ( Commercial Plantation )</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <!-- <h6 class="card-subtitle mb-2"> ggg </h6> -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="table-responsive m-b-30">
+                                        {% if farmdetails.establishment_type in typeest %}
+                                        <table class="table table-striped">
+                                            <thead class="eok">
+                                                <tr>
+                                                    <th scope="col"> No </th>
+                                                    <th scope="col"> Species </th>
+                                                    <th scope="col">No. of Trees (Stocking) </th>
+                                                    <th scope="col"> Planting Distance</th>
+                                                    <th scope="col">Year of Establishment </th>
+                                                    <th scope="col">Comments </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for tree in trees %}
+                                                <tr>
+                                                    <td scope="row">{{forloop.counter}} </td>
+                                                    <td>{{tree.wcp_species_planted}} </td>
+                                                    <td>{{tree.wcp_species_planted}} </td>
+                                                    <td>{{tree.wcp_planting_distance}}</td>
+                                                    <th>{{tree.wcp_establishment_year}}</th>
+                                                    <th> </th>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        {% else %}
+                                        <table class="table table-striped">
+                                            <thead class="eok">
+                                                <tr>
+                                                    <th scope="col"> No </th>
+                                                    <th scope="col"> Species </th>
+                                                    <th scope="col">No. of Trees (Stocking) </th>
+                                                    <!-- <th scope="col"> Planting Distance</th> -->
+                                                    <th scope="col">Year of Nurturing </th>
+                                                    <th scope="col">Year of Planting </th>
+                                                    <th scope="col">Latitude </th>
+                                                    <th scope="col">Longitude </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for tree in trees %}
+                                                <tr>
+                                                    <td scope="row">{{forloop.counter}} </td>
+                                                    <td>{{tree.ptn_species}} </td>
+                                                    <td>{{tree.ptn_size_of_tree}} </td>
+                                                    <td>{{tree.ptn_year_nurturing}}</td>
+                                                    <th>{{tree.ptn_year_planted}}</th>
+                                                    <th>{{tree.ptn_latitude}} </th>
+                                                    <th>{{tree.ptn_longitude}} </th>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white_card card_height_100 mb_10">
+                        <div class="white_card_header">
+                            <div class="box_header pb-4 pt-5">
+                                <div class="main-title">
+                                    <a class="disabled">(C1) Declaration )</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <!-- <h6 class="card-subtitle mb-2"> ggg </h6> -->
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <h6 class="card-subtitle mb-2"> Farmer/Group Rep Signature (Thumbprint) </h6><br>
+                                    <img class="col-sm-7 img-thumbnail" src="/media/{{perdetails.farmer_thumb}}" itemprop="thumbnail" alt="Image description">
+                                </div>
+                                <div class="col-sm-8">
+                                    <h6 class="card-subtitle"> Farmer/Group Witness Signature (Thumbprint) </h6><br>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <img class="col-sm-12 img-thumbnail" src="/media/{{perdetails.withness_thumb}}" itemprop="thumbnail" alt="" style="display: inline;">
+                                        </div>
+                                        <div class="col-sm-7 offset-1 ">
+                                            <div class="form-group row pt-2 pb-2">
+                                                <label for="inputEmail3" class="col-sm-4 col-form-label">Name</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control" id="inputEmail3">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row pt-2 pb-2">
+                                                <label for="inputEmail3" class="col-sm-4 col-form-label">Date </label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control" id="inputEmail3">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row pt-2 pb-2">
+                                                <label for="inputEmail3" class="col-sm-4 col-form-label">Phone Number </label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control" id="inputEmail3">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white_card card_height_100 mb_10">
+                        <div class="white_card_header">
+                            <div class="box_header pb-4 pt-5">
+                                <div class="main-title">
+                                    <a class="disabled">(C1) Endorsement </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h6 class="card-subtitle mb-2" style="display: inline; float: left;"> District Forestry Manager's Signature & Stamp </h6>
+                                    <span style="display: inline; padding:10px; background-color: #d4d4d4; font-weight:500; color: #fff; border-radius: 6px; float:right; margin:-10px 5px 15px;"> FOR OFFICIAL USE ONLY </span>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Name: </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-4 col-form-label">Date</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="inputEmail3">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 offset-sm-2 ">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="" class="col-sm-12 col-form-label"> Comments: <br> All the form details have been verified, hence approved </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                </
+
+          <!--   <script src="/static/plugins/jquery/jquery.min.js"></script>
+            <script src="/static/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/iconify/2.0.0/iconify.min.js" integrity="sha512-lYMiwcB608+RcqJmP93CMe7b4i9G9QK1RbixsNu4PzMRJMsqr/bUrkXUuFzCNsRUo3IXNUr5hz98lINURv5CNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            <script src="/static/plugins/select2/js/select2.full.min.js"></script>
+            <script src="/static/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+            <script src="/static/plugins/moment/moment.min.js"></script>
+            <script src="/static/plugins/inputmask/jquery.inputmask.min.js"></script>
+            <script src="/static/plugins/daterangepicker/daterangepicker.js"></script>
+            <script src="/static/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+            <script src="/static/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+            <script src="/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+            <script src="/static/plugins/bs-stepper/js/bs-stepper.min.js"></script>
+            <script src="/static/plugins/dropzone/min/dropzone.min.js"></script>
+            <script src="/static/dist/js/adminlte.min%EF%B9%96v=3.2.0.js"></script>
+            <script src="/static/dist/js/demo.js"></script>
+
+            </html>
+ -->
+
+{% endblock %}
+
+
+
+{% block js %}
+
+<script type="text/javascript"> 
+function printDiv(divName) {
+     var printContents = document.getElementById(divName).innerHTML;
+     var originalContents = document.body.innerHTML;
+
+     document.body.innerHTML = printContents;
+
+     window.print();
+
+     document.body.innerHTML = originalContents;
+}
+</script>
+
+{% endblock %}

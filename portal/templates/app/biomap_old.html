@@ -1,0 +1,410 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block css %}
+<!-- map css  -->
+<link rel="stylesheet" href="vendors/mapJs/mapsjs-ui.css" />
+<style type="text/css">
+.district {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+}
+
+.lgdicon {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    width: 20px;
+    height: 20px;
+    float: right;
+    margin-left: 10px;
+}
+</style>
+<style>
+    .switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #185259;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #185259;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 90%;
+}
+
+.eok {
+    color: #14256A;
+    font-family: "Comfortaa", cursive;
+    font-weight: 600;
+    font-size: 15px;
+    margin-left: 15%;
+    /* line-height: 1.2; */
+}
+</style>
+{% endblock%}
+{% block body %}
+<div class="container-fluid p-0 sm_padding_15px">
+    <div class="row justify-content-center">
+        <div class="col-xl-12">
+            <div class="card_box box_shadow">
+                <div class="box_body">
+                    <div class="" style="height: 87vh; background:#eee;">
+                        <div class="mapouter" id="mapid" style="height:87vh; background:#red;">
+                            <div class="mapLegend" id="mapLegend">
+                                <div id="" class="toolBar bgWhite">
+                                    <img id="zoomin" src="/static/app/img/maptools/zin.png" class="toolbaricon" title="zoom in">
+                                    <img id="zoomout" src="/static/app/img/maptools/zout.png" class="toolbaricon" title="zoom out">
+                                    <img id="zoomex" src="/static/app/img/maptools/fullextnt.png" class="toolbaricon" title="zoom extent">
+                                    <img id="legBox" src="/static/app/img/maptools/legend.png" class="toolbaricon" title="Toggle Legend">
+                                    <img id="baseMap" src="/static/app/img/maptools/basemap.png" class="toolbaricon" title="Toggle Basemap">
+                                    <img id="zoomtabfil" src="/static/app/img/maptools/reload.png" class="toolbaricon" title="Refresh Map">
+                                    <img id="previousebtn" src="/static/app/img/maptools/print.png" class="toolbaricon" title="print map">
+                                    <span class="cet legendcet pcoded-mcaret"></span>
+                                    <span class="cet basemapcet pcoded-mcaret"></span>
+                                </div>
+                                <div class="Cont legendCont bgWhite" style="display: block;">
+                                    <a href="">
+                                    </a>
+                                    <div class="">
+                                        <div class="accordion">
+                                            <div class="option"> <input type="checkbox" id="toggle1" class="toggle"> <label class="title" for="toggle1"> Admin Boundaries </label>
+                                                <div class="content"><i class="entypo-down-open-big sf"></i>
+                                                    <div class="col-sm-12 col-xl-12 m-b-5">
+                                                        <!--  <div class="">
+                                                                <span class="lgdicon region">
+                                                                </span>
+                                                                <input class="icheck" id="regcheck" type="checkbox" checked="" name="">
+                                                                <label for="myCheckbox">Region</label>
+                                                            </div> -->
+                                                        <div class="">
+                                                            <span class="lgdicon district">
+                                                            </span>
+                                                            <input class="icheck" id="distcheck" type="checkbox" name="">
+                                                            <label for="myCheckbox" class="eok">District</label>
+                                                            <!-- <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i> -->
+                                                        </div>
+                                                        <div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="option"> <input type="checkbox" id="toggledis" class="toggle"> <label class="title" for="toggledis"> Layers </label>
+                                                <div class="content"><i class="entypo-down-open-big sf"></i>
+                                                    <div class="col-sm-12 col-xl-12 m-b-5" id="sectorchecks">
+                                                         <div class="">
+                                                                <span class="lgdicon hea">
+                                                                    <i id="farmload" class="fa fa-spinner fa-pulse fa-1x fa-fw hidden"></i>
+                                                                </span>
+                                                                <input class="icheck" id="farmcheck" type="checkbox" name="">
+                                                                <label for="myCheckbox" class="eok">  Farm Lands </label>
+                                                            </div>
+                                                            <hr>
+                                                           <!--  <div class="">
+                                                                <span class="lgdicon hea">
+                                                                    <i id="treeload" class="fa fa-spinner fa-pulse fa-1x fa-fw hidden"></i>
+                                                                </span>
+                                                                <input class="icheck" id="treeloadcheck" type="checkbox" name="">
+                                                                <label for="myCheckbox" class="eok">  Trees </label>
+                                                            </div> -->
+
+                                                        <div class="">
+                                                            <span class="lgdicon hea">
+                                                                <i id="biomasload" class="fa fa-spinner fa-pulse fa-1x fa-fw hidden"></i>
+                                                            </span>
+                                                            <input class="icheck " id="biomascheck" type="checkbox" name="">
+                                                            <label for="myCheckbox" class="eok"> Biomass </label>
+                                                        </div>
+                                                        <!--  <div class="">
+                                                                <span class="lgdicon hea">
+                                                                    <i id="biomasload" class="fa fa-spinner fa-pulse fa-1x fa-fw hidden"></i>
+                                                                </span>
+                                                                <label class="switch">
+                                                              <input type="checkbox" id="biomascheck" >
+                                                              <span class="slider round"></span>
+                                                            </label>
+                                                            <label class="eok"for="myCheckbox">  Biomas </label>
+                                                            </div>
+ -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="Cont basemapCont bgWhite" style="display: none;">
+                                    <div class="tileDiv" id="no_basemap" style="">
+                                        <img src="/static/app/img/tiles/1.png" class="tiles" title="Satellite Image">
+                                        No Basemap
+                                    </div>
+                                    <div class="tileDiv" id="basemap1" style="">
+                                        <img id="" src="/static/app/img/tiles/2.png" class="tiles" title="Satellite Image">
+                                        Openstreetmap
+                                    </div>
+                                    <div class="tileDiv" id="basemap2" style="">
+                                        <img id="" src="/static/app/img/tiles/3.png" class="tiles" title="Satellite Image">
+                                        Satellite Image
+                                    </div>
+                                    <div class="tileDiv" id="basemap3" style="">
+                                        <img id="" src="/static/app/img/tiles/4.png" class="tiles" title="Satellite Image">
+                                        Openstreetmap Hotmap
+                                    </div>
+                                    <div class="tileDiv" id="basemap4" style="">
+                                        <img id="" src="/static/app/img/tiles/5.png" class="tiles" title="Satellite Image">
+                                        Opentopomap
+                                    </div>
+                                    <div class="tileDiv" id="basemap6" style="">
+                                        <img id="" src="/static/app/img/tiles/6.png" class="tiles" title="Satellite Image">
+                                        World Street Map
+                                    </div>
+                                    <!--  <div class="tileDiv" id="basemap7" style="">
+                                            <img id="" src="/static/app/img/tiles/7.png" class="tiles" title="Satellite Image">
+                                             Tile 6 name here
+                                        </div> -->
+                                    <!-- <div>
+                                            <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-2.jpg" data-lightbox="example-2" data-title="Optional caption."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-2.jpg" alt="image-1"/></a>
+                                        </div> -->
+                                </div>
+                            </div>
+                            <div class="leaflet-bottom leaflet-left" id="ledgend" style="background-color:white;height: 25vh; width:15% ; padding: 2%;">
+                                <strong>
+                                    <h4 for="myCheckbox" style="margin-left: 4%;">Legend </h4>
+                                </strong> <br>
+                                
+                                <span class="lgdicon district" style=" background-color:#FEB24C; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">0 - 19.99 </label> <br>
+
+                                <span class="lgdicon district" style=" background-color:#FD8D3C; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">20 - 39.99 </label> <br>
+
+                                <span class="lgdicon district" style=" background-color:#FC4E2A; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">40 - 59.99 </label> <br>
+
+                                <span class="lgdicon district" style=" background-color:#E31A1C; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">60 - 79.99 </label> <br>
+
+                                <span class="lgdicon district" style=" background-color:#800026; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">80 - 100 </label> <br>
+                             
+                               
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock%}
+{% block js %}
+<script src="/static/app/js/leaflet-heat.js"></script>
+<script src="/static/app/js/map2.js"></script>
+<script type="text/javascript">
+function getColor(d) {
+
+
+    {% for aa in ledgend %}
+
+    if ( d > {{ aa.from }} && d <= {{ aa.to }} ) {
+
+        return "{{ aa.color }}"
+
+    } else {
+
+        return "#FEB24C"
+    }
+
+
+    {% endfor %}
+
+}
+
+
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.percentage),
+        weight: 2,
+        opacity: 1,
+        color: getColor(feature.properties.percentage),
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+}
+
+// function biomas() {
+//     return {
+//         fillColor: 'transparent',
+//         color: 'red',
+//         weight: '3',
+//         dashArray: '',
+//         opacity: '1',
+//         fillOpacity: '0',
+//     };
+// }
+
+
+
+
+function biomasonEachFeature(feature, layer) {
+
+
+    labeltoshow = '<table class="table table-bordered">'
+    labeltoshow += "<thead><tr style='background-color:#4aa;color:white;'><th colspan='2' > <b><center> " + feature.properties.community + "</center></b></th><tr></thead>"
+
+    // labeltoshow += "<tbody><tr><td> <b> Community </b></td><td> " + feature.properties.community + " </td></tr>"
+    labeltoshow += "<tbody><tr><td> <b> Biomass </b></td><td> " + feature.properties.biomas +"Kg</td></tr>"
+    labeltoshow += "<tbody><tr><td> <b> Ledgend Value </b></td><td> " + feature.properties.percentage + " </td></tr>"
+
+    labeltoshow += "</tbody></table>"
+
+    //  layer.bindPopup(labeltoshow, {
+    //     direction: 'auto'
+    // })
+
+    layer.bindTooltip(labeltoshow, {
+        direction: 'auto'
+    })
+
+}
+
+// $("#ledgend").hide()
+var biomaslayer
+biomasmap('/biomasmap/', style, biomasonEachFeature)
+
+function biomasmap(url, mnh, oneach) {
+
+    
+option= {
+gradient : {0.4: '#FED976', 0.65: '#FC4E2A', 1: '#800026'},
+max : 1
+}
+
+// [[1,'#FEB24C'],[2,'#FEB24C'],[3,'#FD8D3C'],[4,'#FC4E2A'],[5,'#E31A1C'],[6,'#800026']]
+
+
+    $.get(url, function(data) {
+        biomaslayer = L.heatLayer(data,option).addTo(mymap);
+        // .addTo(mymap);
+        $("#biomasload").hide()
+    })
+}
+
+
+var geojsonMarkerOptions = {
+    radius: 8,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+
+
+
+var biopointlayer
+$.get('/biomaspoint/', function(data) {
+    // biopointlayer = L.geoJSON(data, {
+    //     pointToLayer: function(feature, latlng) {
+    //         return L.circleMarker(latlng, style(feature));
+    //     },
+    //     onEachFeature: onEachFeature
+    // })
+
+      biopointlayer =  L.geoJSON(data, {
+        onEachFeature: biomasonEachFeature,
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, style(feature));
+        },
+        })
+
+
+// .addTo(mymap);
+    // .addTo(mymap);
+    $("#biomasload").hide()
+})
+
+
+
+mymap.on('zoomend', function() {
+var zoomlevel = mymap.getZoom();
+    if (zoomlevel  <13){
+        if (mymap.hasLayer(biopointlayer)) {
+            mymap.removeLayer(biopointlayer);
+        } else {
+            console.log("no point layer active");
+        }
+    }
+    if (zoomlevel >= 13){
+        if (mymap.hasLayer(biopointlayer)){
+            console.log("layer already added");
+        } else {
+            mymap.addLayer(biopointlayer);
+        }
+    }
+console.log("Current Zoom Level =" + zoomlevel)
+});
+
+
+
+$('#biomascheck').on('change', function() {
+    var man = $('#biomascheck').is(':checked');
+
+    if (man == true) {
+        if (biomaslayer) {
+            mymap.addLayer(biomaslayer);
+            mymap.addLayer(biopointlayer);
+
+            $("#ledgend").show()
+        }
+    } else {
+        // mymap.removeLayer(biomaslayer);
+        mymap.removeLayer(biopointlayer);
+
+        $("#ledgend").hide()
+    }
+})
+</script>
+{% endblock%}

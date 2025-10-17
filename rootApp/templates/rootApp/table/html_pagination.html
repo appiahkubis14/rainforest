@@ -1,0 +1,150 @@
+{% load staticfiles %}
+{% load root %}
+<style type="text/css">
+.card .card-search .card-search-div {
+    padding: 15px 15px 5px !important;
+    display: inline-block !important;
+}
+
+.card .card-search .form-control {
+    position: relative !important;
+    width: auto !important;
+    display: inline-block !important;
+    font-size: 12px;
+    text-indent: unset;
+}
+</style>
+<div id="content" class="container-fluid">
+    <div class="content-body">
+        <div id="dashboard_content" class="tab-content">
+            <div id="">
+                <div id="content" class="container-fluid">
+                    <div class="content-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="card card-data-tables">
+                                    <header class="card-heading">
+                                        <h2 class="card-title"></h2>
+                                        <div class="card-search">
+                                            <div id="" class="form-group label-floating is-empty">
+                                                <div class="card-search-div">
+                                                    <label for="validationCustom03">Category:</label>
+                                                    <select class="form-control form-control-lg" name="category" id="validationCustom03" onchange="ChangecatList()" required>
+                                                        <option value="">Choose Field</option>
+                                                        <option value="value1"> Pesonnel Table </option>
+                                                        <option value="value2"> COmmunity Table </option>
+                                                    </select>
+                                                </div>
+                                                <div class="card-search-div">
+                                                    <label for="validationCustom03">Category:</label>
+                                                    <select class="form-control form-control-lg" name="category" id="validationCustom03" onchange="ChangecatList()" required>
+                                                        <option value="">Choose Operator </option>
+                                                        <option value="value1"> Like </option>
+                                                        <option value="value2"> And </option>
+                                                        <option value="value3"> Or </option>
+                                                    </select>
+                                                </div>
+                                                <div class="card-search-div">
+                                                    <label for="validationCustom03">Category:</label>
+                                                    <input type="text" class="form-control filter-input" placeholder="Filter Products..." autocomplete="off">
+                                                </div>
+                                                <a href="javascript:void(0)" class="close-search" data-card-search="close" data-toggle="tooltip" data-placement="top" title="Close"><i class="zmdi zmdi-close"></i></a>
+                                            </div>
+                                        </div>
+                                        <ul class="card-actions icons right-top">
+                                            <li>
+                                                <a href="javascript:void(0)" data-card-search="open" data-toggle="tooltip" data-placement="top" data-original-title="Filter Products">
+                            <i class="zmdi zmdi-filter-list"></i>
+                          </a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" data-original-title="Export All">
+                            <i class="zmdi zmdi-inbox"></i>
+                          </a>
+                                            </li>
+                                        </ul>
+                                    </header>
+                                    <div class="card-body p-0">
+                                        <div class="alert alert-info m-20 hidden-md hidden-lg" role="alert">
+                                            <p>
+                                                Heads up! You can Swipe table Left to Right on Mobile devices.
+                                            </p>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table id="productsTable" class="mdl-data-table product-table m-t-30" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th> ID</th>
+                                                        {% for tablename in tableheader %}
+                                                        <th> {{tableheader|extractdict:tablename}} </th>
+                                                        {% endfor %}
+                                                        <th data-orderable="false" class="col-xs-2">
+                                                            <button type="button" class="btn btn-primary btn-fab" data-toggle="modal" data-target="#schedule_modal"><i class="zmdi zmdi-plus"></i></button>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for programme in paginator %}
+                                                    <tr>
+                                                        <td>{{forloop.counter}}</td>
+                                                        {% for tablename in tableheader %}
+                                                        <td> {{programme|model_dict|extractdict:tablename}} </td>
+                                                        {% endfor %}
+                                                        <td>
+                                                            <a data-toggle="modal" data-target="#editschedule_modal" class="edit-product icon"><i class="zmdi zmdi-edit"></i></a></td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            {% if paginator.has_other_pages %}
+                                            <div class="col-md-12">
+                                                <div class="col-md-4">
+                                                    <div class="dataTables_info" id="productsTable_info" role="status" aria-live="polite">Showing {{paginator.number}} out of {{paginator.paginator.num_pages}} pages</div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="dataTables_paginate paging_simple_numbers pull-right" id="productsTable_paginate">
+                                                        <div class="pagination">
+                                                            {% if paginator.has_previous %}
+                                                            <button class="mdl-button previous" id="productsTable_previous" aria-controls="productsTable" data-dt-idx="0" tabindex="0"><a href="?page={{ paginator.previous_page_number }}">&laquo;</a></button>
+                                                            {% else %}
+                                                            <button class="disabled mdl-button previous disabled" id="productsTable_previous" aria-controls="productsTable" data-dt-idx="0" tabindex="0"><span>&laquo;</span></button>
+                                                            {% endif %}
+                                                            {% for i in paginator.paginator.page_range %}
+                                                            {% if paginator.number == i %}
+                                                            {% if paginator.number|subtract:1 == paginator.previous_page_number and paginator.previous_page_number != 1 and paginator.previous_page_number != 2 %}
+                                                            <button class="mdl-button " aria-controls="productsTable" data-dt-idx="2" tabindex="0"><a>.</a></button>
+                                                            <button class="mdl-button " aria-controls="productsTable" data-dt-idx="2" tabindex="0"><a href="?page={{ i|subtract:1 }}"> {{ i|subtract:1 }}</a></button>
+                                                            {% endif %}
+                                                            <button class="mdl-button  mdl-button--raised mdl-button--colored" aria-controls="productsTable" data-dt-idx="1" tabindex="0"><span>{{ i }} <span class="sr-only">(current)</span></span></button>
+                                                            {% if forloop.first %}
+                                                            <button class="mdl-button " aria-controls="productsTable" data-dt-idx="2" tabindex="0"><a>.</a></button>
+                                                            {% endif %}
+                                                            {% if paginator.number|subtract:1 != 0 and paginator.paginator.num_pages|subtract:i > 1 %}
+                                                            <button class="mdl-button " aria-controls="productsTable" data-dt-idx="2" tabindex="0"><a href="?page={{ i|add:1 }}">{{ i|add:1 }}</a></button>
+                                                            {% endif %}
+                                                            {% elif forloop.first or forloop.counter == 2 %}
+                                                            <button class="mdl-button " aria-controls="productsTable" data-dt-idx="2" tabindex="0"><a href="?page={{ i }}">{{ i }}</a></button>
+                                                            {% elif forloop.last %}
+                                                            <button class="mdl-button " aria-controls="productsTable" data-dt-idx="2" tabindex="0"><a href="?page={{ i }}">{{ i }}</a></button>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                            {% if paginator.has_next %}
+                                                            <button class="mdl-button next" id="" aria-controls="productsTable" data-dt-idx="4" tabindex="0"><a href="?page={{ paginator.next_page_number }}">&raquo;</a></button>
+                                                            {% else %}
+                                                            <button class="mdl-button next" id="" aria-controls="productsTable" data-dt-idx="4" tabindex="0"><span>&raquo;</span></button>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

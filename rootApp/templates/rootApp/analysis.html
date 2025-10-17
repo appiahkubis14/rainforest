@@ -1,0 +1,207 @@
+<div class="row" id="analysis_contain" style="height: 50vh">
+	
+</div>
+
+
+
+
+<script type="text/javascript">
+	
+
+// Highcharts.chart('analysis_contain', {
+//     chart: {
+//         type: 'column'
+//     },
+//     title: {
+//         text: 'AREA COMPUTATION'
+//     },
+//     // subtitle: {
+//     //     text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+//     // },
+//     xAxis: {
+//         type: 'category',
+//         labels: {
+//             rotation: -45,
+//             style: {
+//                 fontSize: '13px',
+//                 fontFamily: 'Verdana, sans-serif'
+//             }
+//         }
+//     },
+//     yAxis: {
+//         min: 0,
+//         title: {
+//             text: 'Area'
+//         }
+//     },
+//     legend: {
+//         enabled: false
+//     },
+//     tooltip: {
+//         pointFormat: 'Area: <b>{point.y:.1f}  SQ. KM </b>'
+//     },
+//     series: [{
+//         name: 'Area',
+//         data: {{chart | safe }},
+//         dataLabels: {
+//             enabled: true,
+//             rotation: -90,
+//             color: '#FFFFFF',
+//             align: 'right',
+//             format: '{point.y:.1f}', // one decimal
+//             y: 10, // 10 pixels down from the top
+//             style: {
+//                 fontSize: '13px',
+//                 fontFamily: 'Verdana, sans-serif'
+//             }
+//         }
+//     }]
+// });
+
+{% if status %}
+
+Highcharts.chart('analysis_contain', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Area per Class'
+    },
+    // subtitle: {
+    //     text: 'Source: WorldClimate.com'
+    // },
+    xAxis: {
+        categories:{{year | safe }},
+        crosshair: true
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Area (Hectares)'
+        }
+    },
+    tooltip: {
+        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style="padding:0"><b>{point.y:.2f} Hectares </b></td></tr>',
+        footerFormat: '</table>',
+        shared: true,
+        useHTML: true
+    },
+    plotOptions: {
+        column: {
+            pointPadding: 0.2,
+            borderWidth: 0
+        }
+    },
+    series: [
+    {
+        name: 'Agroforestrycocoa',
+        data: {{Agroforestrycocoa_arr|safe}}
+
+    }, {
+        name: 'Built',
+        data: {{Built_arr|safe}}
+
+    }, 
+    // {
+    //     name: 'Cocoa',
+    //     data: {{Cocoa_arr|safe}}
+
+    // },
+    {
+        name: 'Cropland',
+        data: {{Cropland_arr|safe}}
+
+    },
+    {
+        name: 'Forest',
+        data: {{Forest_arr|safe}}
+
+    },
+    {
+        name: 'MonoCocoa',
+        data: {{MonoCocoa_arr|safe}}
+
+    },
+    {
+        name: 'OpenForest',
+        data: {{OpenForest_arr|safe}}
+
+    }, {
+        name: 'Water',
+        data: {{Water_arr|safe}}
+
+    }
+    ]
+});
+
+{% else %}
+
+function escapeRegExp(str) {
+    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+}
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+}
+
+var str = "{{ resultstime|safe }}";
+var new_str = replaceAll(str, "'", "\"");
+
+var groups = JSON.parse(new_str);
+
+console.log(groups)
+
+
+
+Highcharts.chart('analysis_contain', {
+    chart: {
+        type: 'spline'
+    },
+    title: {
+        text: 'Timeseries '
+    },
+    // subtitle: {
+    //     text: 'Source: WorldClimate.com'
+    // },
+     tooltip: {
+        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style="padding:0"><b>{point.y:.2f} </b></td></tr>',
+        footerFormat: '</table>',
+        shared: true,
+        useHTML: true
+    },
+    xAxis: {
+        categories: {{year | safe }}
+    },
+    yAxis: {
+        title: {
+            text: 'Area in Hectares'
+        }
+    },
+    plotOptions: {
+        line: {
+            dataLabels: {
+                enabled: true
+            },
+            enableMouseTracking: false
+        }
+    },
+    series:  JSON.parse(new_str)
+});
+
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+</script>

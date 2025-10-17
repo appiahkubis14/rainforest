@@ -1,0 +1,50 @@
+<!-- {% for aa in data %}
+
+<div class="col-md-2 card" style="height: 50vh;">
+    <a id="example5" href="/media/{{aa.species_photos}}" title="{{aa.treespecies | title}}"><img alt="example4" src="/media/{{aa.species_photos}}" style="width:60%;position: relative;" /></a>
+    <h6 class="">{{aa.treespecies | title}}</h6>
+</div>
+
+{% endfor %}
+
+ -->
+<style type="text/css">
+a[data-fancybox] img {
+  cursor: zoom-in;
+}
+
+img {
+
+  object-fit: contain;
+}
+
+
+.imgbox {
+   /* border: 2px solid;*/
+    border-radius: 11%;
+    padding: 1px;
+    margin-right: 1%;
+}
+
+
+</style>
+
+
+
+<div class="flex flex-wrap gap-5 justify-center max-w-5xl mx-auto ">
+    <div class="row" style="padding:5%">
+    {% for aa in data %}
+    <div class="col-md-2 imgbox card">
+          <a data-fancybox="gallery " href="/media/{{aa.species_photos}}">
+            <img class="rounded "  src="/media/{{aa.species_photos}}"  style="width:50%;object-fit:cover;margin-left: 25%;" />
+
+          </a>
+          <p style="text-align:center">{{aa.treespecies | title}}</p>
+
+
+    </div>
+
+  {% endfor %}
+
+  </div>
+</div>

@@ -1,0 +1,67 @@
+{% load humanize %}
+
+<table id="example1" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>Registration Number</th>
+            <!-- <th>Date of Birth</th> -->
+          <!--   <th>indvi_age</th> -->
+            <th>Address</th>
+            <th>Contact</th>
+          <!--   <th>Email</th> -->
+            
+            <th>Forest District</th>
+            <th>Stool Family</th>
+            <th>District</th>
+            <th>Community</th>
+             <th>Date of Submission</th>
+            <th></th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+            {% for aa in benquery %}
+        <tr>
+            <td>{{aa.group_name | title}}</td>
+          
+            <td>{{aa.farmercode }}</td>
+            <!-- <td>{{aa.indvi_dob}}</td> -->
+            <!-- <td>{{aa.indvi_age}}</td> -->
+            <td>{{aa.group_company_add}}</td>
+            <td>{{aa.group_phone}}</td>
+            <!-- <td>{{aa.group_email}}</td> -->
+
+            <td>{{aa.forest_district | title}}</td>
+            <td>{{aa.stool_family | title}}</td>
+            <td>{{aa.mmdas.district | title}}</td>
+            <td>{{aa.community | title}}</td>
+             <td>{{aa.created_date }}</td>
+            <td>
+               <a href="/groupdetail/?code={{aa.id}}"><button class="btn btn-success"><i class="fa fa-user-circle" aria-hidden="true"></i></button></a> 
+               <a href="/map/?code={{aa.id}}"><button class="btn btn-info"><i class="fa fa-user-circle" aria-hidden="true"></i></button></a> 
+
+            </td>
+        </tr>
+
+            {% endfor %}
+    </tbody>
+
+</table>
+
+
+
+<script type="text/javascript">
+    
+$(document).ready(function() {
+    $('#example1').DataTable( {
+        dom: 'Bfrtip',
+        "order": [],
+        buttons: [
+            'excel', 'print'
+        ]
+    } );
+} );
+    
+</script>

@@ -1,0 +1,457 @@
+
+{% extends 'update/base.html' %}
+{% block biomap %} menu-open {% endblock %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+ <link rel="stylesheet" href="/static/dist/css/map.css">
+ <link rel="stylesheet" href="/static/app/css/leaflet-measure.css" />
+     <style type="text/css">
+    #map {
+        /*height: 103vh!important;*/
+        overflow: hidden;
+        position: relative;
+        width: calc(100% - 242px);
+        /*width: 100%;*/
+        /*z-index: 9999999999999999999999999;*/
+    }
+
+    .text-color {
+        color: #298541;
+    }
+
+    .berrybox {
+        background-color: #fff;
+        border-radius: 8px;
+    }
+
+    .popbox {
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        width: 500px;
+        /* Need a specific value to work */
+        min-height: 20vh;
+        top: 25vh;
+    }
+
+    .legendbox {
+        position: absolute;
+        left: 0;
+        width: 200px;
+        min-height: 20vh;
+        bottom: 2vh;
+    }
+
+    span.close {
+        float: right;
+        padding: 5px 7px;
+        border-radius: 100%;
+        border: 1px solid red;
+        color: red;
+        font-size: 12px;
+    }
+
+    .berrybox_head {
+        padding: 10px 10px 5px 20px;
+    }
+
+    .berrybox_body {
+        min-height: 15vh;
+        padding: 10px;
+    }
+
+    .berrybox_footer {
+        padding: 10px;
+    }
+
+    .btn-berry {
+        border-radius: 15px;
+        background: #298541;
+        color: #fff;
+        padding: 5px 10px;
+    }
+
+    .btn-nobg {
+        border: 1px solid #298541;
+        background: transparent;
+        color: #298541;
+        ;
+    }
+
+
+    .custom-control-input:checked~.custom-control-label::before {
+    color: #fff!important;
+    background-color: #358542!important;
+}
+
+.lgdicon {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    width: 20px;
+    height: 20px;
+    float: right;
+    margin-left: 10px;
+}
+
+    </style>
+{% endblock%}
+
+
+{% block body %}
+
+<div class="content-wrapper" id="map" style="">
+
+    <!-- <button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="right" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+                Popover on left
+            </button> -->
+    <div class="mapLegend" id="mapLegend">
+        <div id="" class="toolBar bgWhite">
+            <img id="legBox" src="/static/dist/img/maptools/Legend.svg" class="toolbaricon" title="Toggle Legend" data-container="body" data-toggle="popover" data-placement="left" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+            <img id="baseMap" src="/static/dist/img/maptools/Basemap.svg" class="toolbaricon" title="Toggle Basemap">
+            <img id="reload" src="/static/dist/img/maptools/Refresh.svg" class="toolbaricon" title="toggle Duration">
+            <img id="" src="/static/dist/img/maptools/Print.svg" class="toolbaricon" title="print map">
+        </div>
+        <div class="legendCont" id="lgd" style="display: block;">
+            <div class="baseMap_Cont">
+                <div class="accordion">
+                    <div class="option"> <input type="checkbox" id="toggle1" class="toggle"> <label class="title" for="toggle1"> Admin Boundaries </label>
+                        <div class="content" style="overflow-y:auto;height:100px;"><i class="entypo-down-open-big sf"></i>
+                            <ul class="submenu">
+                               
+                                <li>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="distcheck">
+                                            <label style="font-size: 16px!important;font-weight: 300!important;" class="custom-control-label" for="distcheck"> District</label>
+                                    </div>
+                                </li>
+
+                                <hr>
+                             
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="option"> <input type="checkbox" id="toggledis" class="toggle"> <label class="title" for="toggledis">Layers</label>
+                        <div class="content" style="overflow-y:auto;height:250px;"><i class="entypo-down-open-big sf"></i>
+                            <ul class="submenu">
+
+                                <li>
+                                   <!--  <span class="lgdicon hea">
+                                        <i id="biomasload" class="fa fa-spinner fa-pulse fa-1x fa-fw hidden"></i>
+                                    </span>
+                                    <input class="icheck " id="biomascheck" type="checkbox" name="">
+                                    <label for="myCheckbox" class="eok"> Biomass </label>
+ -->
+
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="biomascheck" checked>
+                                            <label style="font-size: 16px!important;font-weight: 300!important;" class="custom-control-label" for="biomascheck"> Biomass</label> <i id="biomasload" class="fa fa-spinner fa-pulse fa-1x fa-fw hidden"></i>
+                                    </div>
+
+
+                                    <hr>
+
+                                </li>
+
+                                <li>
+                                 
+                                 <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="farmcheck">
+                                            <label style="font-size: 16px!important;font-weight: 300!important;" class="custom-control-label" for="farmcheck"> Farm Lands</label> 
+                                    </div>
+
+                                     <hr>
+                                </li>
+
+                                <li>
+                                    
+                                    
+                                        <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="treeloadcheck">
+                                            <label style="font-size: 16px!important;font-weight: 300!important;" class="custom-control-label" for="treeloadcheck">Trees</label> 
+                                    </div>
+
+
+                                       <hr>
+  
+
+                                </li>
+
+                             <!--    <li>
+                                    <div class="togglebutton m-b-5 ">
+                                        <label>
+                                            <input id="biomascheck" type="checkbox" class="toggle-success ledgcheck"><span class="toggle"></span> Biomass
+
+                                        </label>
+                                    </div>
+                                </li> -->
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- <div class="option"> <input type="checkbox" id="togglerep" class="toggle"> <label class="title " for="togglerep"> Implementing Partners</label>
+                        <div class="content" id="implementpartcont" style="overflow-y:auto;height:250px;">
+                            <ul class="submenu">
+                                <li>
+                                    <div class="">
+                                        <label>
+                                            <img class="proj" src="/static/mapApp/img/legend/insti/no.jpg">Kingdom of the Netherlands
+                                            <input type="checkbox" id="Kingdom of the Netherlands" class="checkpart">
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="">
+                                        <label>
+                                            <img class="proj" src="/static/mapApp/img/legend/insti/no.jpg">Global Affairs of Canada
+                                            <input type="checkbox" id="Global Affairs of Canada" class="checkpart">
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="">
+                                        <label>
+                                            <img class="proj" src="/static/mapApp/img/legend/insti/no.jpg">None
+                                            <input type="checkbox" id="None" class="checkpart">
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="">
+                                        <label>
+                                            <img class="proj" src="/static/mapApp/img/legend/insti/no.jpg">World Bank
+                                            <input type="checkbox" id="World Bank" class="checkpart">
+                                        </label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+        <div class="legendCont bgWhite" id="bsmp">
+            <div class="baseMap_Cont">
+                <div class="tileDiv" id="no_basemap" style="">
+                    <img src="/static/dist/img/tiles/1.png" class="tiles" title="Satellite Image">
+                    No Basemap
+                </div>
+                <div class="tileDiv" id="basemap1" style="">
+                    <img id="" src="/static/dist/img/tiles/2.png" class="tiles" title="Satellite Image">
+                    Openstreetmap
+                </div>
+                <div class="tileDiv" id="basemap2" style="">
+                    <img id="" src="/static/dist/img/tiles/3.png" class="tiles" title="Satellite Image">
+                    Satellite Image
+                </div>
+                <div class="tileDiv" id="basemap3" style="">
+                    <img id="" src="/static/dist/img/tiles/4.png" class="tiles" title="Satellite Image">
+                    Openstreetmap Hotmap
+                </div>
+                <div class="tileDiv" id="basemap4" style="">
+                    <img id="" src="/static/dist/img/tiles/5.png" class="tiles" title="Satellite Image">
+                    Opentopomap
+                </div>
+                <div class="tileDiv" id="basemap6" style="">
+                    <img id="" src="/static/dist/img/tiles/6.png" class="tiles" title="Satellite Image">
+                    World Street Map
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+    <div class="leaflet-bottom leaflet-left" id="ledgend" style="background-color:white;height: 29vh; width:15% ; padding: 2%;">
+        <strong>
+            <h4 for="myCheckbox" style="margin-left: 4%;">Legend </h4>
+        </strong> <br>
+        
+        <span class="lgdicon district" style=" background-color:#FEB24C; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">0 - 19.99 </label> <br>
+
+        <span class="lgdicon district" style=" background-color:#FD8D3C; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">20 - 39.99 </label> <br>
+
+        <span class="lgdicon district" style=" background-color:#FC4E2A; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">40 - 59.99 </label> <br>
+
+        <span class="lgdicon district" style=" background-color:#E31A1C; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">60 - 79.99 </label> <br>
+
+        <span class="lgdicon district" style=" background-color:#800026; float: left;border-radius: 59%;"> </span><label for="myCheckbox" style="margin-left: 4%;">80 - 100 </label> <br>
+     
+       
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+{% block js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+<script src="/static/app/js/leaflet-measure.js"></script>
+<script src="/static/app/js/leaflet-heat.js"></script>
+<script src="/static/app/js/map2.js"></script>
+<script type="text/javascript">
+function getColor(d) {
+
+
+    {% for aa in ledgend %}
+
+    if ( d > {{ aa.from }} && d <= {{ aa.to }} ) {
+
+        return "{{ aa.color }}"
+
+    } else {
+
+        return "#FEB24C"
+    }
+
+
+    {% endfor %}
+
+}
+
+
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.percentage),
+        weight: 2,
+        opacity: 1,
+        color: getColor(feature.properties.percentage),
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+}
+
+// function biomas() {
+//     return {
+//         fillColor: 'transparent',
+//         color: 'red',
+//         weight: '3',
+//         dashArray: '',
+//         opacity: '1',
+//         fillOpacity: '0',
+//     };
+// }
+
+
+
+
+function biomasonEachFeature(feature, layer) {
+
+
+    labeltoshow = '<table class="table table-bordered">'
+    labeltoshow += "<thead><tr style='background-color:#4aa;color:white;'><th colspan='2' > <b><center> " + feature.properties.community + "</center></b></th><tr></thead>"
+
+    // labeltoshow += "<tbody><tr><td> <b> Community </b></td><td> " + feature.properties.community + " </td></tr>"
+    labeltoshow += "<tbody><tr><td> <b> Biomass </b></td><td> " + feature.properties.biomas +"Kg</td></tr>"
+    // labeltoshow += "<tbody><tr><td> <b> Ledgend Value </b></td><td> " + feature.properties.percentage + " </td></tr>"
+
+    labeltoshow += "</tbody></table>"
+
+    //  layer.bindPopup(labeltoshow, {
+    //     direction: 'auto'
+    // })
+
+    layer.bindTooltip(labeltoshow, {
+        direction: 'auto'
+    })
+
+}
+
+// $("#ledgend").hide()
+var biomaslayer
+biomasmap('/biomasmap/', style, biomasonEachFeature)
+
+function biomasmap(url, mnh, oneach) {
+
+    
+option= {
+gradient : {0.4: '#FED976', 0.65: '#FC4E2A', 1: '#800026'},
+max : 1
+}
+
+// [[1,'#FEB24C'],[2,'#FEB24C'],[3,'#FD8D3C'],[4,'#FC4E2A'],[5,'#E31A1C'],[6,'#800026']]
+
+    loader()
+    $.get(url, function(data) {
+        biomaslayer = L.heatLayer(data,option).addTo(mymap);
+        unload()
+        $("#biomasload").hide()
+    })
+}
+
+
+var geojsonMarkerOptions = {
+    radius: 8,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+
+
+
+var biopointlayer
+$.get('/biomaspoint/', function(data) {
+
+
+      biopointlayer =  L.geoJSON(data, {
+        onEachFeature: biomasonEachFeature,
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, style(feature));
+        },
+        })
+
+    mymap.addLayer(biopointlayer);
+    $("#biomasload").hide()
+})
+
+
+
+mymap.on('zoomend', function() {
+var zoomlevel = mymap.getZoom();
+    if (zoomlevel  <13){
+        if (mymap.hasLayer(biopointlayer)) {
+            mymap.removeLayer(biopointlayer);
+        } else {
+            console.log("no point layer active");
+        }
+    }
+    if (zoomlevel >= 13){
+        if (mymap.hasLayer(biopointlayer)){
+            console.log("layer already added");
+        } else {
+            mymap.addLayer(biopointlayer);
+        }
+    }
+console.log("Current Zoom Level =" + zoomlevel)
+});
+
+
+
+$('#biomascheck').on('change', function() {
+    var man = $('#biomascheck').is(':checked');
+
+    if (man == true) {
+        if (biomaslayer) {
+           
+            mymap.addLayer(biopointlayer);
+            mymap.addLayer(biomaslayer);
+
+            $("#ledgend").show()
+        }
+    } else {
+        // mymap.removeLayer(biomaslayer);
+        mymap.removeLayer(biopointlayer);
+        mymap.addLayer(biomaslayer);
+
+        $("#ledgend").hide()
+    }
+})
+</script>
+{% endblock%}

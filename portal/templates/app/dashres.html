@@ -1,0 +1,371 @@
+    
+{% load eok %}
+     <div class="row ">
+            <div class="col-lg-12">
+                <div class="single_element">
+                    <div class="quick_activity">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="quick_activity_wrap">
+                                    <!-- single_quick_activity  -->
+                                    <div class="single_quick_activity">
+                                        <div class="count_content">
+                                            <p>Beneficiaries</p>
+                                            <h3><span class="counter">{{totalben}}</span> </h3>
+                                        </div>
+                                        <a href="#" class="notification_btn">Total</a>
+                                        <div id="bar1" class="barfiller">
+                                            <div class="tipWrap">
+                                                <span class="tip"></span>
+                                            </div>
+                                            <span class="fill" data-percentage="0"></span>
+                                        </div>
+                                    </div>
+                                    <!-- single_quick_activity  -->
+                                    <div class="single_quick_activity">
+                                        <div class="count_content">
+                                            <p>Individual</p>
+                                            <h3><span class="counter">{{totalbenindiv}}</span> </h3>
+                                        </div>
+                                        <a href="#" class="notification_btn yellow_btn">Total</a>
+                                        <div id="bar2" class="barfiller">
+                                            <div class="tipWrap">
+                                                <span class="tip"></span>
+                                            </div>
+                                            <span class="fill" data-percentage="65"></span>
+                                        </div>
+                                    </div>
+                                    <!-- single_quick_activity  -->
+                                    <div class="single_quick_activity">
+                                        <div class="count_content">
+                                            <p>Group/Company</p>
+                                            <h3><span class="counter">{{totalbengroup}}</span> </h3>
+                                        </div>
+                                        <a href="#" class="notification_btn green_btn">Total</a>
+                                        <div id="bar3" class="barfiller">
+                                            <div class="tipWrap">
+                                                <span class="tip"></span>
+                                            </div>
+                                            <span class="fill" data-percentage="75"></span>
+                                        </div>
+                                    </div>
+                                    <!-- single_quick_activity  -->
+                                    <div class="single_quick_activity">
+                                        <div class="count_content">Farms</p>
+                                            <h3><span class="counter">{{totalfarm}}</span></h3>
+                                        </div>
+                                        <a href="#" class="notification_btn violate_btn">Total</a>
+                                        <div id="bar4" class="barfiller">
+                                            <div class="tipWrap">
+                                                <span class="tip"></span>
+                                            </div>
+                                            <span class="fill" data-percentage="85"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="white_card card_height_100 mb_30">
+                    <!-- <div class="white_card_header">
+                        <div class="box_header m-0">
+                            <div class="main-title">
+                                <h3 class="m-0">Payment History</h3>
+                            </div>
+                           
+                        </div>
+                    </div> -->
+                    <div class="white_card_body p-0">
+                        <div id="ipie" > </div>
+                    </div>
+                </div>
+            </div>
+             <div class="col-lg-4">
+                <div class="white_card card_height_100 mb_30">
+                   <!--  <div class="white_card_header">
+                        <div class="box_header m-0">
+                            <div class="main-title">
+                                <h3 class="m-0">Payment History</h3>
+                            </div>
+                           
+                        </div>
+                    </div> -->
+                    <div class="white_card_body p-0">
+                        <div id="idash" > </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="white_card card_height_100 mb_30">
+                    <div class="white_card_header">
+                        <div class="box_header m-0">
+                            <div class="main-title">
+                                <h3 class="m-0">COMMUNITIES AND SPECIES PLANTED</h3>
+                            </div>
+                           
+                        </div>
+                    </div>
+                    <div class="white_card_body">
+                        <div class="QA_table table-responsive ">
+                            <!-- table-responsive -->
+                            <table id="comspe" class="table pt-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Community</th>
+                                        <th scope="col">Species</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for aa in commtrees %}
+                                    <tr>
+                                        <td>{{aa.community}}</td>
+                                        <td>{{aa.species | eokremove }}</td>
+                                       
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                
+                <div class="col-lg-5">
+                <div class="white_card card_height_100 mb_30 QA_section">
+                    <div class="white_card_header">
+                    
+                        <div class="main-title">
+                                <h3 class="m-0">Forest Coverage (Hectares)</h3>
+                            </div>
+                    </div>
+                    <div class="white_card_body">
+
+
+                        <div id="targetgujet"></div>
+                </div>
+            </div>
+         </div>
+
+            <div class="col-lg-7">
+                <div class="white_card card_height_100 mb_30 QA_section">
+                    <div class="white_card_header">
+                       
+                    </div>
+                    <div class="white_card_body">
+                        <div id="commdash"></div>
+                </div>
+            </div>
+
+            </div>
+
+        </div>
+       <!--      <div class="col-lg-12">
+                <div class="white_card card_height_100 mb_30 QA_section">
+                    <div class="white_card_header">
+                       
+                    </div>
+                    <div class="white_card_body">
+                        <div id="commdash"></div>
+                </div>
+            </div>
+        </div>
+ -->
+
+        <script type="text/javascript">
+
+$(document).ready(function() {
+    $('#comspe').DataTable( {
+        // dom: 'Bfrtip',
+        "lengthChange": false,
+        "pageLength": 4
+       
+    } );
+} );
+
+            
+
+ Highcharts.chart('idash', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'DISTRIBUTION OF FARMS BY GENDER '
+    },
+    // subtitle: {
+    //     text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+    // },
+    xAxis: {
+        type: 'category',
+        labels: {
+            rotation: -45,
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Farms'
+        }
+    },
+    legend: {
+        enabled: false
+    },
+    tooltip: {
+        pointFormat: 'Total Farm: <b>{point.y:.0f} </b>'
+    },
+    series: [{
+        name: 'Total Farm ',
+        data: {{farm | safe}},
+        dataLabels: {
+            enabled: true,
+            rotation: -90,
+            color: '#FFFFFF',
+            align: 'right',
+            format: '{point.y:.1f}', // one decimal
+            y: 10, // 10 pixels down from the top
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    }]
+});
+
+
+
+Highcharts.chart('ipie', {
+    chart: {
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false,
+        type: 'pie'
+    },
+    title: {
+        text: 'FARM DISTRIBUTION'
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    accessibility: {
+        point: {
+            valueSuffix: '%'
+        }
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: false
+            },
+            showInLegend: true
+        }
+    },
+    series: [{
+        name: 'Brands',
+        colorByPoint: true,
+        data: [{
+            name: 'Natural',
+            y: {{natural_farm}},
+            sliced: true,
+            selected: true
+        }, {
+            name: 'Planted',
+            y: {{planted}}
+        }]
+    }]
+});
+
+
+
+
+Highcharts.chart('commdash', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'FARM DISTRIBUTION BY COMMUNITY'
+    },
+    // subtitle: {
+    //     text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+    // },
+    xAxis: {
+        type: 'category',
+        labels: {
+            rotation: -45,
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Number of Farms'
+        }
+    },
+    legend: {
+        enabled: false
+    },
+    tooltip: {
+        pointFormat: 'Total no. of Farms : <b>{point.y:.0f}</b>'
+    },
+    series: [{
+        name: 'Total',
+        data: {{commfarm | safe}},
+        dataLabels: {
+            enabled: true,
+            rotation: -90,
+            color: '#FFFFFF',
+            align: 'right',
+            format: '{point.y:.1f}', // one decimal
+            y: 10, // 10 pixels down from the top
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    }]
+});
+
+
+var data = [
+  {
+    domain: { x: [0, 1], y: [0, 1] },
+    value: {{ calforest | safe }},
+    title: { text: "Speed" },
+    type: "indicator",
+    mode: "gauge+number+delta",
+    delta: { reference: {{ calforest | safe }} },
+    gauge: {
+      axis: { range: [null, {{ threshod | safe }}] },
+      steps: [
+        { range: [0, 250], color: "lightgray" },
+        { range: [250, 400], color: "gray" }
+      ],
+      threshold: {
+        line: { color: "red", width:7 },
+        thickness: 1,
+        value: {{ threshod | safe }}
+      }
+    }
+  }
+];
+
+var layout = { width: 500, height: 450, margin: { t: 0, b: 0 } };
+Plotly.newPlot('targetgujet', data, layout);
+
+        </script>

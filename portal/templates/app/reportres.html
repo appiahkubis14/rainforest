@@ -1,0 +1,112 @@
+{% load humanize %}
+
+<style type="text/css">
+    .eok{
+        color: green!important;
+    }
+</style>
+<table id="example" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Date of Birth</th>
+          <!--   <th>indvi_age</th> -->
+            <th>Address</th>
+            <th>Contact</th>
+            <!-- <th>Email</th> -->
+           
+      
+            <th>Forest District</th>
+            <th>Stool Family</th>
+            <th>District</th>
+            <th>Community</th>
+            <th>Date of Submission</th>
+            <th></th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+
+            {% for aa in benquery %}
+        <tr>
+            <td>{{aa.indvi_first_name | title}} {{aa.indvi_surname | title}}</td>
+          
+            <td>{{aa.indvi_gender | title}}</td>
+            <td>{{aa.indvi_dob}}</td>
+            <!-- <td>{{aa.indvi_age}}</td> -->
+            <td>{{aa.indvi_address}}</td>
+            <td>{{aa.indvi_phone_no}}</td>
+            <!-- <td>{{aa.indvi_email}}</td> -->
+            
+
+            <td>{{aa.forest_district | title}}</td>
+            <td>{{aa.stool_family | title}}</td>
+            <td>{{aa.mmdas.district | title}}</td>
+            <td>{{aa.community | title}}</td>
+            <td>{{aa.created_date }}</td>
+            <td>
+              
+                <i class="fas fa-ellipsis-v  fa-circle exampopover" style='color: green' data-container="body" data-toggle="popover" data-placement="bottom" data-content="<a href='/map/?code={{aa.id}}' > <li class='eok'>Tree Details</li><hr><a><a href='/indivdetail/?code={{aa.id}}' ><li class='eok'>Farmer Details</li><a>"></i>
+
+              <!--   <img src="/static/dist/img/maptools/Ellipsis.svg" st> -->
+
+            </td>
+        </tr>
+
+            {% endfor %}
+    </tbody>
+
+</table>
+
+
+
+<script type="text/javascript">
+    
+$(document).ready(function() {
+    $('#example').DataTable( {
+        dom: 'Bfrtip',
+        "order": [],
+        buttons: [
+            'excel', 'print'
+        ]
+    } );
+} );
+
+
+// $(function () {
+
+//  $('body').on('click', '.exampopover', function() {
+//   $('.exampopover').popover({
+//     html: true,
+//     content: function() {
+//       return $('#popover-content').html();}
+//   })
+// })
+
+
+$(document).ready(function() {
+  // Initialize popover on the initial page load
+  $('.exampopover').popover({
+    html: true,
+    content: function() {
+      return $('#popover-content').html();
+    }
+  });
+
+  // Reattach popover event listener after each DataTables redraw
+  $('#example').on('draw.dt', function() {
+    $('.exampopover').popover({
+      html: true,
+      content: function() {
+        return $('#popover-content').html();
+      }
+    });
+  });
+});
+
+    
+</script>
+
+

@@ -1,0 +1,1016 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title> RAINFOREST PORTAL </title>
+    <link rel="stylesheet" href="/static/rootApp/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/rootApp/css/vendor.bundle.css">
+    <link rel="stylesheet" href="/static/rootApp/css/app.bundle.css">
+    <link rel="stylesheet" href="/static/rootApp/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/rootApp/css/theme-a.css">
+    <link rel="stylesheet" href="/static/rootApp/css/map.css">
+    <link rel="stylesheet" href="/static/rootApp/css/custom.css">
+    <link rel="stylesheet" href="/static/rootApp/css/leaflet-measure.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="" />
+    <link rel="stylesheet" type="text/css" href="{% static 'rootApp/leaflet/autocomplete/easy-autocomplete.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'rootApp/leaflet/autocomplete/easy-autocomplete.themes.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.css">
+    <link rel="stylesheet" href="/static/rootApp/leaflet/L.Control.MousePosition.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.12/leaflet.draw.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style type="text/css">
+    #customers th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    #customers td,
+    #customers th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #eac-container-inputsearch {
+        z-index: 999999 !important;
+    }
+
+    .leaflet-control-browser-print {
+        display: none !important;
+    }
+
+    .leaflet-control-mouseposition {
+
+        margin-left: 50vw !important;
+    }
+
+    }
+
+    .info {
+        -webkit-print-color-adjust: exact;
+        background: white !important
+    }
+
+    .info h4 {
+        margin: 0 0 5px;
+        color: #777;
+        background: white
+    }
+
+
+    @media print {
+        .info {
+            -webkit-print-color-adjust: exact;
+            background: white !important;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+            background: white
+        }
+
+        .reg1 {
+            -webkit-print-color-adjust: exact;
+            background-color: red !important;
+            margin-left: 20px;
+        }
+
+        .district1 {
+            -webkit-print-color-adjust: exact;
+            background-color: #a69 !important;
+            margin-left: 20px;
+        }
+
+        .protect1 {
+            -webkit-print-color-adjust: exact;
+            background-color: #aea !important;
+            margin-left: 20px;
+        }
+
+        .platn1 {
+            -webkit-print-color-adjust: exact;
+            background-color: #be6 !important;
+            margin-left: 20px;
+        }
+
+        .info1 {
+            -webkit-print-color-adjust: exact;
+            background-color: #fff !important;
+            list-style-type: none !important;
+        }
+    }
+
+
+
+
+    .leaflet-browser-print--manualMode-button {
+
+        z-index: 9999999999 !important;
+
+    }
+
+
+
+
+    @media print {
+        #tittop {
+            position: absolute;
+            top: 0%;
+            left: 0px;
+            width: 100%;
+            z-index: 9999999999999999;
+            text-align: center;
+            padding: 10px;
+            background: #fff;
+            font-weight: 900;
+            text-transform: capitalize;
+            margin: 0;
+            font-size: 18px !important;
+        }
+
+        #arrow {
+            top: 65px !important;
+            left: 10px !important;
+        }
+    }
+
+    @media screen {
+        #tittop {
+            position: absolute;
+            top: 0%;
+            left: 0px;
+            width: 100%;
+            z-index: 9999999999999999;
+            text-align: center;
+            padding: 10px;
+            background: #fff;
+            font-weight: 900;
+            text-transform: capitalize;
+            margin: 0;
+            font-size: 18px !important;
+        }
+    }
+
+    #tittop {
+        position: absolute;
+        top: 0%;
+        left: 0px;
+        width: 100%;
+        z-index: 9999999999999999;
+        text-align: center;
+        padding: 10px;
+        background: #fff;
+        font-weight: 900;
+        text-transform: capitalize;
+        margin: 0;
+        font-size: 18px !important;
+    }
+
+    .grid-print-container {
+        min-width: 100vw !important;
+        margin-top: 40px !important;
+        border-top: 2px solid green !important;
+        /* Firefox */
+        height: -moz-calc(100vh - 40px) !important;
+        /* WebKit */
+        height: -webkit-calc(100vh - 40px) !important;
+        /* Opera */
+        height: -o-calc(100vh - 40px) !important;
+        /* Standard */
+        height: calc(100vh - 40px) !important;
+    }
+
+
+
+    .leaflet-browser-print--manualMode-button {
+        position: absolute !important;
+        top: 5px !important;
+        right: 20px !important;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 20px;
+        font-size: 12px;
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        will-change: box-shadow, transform;
+        transition: box-shadow .2s cubic-bezier(.4, 0, 1, 1), background-color .2s cubic-bezier(.4, 0, .2, 1);
+        outline: 0;
+        background-color: #28bebd;
+        color: #fff;
+        box-shadow: 0 2px 2px 0 rgba(40, 190, 189, .14), 0 3px 1px -2px rgba(40, 190, 189, .2), 0 1px 5px 0 rgba(40, 190, 189, .12);
+    }
+
+    .leaflet-browser-print--manualMode-button:hover {
+        background-color: #279c9c;
+        box-shadow: 0 14px 26px -12px rgba(40, 190, 189, .42), 0 4px 23px 0 rgba(0, 0, 0, .12), 0 8px 10px -5px rgba(40, 190, 189, .2);
+    }
+
+    #arrow {
+        top: 65px !important;
+        left: 10px !important;
+    }
+
+
+    .overlay {
+        position: absolute;
+        width: 100%;
+        height: 100vh;
+        z-index: 99999;
+        background: #efefefc2;
+    }
+
+    .overlay1 {
+        position: absolute;
+        height: 45vh;
+        z-index: 99999;
+        background: #efefefc2;
+        width: 100%;
+    }
+
+    .loader {
+        position: relative;
+        width: 15%;
+        margin-left: 45%;
+        height: 20vh;
+        margin-top: 43vh;
+
+    }
+
+    .ui-dialog .ui-dialog-content {
+
+        padding: 0 !important;
+
+    }
+
+    .loader1 {
+        position: relative;
+        /* width: 15%; */
+        margin-left: 25%;
+        height: 15vh;
+        margin-top: 10vh;
+    }
+
+
+    .ui-dialog {
+        z-index: 10000 !important;
+    }
+
+    .ui-dialog #dialog {
+        padding: 5px !important;
+    }
+
+
+
+    [data-toggle="collapse"][data-parent="#accordion"] i {
+        -webkit-transition: transform 150ms ease 0s;
+        -moz-transition: transform 150ms ease 0s;
+        -o-transition: transform 150ms ease 0s;
+        -ms-transition: all 150ms ease 0s;
+        transition: transform 150ms ease 0s;
+    }
+
+    [data-toggle="collapse"][data-parent="#accordion"][aria-expanded="true"] i {
+        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
+        -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+
+
+    .now-ui-icons {
+        display: inline-block;
+        font: normal normal normal 14px/1 'Nucleo Outline';
+        font-size: inherit;
+        speak: none;
+        text-transform: none;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    @-webkit-keyframes nc-icon-spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @-moz-keyframes nc-icon-spin {
+        0% {
+            -moz-transform: rotate(0deg);
+        }
+
+        100% {
+            -moz-transform: rotate(360deg);
+        }
+    }
+
+    @keyframes nc-icon-spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+            -moz-transform: rotate(0deg);
+            -ms-transform: rotate(0deg);
+            -o-transform: rotate(0deg);
+            transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+            -moz-transform: rotate(360deg);
+            -ms-transform: rotate(360deg);
+            -o-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+    }
+
+    .now-ui-icons.objects_umbrella-13:before {
+        content: "\ea5f";
+    }
+
+    .now-ui-icons.shopping_cart-simple:before {
+        content: "\ea1d";
+    }
+
+    .now-ui-icons.shopping_shop:before {
+        content: "\ea50";
+    }
+
+    .now-ui-icons.ui-2_settings-90:before {
+        content: "\ea4b";
+    }
+
+    .nav-tabs {
+        border: 0;
+        padding: 15px 0.7rem;
+    }
+
+    .nav-tabs:not(.nav-tabs-neutral)>.nav-item>.nav-link.active {
+        box-shadow: 0px 5px 35px 0px rgba(0, 0, 0, 0.3);
+    }
+
+    .card .nav-tabs {
+        border-top-right-radius: 0.1875rem;
+        border-top-left-radius: 0.1875rem;
+    }
+
+    .nav-tabs>.nav-item>.nav-link {
+        color: #888888;
+        margin: 0;
+        margin-right: 5px;
+        background-color: transparent;
+        border: 1px solid transparent;
+        border-radius: 30px;
+        font-size: 14px;
+        padding: 11px 23px;
+        line-height: 1.5;
+    }
+
+    .nav-tabs>.nav-item>.nav-link:hover {
+        background-color: transparent;
+    }
+
+    .nav-tabs>.nav-item>.nav-link.active {
+        background-color: #444;
+        border-radius: 0px;
+        color: #FFFFFF;
+    }
+
+    .nav-tabs>.nav-item>.nav-link i.now-ui-icons {
+        font-size: 14px;
+        position: relative;
+        top: 1px;
+        margin-right: 3px;
+    }
+
+    .nav-tabs.nav-tabs-neutral>.nav-item>.nav-link {
+        color: #FFFFFF;
+    }
+
+    .nav-tabs.nav-tabs-neutral>.nav-item>.nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #FFFFFF;
+    }
+
+    .card {
+        border: 0;
+        border-radius: 0.1875rem;
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        margin-bottom: 0px;
+        box-shadow: 0px 5px 25px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .card .card-header {
+        background-color: transparent;
+        border-bottom: 0;
+        background-color: transparent;
+        border-radius: 0;
+        padding: 0;
+    }
+
+    .card[data-background-color="orange"] {
+        background-color: #f96332;
+    }
+
+    .card[data-background-color="red"] {
+        background-color: #FF3636;
+    }
+
+    .card[data-background-color="yellow"] {
+        background-color: #FFB236;
+    }
+
+    .card[data-background-color="blue"] {
+        background-color: #2CA8FF;
+    }
+
+    .card[data-background-color="green"] {
+        background-color: #15b60d;
+    }
+
+    [data-background-color="orange"] {
+        background-color: #175259;
+    }
+
+    [data-background-color="black"] {
+        background-color: #2c2c2c;
+    }
+
+    [data-background-color]:not([data-background-color="gray"]) {
+        color: #FFFFFF;
+    }
+
+    [data-background-color]:not([data-background-color="gray"]) p {
+        color: #FFFFFF;
+    }
+
+    [data-background-color]:not([data-background-color="gray"]) a:not(.btn):not(.dropdown-item) {
+        color: #FFFFFF;
+    }
+
+    [data-background-color]:not([data-background-color="gray"]) .nav-tabs>.nav-item>.nav-link i.now-ui-icons {
+        color: #FFFFFF;
+    }
+
+
+    @font-face {
+        font-family: 'Nucleo Outline';
+        src: url("https://github.com/creativetimofficial/now-ui-kit/blob/master/assets/fonts/nucleo-outline.eot");
+        src: url("https://github.com/creativetimofficial/now-ui-kit/blob/master/assets/fonts/nucleo-outline.eot") format("embedded-opentype");
+        src: url("https://raw.githack.com/creativetimofficial/now-ui-kit/master/assets/fonts/nucleo-outline.woff2");
+        font-weight: normal;
+        font-style: normal;
+
+    }
+
+    .now-ui-icons {
+        display: inline-block;
+        font: normal normal normal 14px/1 'Nucleo Outline';
+        font-size: inherit;
+        speak: none;
+        text-transform: none;
+        /* Better Font Rendering */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .loader1 {
+
+        width: 50%;
+    }
+
+    footer {
+        margin-top: 5px;
+        color: #555;
+        background: #fff;
+        padding: 25px;
+        font-weight: 300;
+        background: #f7f7f7;
+
+    }
+
+    .footer p {
+        margin-bottom: 0;
+    }
+
+    footer p a {
+        color: #555;
+        font-weight: 400;
+    }
+
+    footer p a:hover {
+        color: #e86c42;
+    }
+
+    @media screen and (max-width: 768px) {
+
+        .nav-tabs {
+            display: inline-block;
+            width: 100%;
+            padding-left: 100px;
+            padding-right: 100px;
+            text-align: center;
+        }
+
+        .nav-tabs .nav-item>.nav-link {
+            margin-bottom: 5px;
+        }
+    }
+
+    .nav-item {
+        width: 50%;
+    }
+
+    .listp {
+        margin-left: 0px !important;
+        width: 100%;
+    }
+
+    .listp>li {
+        display: block;
+        padding: 5px 0px;
+    }
+
+    .listp>li>input {
+        float: left;
+        padding: 5px 0px;
+    }
+
+    .legend {
+        line-height: 18px;
+        color: #555;
+    }
+    </style>
+    {% block csspart %}
+    {% endblock %}
+</head>
+
+
+
+
+<body class="{% block classBody %} {% endblock %}">
+    <div id="app_wrapper">
+        <div id="overlay" class="overlay dialog">
+            <div class="col-md-12">
+                <img class="loader" src="/static/rootApp/img/eok.gif" />
+            </div>
+        </div>
+        <div id="app_body" style="">
+            <div id="search_box" class="">
+                <!--            <div id="toolBox" class="col-md-12 col-xs-12">
+                        <div class="">
+                        <div class="legendTog">
+                            <span class="">
+                                    <button id="searchbtn" type="button" class="btn btn-white btn-fab animate-fab btn-fab-sm searchbtn">
+                                        <i class="zmdi zmdi-menu"></i>
+                                    </button>
+                                </span>
+                        </div>
+                        
+                        <div class="searchBox" style="">
+                            <div class="input-group" style="margin:0px; ">
+                               <input type="text" class="form-control" id="inputsearch" placeholder="Enter search item...">
+                                <span class="input-group-btn">
+                                  
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+                <div id="resultBox" class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-12 col-xl-6" style="padding: 0px;">
+                            <!-- Tabs with Background on Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <ul class="nav nav-tabs nav-tabs-neutral justify-content-center" role="tablist" data-background-color="orange">
+                                        <!--  <li class="nav-item">
+                                            <a class="nav-link active" id="home2" data-toggle="tab" href="#home1" role="tab"> Map</a>
+                                        </li> -->
+                                        <!--  <li class="nav-item">
+                                            <a class="nav-link" data-toggle="tab" id="profile2" href="#profile1" role="tab"> Analysis</a>
+                                        </li> -->
+                                        <li class="nav-item">
+                                            <h2 style="float: left; margin-top: 10px;color: white;"> Legend</h2>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Tab panes -->
+                                    <div class="tab-content text-center">
+                                        <div class="tab-pane active" id="home1" role="tabpanel">
+                                            <div class="">
+                                                <div class="col-md-12 col-xs-12" style="border-bottom: 1px solid #e1e1e1;">
+                                                    <!-- <button id="close" type="button" class="btn  btn-fab animate-fab btn-fab-sm " style="float:right;background: transparent;">
+                                                                                <i class="zmdi zmdi-close-circle-o"></i>
+                                                                            </button>    -->
+                                                </div>
+                                                <div class="col-xs-12 col-md-12" style="padding-top:15px; ">
+                                                    <div class="accordion" id="multiple" data-allow-toggle="true" data-allow-multiple="true">
+                                                        <div class="accordion__group">
+                                                            <h3 class="accordion__header">
+                                                                <button class="accordion__trigger" id="multiple-trigger-1" aria-controls="multiple-panel-1" aria-expanded="false">
+                                                                    <span class="accordion__title">Admin Boundary</span>
+                                                                    <span class="accordion__arrow" aria-hidden="true"></span>
+                                                                </button>
+                                                            </h3>
+                                                            <div class="accordion__panel accordion__panel_expanded" role="region" id="multiple-panel-1" aria-labelledby="multiple-trigger-1">
+                                                                <div class="accordion__panel-inner">
+                                                                    <ul class="listp">
+                                                                        <li>
+                                                                            <input type="checkbox" id="regcheck" name="" checked="">
+                                                                            <span class="check"></span>
+                                                                            <i class="input-helper"></i> Pilot Boundary
+                                                                            <span class="legendbox reg"> </span>
+                                                                        </li>
+                                                                        <li>
+                                                                            <input type="checkbox" id="districtcheck" name=""><span class="check"></span>
+                                                                            <i class="input-helper"></i> District Boundary
+                                                                            <span class="legendbox district"> </span>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div><!-- .accordion__panel-inner -->
+                                                            </div><!-- .accordion__panel -->
+                                                        </div><!-- .accordion__group -->
+                                                        <!--  <div class="accordion__group">
+                                                            <h3 class="accordion__header">
+                                                                <button class="accordion__trigger" id="multiple-trigger-2" aria-controls="multiple-panel-2" aria-expanded="false">
+                                                                    <span class="accordion__title"> Layers</span>
+                                                                    <span class="accordion__arrow" aria-hidden="true"></span>
+                                                                </button>
+                                                            </h3>
+                                                            <div class="accordion__panel" role="region" id="multiple-panel-2" aria-labelledby="multiple-trigger-2">
+                                                                <div class="accordion__panel-inner">
+                                                                    <ul class="listp">
+                                                                        <li>
+                                                                            <input type="checkbox" id="protectcheck" name=""><span class="check"></span>
+                                                                            <i class="input-helper"></i> Protected Area
+                                                                            <span class="legendbox protect"> </span>
+                                                                        </li>
+                                                                      
+
+
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div> -->
+                                                        <div class="accordion__group">
+                                                            <h3 class="accordion__header">
+                                                                <button class="accordion__trigger" id="multiple-trigger-2" aria-controls="multiple-panel-2" aria-expanded="true">
+                                                                    <span class="accordion__title"> Filter Data </span>
+                                                                    <span class="accordion__arrow" aria-hidden="true"></span>
+                                                                </button>
+                                                            </h3>
+                                                            <div class="accordion__panel" role="region" id="multiple-panel-2" aria-labelledby="multiple-trigger-2">
+                                                                <div class="accordion__panel-inner">
+                                                                    <ul class="listp">
+                                                                        <li>
+                                                                           <!--  <input type="checkbox" id="rangecheck" name=""><span class=" "></span> -->
+                                                                           <button id="rangecheck" class="btn btn-primary btn-sm ">Time series</button>
+                                                                            <!-- <i class="input-helper"></i>  -->
+                                                                        </li>
+                                                                        <li>
+                                                                            <input type="checkbox" id="querycheck" name="" checked=""><span class="check"></span>
+                                                                            <i class="input-helper"></i> Querried Layer
+                                                                        </li>
+                                                                    </ul>
+                                                                    <div class="form-group">
+                                                                        <label for="pwd">Query 1</label>
+                                                                        <!-- <input type="date" class="form-control" id="start"  min="2018-01-01"> -->
+                                                                        <select class="form-control" id="start">
+                                                                            <option value="">Select a Year </option>
+                                                                            {% for date in daterange %}
+                                                                            <option value="{{date}}">{{date}}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="pwd">Query 2</label>
+                                                                        <!-- <input type="date" class="form-control" id="end"   min="2018-01-01"> -->
+                                                                        <select class="form-control" id="end">
+                                                                            <option value="">Select a Year</option>
+                                                                            {% for date in daterange %}
+                                                                            <option value="{{date}}">{{date}}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <button style="margin-left: 35%;" id="filter" class="btn btn-green"> Filter </button>
+                                                                </div><!-- .accordion__panel-inner -->
+                                                            </div><!-- .accordion__panel -->
+                                                        </div><!-- .accordion__group -->
+                                                    </div><!-- .accordion -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="profile1" role="tabpanel">
+                                            <div id="overlay_map_analysis" class="overlay1 hidden">
+                                                <div class="col-md-12">
+                                                    <img class="loader1" src="/static/rootApp/img/eok.gif" />
+                                                </div>
+                                            </div>
+                                            <div id="analysis_cont_map">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Tabs on plain Card -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="mapTools" class="mapTools">
+                <button id="zoomin" type="button" class="btn btn-purple btn-fab animate-fab btn-fab-sm mapTools-btn">
+                    <i class="zmdi zmdi-plus"></i>
+                </button>
+                <button id="zoomout" type="button" class="btn btn-purple btn-fab animate-fab btn-fab-sm mapTools-btn">
+                    <i class="zmdi zmdi-minus"></i>
+                    <button type="button" class="btn btn-purple btn-fab animate-fab btn-fab-sm mapTools-btn" data-toggle="modal" data-target="#myModal">
+                        <i class="zmdi zmdi-print"></i>
+                    </button>
+            </div>
+            <div id="mapid" style="width:100% ; height:99vh; ">
+            </div>
+            <div class="leaflet-bottom leaflet-left">
+                <img src="/static/rootApp/img/ledgend.png" style="width:60% ;">
+            </div>
+        </div>
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Map Title</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group label-floating is-empty">
+                            <label class="control-label">Enter a title for the map</label>
+                            <input id="mapotitle" type="text" class="form-control">
+                        </div>
+                        <!-- <input id="mapotitle" type="textbox" name="title"> -->
+                        <button type="button" data-dismiss="modal" id="custom_print_button" class="btn btn-default"> <i class="zmdi zmdi-print"></i> PROCEED TO PRINT</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+        <div id="about_dialog" title="About dialog">
+            <p>
+                The portal is developed by CERSGIS for the purposes of visualizing
+                galamsey areas to support SERVIR WEST AFRICA's Galamsey Monitoring
+                System.
+            </p>
+        </div>
+        <div id="changedetection" title="Area Computation">
+            <div id="overlay_chart" class="overlay1 ">
+                <div class="col-md-12">
+                    <img class="loader1" src="/static/rootApp/img/eok.gif" />
+                </div>
+            </div>
+            <div class="row" id="analysis_contain_parent"></div>
+        </div>
+        <div id="timeseries" title="Timeseries Computation">
+            <div id="overlay_timechart" class="overlay1 ">
+                <div class="col-md-12">
+                    <img class="loader1" src="/static/rootApp/img/eok.gif" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="checkbox" style="padding-left: 5%;">
+                    <label><input type="checkbox" class="class" value="Agroforestrycocoa">Agroforestry Cocoa</label>
+                    <label><input type="checkbox" class="class" value="Built">Built</label>
+                    <label><input type="checkbox" class="class" value="Cropland">Cropland</label>
+                    <label><input type="checkbox" class="class" value="Forest">Forest</label>
+                    <label><input type="checkbox" class="class" value="MonoCocoa">MonoCocoa</label>
+                    <label><input type="checkbox" class="class" value="OpenForest">OpenForest</label>
+                </div>
+
+                <div class="row" style="padding-left: 5%;padding-right: 5%;">
+                <div class="form-group col-md-4">
+                    <label for="pwd">Query 1</label>
+                    <!-- <input type="date" class="form-control" id="start"  min="2018-01-01"> -->
+                    <select class="form-control" id="time_start">
+                        <option value="">Select a Year </option>
+                        {% for date in daterange %}
+                        <option value="{{date}}">{{date}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="pwd">Query 2</label>
+                    <!-- <input type="date" class="form-control" id="end"   min="2018-01-01"> -->
+                    <select class="form-control" id="time_end">
+                        <option value="">Select a Year</option>
+                        {% for date in daterange %}
+                        <option value="{{date}}">{{date}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <br>
+                <button class="btn btn-success btn-sm" id="runanalysis">Run Analysis</button>
+                </div>
+                </div>
+                <div class="checkbox">
+                </div>
+                <div class="checkbox">
+                </div>
+            </div>
+            <div class="row" id="timeseries_contain_parent"></div>
+        </div>
+    </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <!-- <script src="/static/rootApp/js/jquery.min.js"></script> -->
+    <script src="/static/rootApp/js/popper.js"></script>
+    <script src="/static/rootApp/js/bootstrap.min.js"></script>
+    <script src="/static/rootApp/js/vendor.bundle.js"></script>
+    <script src="/static/rootApp/js/app.bundle.js"></script>
+    <script src="/static/rootApp/js/main.js"></script>
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+    <script type="text/javascript" src="{% static 'rootApp/leaflet/autocomplete/jquery.easy-autocomplete.js' %}"></script>
+    <script type="text/javascript" src="{% static 'rootApp/leaflet/leaflet_cor/Leaflet.Coordinates-0.1.5.src.js' %}"></script>
+    <script src="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.js"></script>
+    <script src="/static/rootApp/leaflet/L.Control.MousePosition.js"></script>
+    <script src="/static/rootApp/leaflet/leaflet.browser.print.min.js"></script>
+    <script src="https://unpkg.com/togeojson@0.14.2"></script>
+    <script src="/static/rootApp/js/leaflet.filelayer.js"></script>
+    <script src="/static/rootApp/js/leaflet-measure.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.12/leaflet.draw.js"></script>
+    <script src="/static/rootApp/js/map.js"></script>
+    <script src="/static/rootApp/js/admin.js"></script>
+    <script src="/static/rootApp/js/authentication.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        $(".leaflet-browser-print--manualMode-button").addClass("btn");
+        $(".leaflet-browser-print--manualMode-button").addClass("btn-green btn-sm");
+    });
+
+
+    $("#changedetection").dialog({
+        autoOpen: false,
+        width: 600,
+        minHeight: 500,
+        show: {
+            effect: "blind",
+            duration: 1000,
+        },
+        hide: {
+            effect: "blind",
+            duration: 1000,
+        },
+        position: { my: "center", at: "center", of: window },
+    });
+    $("#about_dialog").dialog({
+        autoOpen: false,
+        width: 900,
+        show: {
+            effect: "blind",
+            duration: 1000,
+        },
+        hide: {
+            effect: "blind",
+            duration: 1000,
+        },
+    });
+
+
+
+    $("#timeseries").dialog({
+        autoOpen: false,
+        width: 610,
+        minHeight: 500,
+        show: {
+            effect: "blind",
+            duration: 1000,
+        },
+        hide: {
+            effect: "blind",
+            duration: 1000,
+        },
+        position: { my: "center", at: "center", of: window },
+    });
+
+    // $("#about_dialog").dialog("open");
+
+
+    var getclasses = []
+
+    $("body").on("change", ".class ", function() {
+
+       var man = $(this).is(':checked');
+
+       if (man){
+        if (getclasses.length <= 2) {
+
+            var man = $(this).is(':checked');
+
+            if (man == true) {
+
+                getclasses.push($(this).val());
+
+                // console.log(getclasses)
+
+                // alert("hellooo 1 ")
+            } 
+
+
+
+        } else {
+
+            $(this).prop("checked", false);
+            alert("only 3 class can be check at a time")
+
+
+        }
+
+
+        }else {
+
+
+                var removeItem = $(this).val();
+
+                getclasses = jQuery.grep(getclasses, function(value) {
+                    return value != removeItem;
+                });
+
+                //  alert("hellooo 2")
+                // console.log(getclasses)
+
+            }
+
+
+    })
+
+
+    $("#overlay_timechart").hide()
+
+
+    $("body").on("click", "#runanalysis ", function() {
+
+       
+        var start = $("#time_start").val()
+
+        var end = $("#time_end").val()
+
+        $("#timeseries").dialog("open");
+
+        if (start && end && getclasses.length > 0 ) {
+
+             $("#overlay_timechart").show()
+            // $("#overlay_chart").show();
+            $.get("/lulc/analysistimeseries/?start=" + start + '&end=' + end + '&range=on&class=' + getclasses, function(data) {
+
+
+
+                if (data.chart == "error") {
+
+                    $("#overlay_timechart").hide();
+                    alert("An error occurred")
+                } else {
+
+                    $("#timeseries_contain_parent").html(data)
+
+                    $("#overlay_timechart").hide();
+                }
+
+
+            });
+
+
+
+        } else {
+
+
+            alert("please Select start and end date and at least one class")
+
+        }
+
+
+
+
+    })
+    </script>
+</body>
+
+</html>

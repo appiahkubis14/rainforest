@@ -1,0 +1,731 @@
+<!-- templates/update/tree_species.html -->
+{% extends 'update/base.html' %}
+{% load static %}
+
+{% block title %}Tree Species Management{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+:root {
+    --primary-color: #2e7d32;
+    --primary-dark: #1b5e20;
+    --primary-light: #4caf50;
+    --secondary-color: #079251;
+    --text-dark: #2e3715;
+    --text-light: #6b8e23;
+    --bg-light: #f8fdf8;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Header Styles */
+.species-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0 0 20px 20px;
+    box-shadow: var(--card-shadow);
+}
+
+.species-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.species-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* Card Styles */
+.species-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--card-shadow);
+    border: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.species-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.species-card-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.species-card-header h3 {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Table Styles */
+.table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+#speciesTable {
+    width: 100%;
+    margin: 0;
+}
+
+#speciesTable thead th {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+#speciesTable tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid #e8f5e8;
+    vertical-align: middle;
+    transition: background-color 0.3s ease;
+}
+
+#speciesTable tbody tr:hover td {
+    background-color: #f0f9f0;
+}
+
+/* Species Image */
+.species-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 3px solid var(--primary-light);
+    transition: transform 0.3s ease;
+}
+
+.species-image:hover {
+    transform: scale(1.1);
+}
+
+/* Badge Styles */
+.species-badge {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.photo-badge {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #ff5722 100%);
+}
+
+/* Action Buttons */
+.btn-species {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-view {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    color: white;
+}
+
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+}
+
+/* Search Box */
+.search-container {
+    position: relative;
+    max-width: 400px;
+}
+
+.search-box {
+    border-radius: 25px;
+    border: 2px solid #e8f5e8;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.search-box:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+}
+
+/* Stats Cards */
+.stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--primary-color);
+}
+
+.stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    color: var(--text-dark);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+/* Modal Styles */
+.species-modal .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.species-modal .modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    border-radius: 20px 20px 0 0;
+    border: none;
+    padding: 2rem;
+}
+
+.species-modal .modal-body {
+    padding: 2rem;
+}
+
+.species-modal .modal-footer {
+    border-top: 1px solid #e8f5e8;
+    padding: 1.5rem 2rem;
+    border-radius: 0 0 20px 20px;
+}
+
+/* Photo Gallery */
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.gallery-item {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: var(--hover-shadow);
+}
+
+.gallery-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .species-title {
+        font-size: 2rem;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+}
+
+/* Add these styles to your existing CSS */
+.container-fluid {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.species-card .card-body.p-0 {
+    border-radius: 0 0 15px 15px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+#speciesTable {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+#speciesTable th,
+#speciesTable td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#speciesTable th:nth-child(3),
+#speciesTable td:nth-child(3),
+#speciesTable th:nth-child(4),
+#speciesTable td:nth-child(4) {
+    white-space: normal;
+    min-width: 200px;
+}
+
+/* Ensure the table takes full width */
+.dataTables_wrapper {
+    width: 100% !important;
+}
+
+.dataTables_scroll {
+    width: 100% !important;
+}
+
+/* Adjust header to be full width too */
+.species-header .container {
+    max-width: 100%;
+}
+
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- <div class="species-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="species-title animate__animated animate__fadeInDown">
+                    <i class="fas fa-tree me-3"></i>Tree Species Catalog
+                </h1>
+                <p class="species-subtitle animate__animated animate__fadeInUp">
+                    Manage and explore our comprehensive collection of tree species
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="search-container animate__animated animate__fadeInRight">
+                    <input type="text" id="searchInput" class="form-control search-box" placeholder="Search species...">
+                    <i class="fas fa-search position-absolute" style="right: 20px; top: 50%; transform: translateY(-50%); color: #6b8e23;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<div class="container-fluid mt-4 px-4" style="margin: 0;">
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card fade-in">
+                <div class="stats-number" id="totalSpecies">0</div>
+                <div class="stats-label">Total Species</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card fade-in" style="animation-delay: 0.1s;">
+                <div class="stats-number" id="speciesWithPhotos">0</div>
+                <div class="stats-label">With Photos</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card fade-in" style="animation-delay: 0.2s;">
+                <div class="stats-number" id="botanicalRecords">0</div>
+                <div class="stats-label">Botanical Names</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card fade-in" style="animation-delay: 0.3s;">
+                <div class="stats-number" id="uniqueCodes">0</div>
+                <div class="stats-label">Unique Codes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table -->
+    <div class="species-card fade-in">
+        <div class="species-card-header">
+            <h3><i class="fas fa-list me-2"></i>Tree Species List</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="speciesTable" class="table table-hover w-100">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Code</th>
+                            <th>Common Name</th>
+                            <th>Botanical Name</th>
+                            <th>Photos</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be loaded via DataTables -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Species Detail Modal -->
+<div class="modal fade species-modal" id="speciesDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="speciesModalTitle">
+                    <i class="fas fa-tree me-2"></i>Species Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="speciesModalBody">
+                <!-- Content will be loaded via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-species" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize DataTable with proper configuration
+    var speciesTable = $('#speciesTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/tree-species-datatable/',
+            type: 'GET',
+            data: function(d) {
+                // Add any additional data you want to send
+                d.search = $('#searchInput').val();
+            },
+            dataSrc: function(json) {
+                // Update stats when data is loaded
+                updateStats(json);
+                return json.data;
+            },
+            error: function(xhr, error, thrown) {
+                console.log('DataTables error:', error);
+                console.log('Server response:', xhr.responseText);
+            }
+        },
+        columns: [
+            {
+                data: 'main_photo_url',
+                render: function(data, type, row) {
+                    if (!data || data === '') {
+                        data = '/static/dist/img/default-tree.png';
+                    }
+                    return `<img src="${data}" alt="${row.name}" class="species-image">`;
+                },
+                orderable: false,
+                searchable: false
+            },
+            { 
+                data: 'code',
+                render: function(data) {
+                    return data ? `<span class="species-badge">${data}</span>` : '<span class="text-muted">N/A</span>';
+                }
+            },
+            { 
+                data: 'name',
+                render: function(data) {
+                    return data || '<span class="text-muted">N/A</span>';
+                }
+            },
+            { 
+                data: 'botanical',
+                render: function(data) {
+                    return data || '<span class="text-muted">N/A</span>';
+                }
+            },
+            {
+                data: 'photo_count',
+                render: function(data, type, row) {
+                    if (data > 0) {
+                        return `<span class="species-badge photo-badge">${data} <i class="fas fa-camera ms-1"></i></span>`;
+                    }
+                    return '<span class="badge bg-secondary">No photos</span>';
+                },
+                orderable: false,
+                searchable: false
+            },
+            {
+                data: 'id',
+                render: function(data, type, row) {
+                    return `
+                        <button class="btn btn-view btn-species btn-sm" onclick="viewSpeciesDetail(${data})">
+                            <i class="fas fa-eye me-1"></i> View
+                        </button>
+                    `;
+                },
+                orderable: false,
+                searchable: false
+            }
+        ],
+        order: [[2, 'asc']], // Sort by common name ascending
+        pageLength: 12,
+        lengthMenu: [10, 25, 50, 100],
+        language: {
+            emptyTable: 'No tree species found',
+            zeroRecords: 'No matching species found',
+            loadingRecords: '<div class="loading-spinner mx-auto"></div> Loading...',
+            processing: '<div class="loading-spinner"></div> Processing...',
+            search: 'Search:',
+            paginate: {
+                first: 'First',
+                last: 'Last',
+                next: 'Next',
+                previous: 'Previous'
+            }
+        },
+        initComplete: function() {
+            // Add some animation after table is initialized
+            $('.fade-in').addClass('animate__animated animate__fadeIn');
+        }
+    });
+
+    // Update statistics
+    function updateStats(json) {
+        if (json && json.recordsTotal !== undefined) {
+            $('#totalSpecies').text(json.recordsTotal);
+            
+            // Calculate additional stats from the data
+            let speciesWithPhotos = 0;
+            let botanicalRecords = 0;
+            let uniqueCodes = new Set();
+            
+            if (json.data) {
+                json.data.forEach(function(species) {
+                    if (species.photo_count > 0) speciesWithPhotos++;
+                    if (species.botanical && species.botanical !== 'na') botanicalRecords++;
+                    if (species.code && species.code !== 'na') uniqueCodes.add(species.code);
+                });
+            }
+            
+            $('#speciesWithPhotos').text(speciesWithPhotos);
+            $('#botanicalRecords').text(botanicalRecords);
+            $('#uniqueCodes').text(uniqueCodes.size);
+        }
+    }
+
+    // Search functionality
+    $('#searchInput').on('keyup', function() {
+        speciesTable.search(this.value).draw();
+    });
+
+    // View species details
+    window.viewSpeciesDetail = function(speciesId) {
+        $('#speciesDetailModal').modal('show');
+        $('#speciesModalBody').html(`
+            <div class="text-center py-4">
+                <div class="loading-spinner mx-auto mb-3"></div>
+                <p>Loading species details...</p>
+            </div>
+        `);
+
+        $.ajax({
+            url: `/tree-species-detail/${speciesId}/`,
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    displaySpeciesDetails(response.species);
+                } else {
+                    $('#speciesModalBody').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${response.error || 'Error loading species details'}
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', error);
+                $('#speciesModalBody').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Failed to load species details. Please try again.
+                    </div>
+                `);
+            }
+        });
+    }
+
+    // Display species details in modal
+    function displaySpeciesDetails(species) {
+        const photosHtml = species.photos && species.photos.length > 0 ? `
+            <div class="mb-4">
+                <h6><i class="fas fa-images me-2"></i>Photo Gallery</h6>
+                <div class="photo-gallery">
+                    ${species.photos.map(photo => `
+                        <div class="gallery-item">
+                            <img src="${photo.url}" alt="${species.name}" class="gallery-img"
+                                 onerror="this.src='/static/dist/img/default-tree.png'">
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        ` : '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>No photos available for this species.</div>';
+
+        $('#speciesModalTitle').html(`<i class="fas fa-tree me-2"></i>${species.name || 'Unknown Species'}`);
+        $('#speciesModalBody').html(`
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <img src="${species.photos && species.photos[0] ? species.photos[0].url : '/static/dist/img/default-tree.png'}" 
+                         alt="${species.name}" class="img-fluid rounded" style="max-height: 200px;"
+                         onerror="this.src='/static/dist/img/default-tree.png'">
+                    <div class="mt-3">
+                        <span class="species-badge">${species.code || 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <h4>${species.name || 'Unknown Species'}</h4>
+                    <p class="text-muted">${species.botanical || 'No botanical name available'}</p>
+                    <p>${species.description || 'No description available.'}</p>
+                    
+                    ${species.common_names && species.common_names.length > 0 ? `
+                        <div class="mt-3">
+                            <strong>Common Names:</strong>
+                            <div class="mt-1">
+                                ${species.common_names.map(name => `<span class="badge bg-light text-dark me-1 mb-1">${name}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${species.uses && species.uses.length > 0 ? `
+                        <div class="mt-3">
+                            <strong>Common Uses:</strong>
+                            <div class="mt-1">
+                                ${species.uses.map(use => `<span class="badge bg-primary me-1 mb-1">${use}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            ${species.growth_characteristics ? `
+                <hr>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6><i class="fas fa-seedling me-2"></i>Growth Characteristics</h6>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="characteristic-item">
+                                    <div class="characteristic-label">Growth Rate</div>
+                                    <div class="characteristic-value">${species.growth_characteristics.growth_rate || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="characteristic-item">
+                                    <div class="characteristic-label">Mature Height</div>
+                                    <div class="characteristic-value">${species.growth_characteristics.mature_height || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="characteristic-item">
+                                    <div class="characteristic-label">Lifespan</div>
+                                    <div class="characteristic-value">${species.growth_characteristics.lifespan || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="characteristic-item">
+                                    <div class="characteristic-label">Soil Type</div>
+                                    <div class="characteristic-value">${species.growth_characteristics.soil_type || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    ${photosHtml}
+                </div>
+            </div>
+        `);
+    }
+
+    // Add characteristic item styling
+    $('head').append(`
+        <style>
+            .characteristic-item {
+                background: #f8fdf8;
+                padding: 1rem;
+                border-radius: 10px;
+                border-left: 4px solid var(--primary-color);
+                text-align: center;
+            }
+            .characteristic-label {
+                font-weight: 600;
+                color: var(--text-dark);
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .characteristic-value {
+                color: var(--primary-color);
+                font-weight: 700;
+                margin-top: 0.5rem;
+                font-size: 0.9rem;
+            }
+        </style>
+    `);
+});
+</script>
+{% endblock %}

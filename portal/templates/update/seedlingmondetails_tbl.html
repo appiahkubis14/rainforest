@@ -1,0 +1,269 @@
+{% extends 'update/base.html' %}
+{% block smonitor %} menu-open {% endblock %}
+{% load static %}
+{% load eok %}
+{% block css %}
+<link rel="stylesheet" href="/static/plugins/daterangepicker/daterangepicker.css">
+<link rel="stylesheet" href="/static/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+<link rel="stylesheet" href="/static/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+<link rel="stylesheet" href="/static/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+<link rel="stylesheet" href="/static/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="/static/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+<link rel="stylesheet" href="/static/plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
+<link rel="stylesheet" href="/static/plugins/bs-stepper/css/bs-stepper.min.css">
+<link rel="stylesheet" href="/static/plugins/dropzone/min/dropzone.min.css">
+<style type="text/css">
+.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+
+a.disabled {
+    background: #298541;
+    color: #fff !important;
+    padding: 10px 30px;
+    font-weight: 500;
+    border-radius: 6px;
+    margin: 10px auto 20px;
+}
+
+.eok {
+    background-color: #298541;
+    color: #fff;
+}
+</style>
+{% endblock %}
+{% block body %}
+<div class="content-wrapper">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-8 offset-1" id="printableArea">
+                    <div class="white_card card_height_100 mb_10">
+                        <div class="white_card_header">
+                            <div class="">
+                                <div class="row hidden_print">
+                                    <a onclick="printDiv('printableArea')" href="#" class="notification_btn red_btn print" style="font-size: 37px; position: absolute; top: 75px; right: 10px;color: #298541;"> <i class="fa fa-print"></i></a><br>
+                                </div>
+                            </div>
+                            <div class="main-title" style="text-align: center;">
+                                <img class="img_centre" src="/static/dist/img/fc.png" style="width: 200px">
+                                <h3 class="m-0" style="text-align: center;">SEEDLING MONITORING </h3>
+                                <br><br>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <div class="white_card_header">
+                                <div class="box_header pb-4 pt-5">
+                                    <div class="main-title">
+                                        <a class="disabled">Baseline Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Farmer Name</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.farmer_name.farmer_name}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Community</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.farmer_name.community}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Date of Visit</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.date_of_visit}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Tree Species</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.treespecies}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Date Received</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.date_received.date}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Date Planted</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.date_planted.date}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity Received</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.qnty_received}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity Planted</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.qntyplanted}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity Survived</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.qnty_survived}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Planting Area Type</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.planting_area_type}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Area Size</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.area_size}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">No. of Trees Registered</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.no_of_trees_registered}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group row pt-2 pb-2">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Farm Location</label>
+                                        <div class="col-sm-9">
+                                            <input type="name" class="form-control" id="" placeholder="{{perdetails.farm_location}}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                               
+                            </div>
+
+
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="white_card card_height_100 pge-break mb_10" style="">
+                        <div class="white_card_header">
+                            <div class="box_header pb-4 pt-5">
+                                <div class="main-title">
+                                    <a class="disabled">Subsequent Monitoring</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="white_card_body">
+                            <!-- <h6 class="card-subtitle mb-2"> ggg </h6> -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="table-responsive m-b-30">
+                                        <table class="table table-striped" id="montbl">
+                                            <thead class="eok">
+                                                <tr>
+                                                    <th scope="col"> Date </th>
+                                                    <th scope="col"> Quantity Survived</th>
+                                                    <th scope="col"> Visit</th>
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for aa in perdetailupdate %}
+                                                <tr>
+                                                    <td scope="row">{{aa.created_date.date}} </td>
+                                                    
+                                                    <td>{{aa.qnty_survived}} </td>
+
+                                                    <td>{{forloop.counter}} </td>
+                                                    
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+function printDiv(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+}
+
+
+   $('#montbl').DataTable({
+        // dom: 'Bfrtip',
+        "lengthChange": false,
+        "pageLength": 5
+
+    });
+
+
+
+
+</script>
+{% endblock %}

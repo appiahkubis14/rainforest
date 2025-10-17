@@ -1,0 +1,63 @@
+{% extends 'update/base.html' %}
+
+{% block lmonitor %} menu-open {% endblock %}
+{% load static %}
+
+{% block css %}
+{% endblock%}
+
+
+
+{% block body %}
+
+<div class="content-wrapper">
+    <div class="row" style="padding: 1% 5%;">
+
+        <div class="col-sm-6">
+            <div class="form-group">
+              <label for="sel1" style="color:#288541;">Filter with Community</label>
+              <select class="form-control" id="community" style="width: 50%;">
+                <option value="">ALL</option>
+                {% for com in community %}
+                <option value="{{com.id}}">{{com.community}}</option>
+
+                {% endfor %}
+              </select>
+            </div>
+        </div>
+
+        
+    </div>
+    <div class="" id="dashcont2" style="padding:1% 5%">
+       
+    </div>
+
+</div>
+{% endblock%}
+
+
+{% block js %}
+
+ <script type="text/javascript">
+        loader()
+        $("#community").change(function(){
+        $(".overlay1").show()
+         $.get(`/dashres2/?com=${$(this).val()}`,function(data){
+
+           $("#dashcont2").html(data)
+
+           unload()
+            
+         })
+
+        })
+
+    $.get('/dashres2/',function(data){
+
+           $("#dashcont2").html(data)
+
+           
+            unload()
+         })
+ </script>
+{% endblock%}

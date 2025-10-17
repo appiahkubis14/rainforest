@@ -1,0 +1,1151 @@
+{% extends 'update/base.html' %}
+{% block map %} active {% endblock %}
+{% block tree_reg %} menu-open {% endblock %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root {
+    --primary-color: #317e39;
+    --primary-dark: #1a722a;
+    --primary-light: #3a6c3f;
+    --secondary-color: #4a7c59;
+    --accent-color: #8a9a5b;
+    --text-dark: #2d3748;
+    --text-light: #718096;
+    --bg-light: #f7fafc;
+    --border-light: #e2e8f0;
+    --success-color: #38a169;
+    --warning-color: #d69e2e;
+    --danger-color: #e53e3e;
+    --info-color: #3182ce;
+}
+
+.dashboard-container {
+    background: var(--bg-light);
+    min-height: 100vh;
+}
+
+/* Header Styles */
+.dashboard-header {
+    background: white;
+    color: var(--text-dark);
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header-title h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.header-title p {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Card Styles */
+.dashboard-card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    background: white;
+    color: var(--text-dark);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    background: white;
+    border: 1px solid var(--border-light);
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Progress Bars */
+.progress {
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--border-light);
+    margin: 0.5rem 0;
+}
+
+.progress-bar {
+    border-radius: 3px;
+}
+
+/* Charts and Graphs */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 1rem 0;
+}
+
+.mini-chart {
+    height: 60px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: 0.25rem;
+    margin: 1rem 0;
+    opacity: 0.9;
+}
+
+/* List Styles */
+.survey-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.survey-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color 0.2s ease;
+}
+
+.survey-item:hover {
+    background-color: var(--bg-light);
+}
+
+.survey-item:last-child {
+    border-bottom: none;
+}
+
+.survey-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    margin-right: 1rem;
+    font-size: 0.875rem;
+}
+
+.survey-info {
+    flex: 1;
+}
+
+.survey-farmer {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.survey-details {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.survey-stats {
+    text-align: right;
+}
+
+.survival-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    border: 1px solid;
+}
+
+.badge-high {
+    background-color: #f0fff4;
+    color: var(--success-color);
+    border-color: #c6f6d5;
+}
+
+.badge-medium {
+    background-color: #fffaf0;
+    color: var(--warning-color);
+    border-color: #fefcbf;
+}
+
+.badge-low {
+    background-color: #fff5f5;
+    color: var(--danger-color);
+    border-color: #fed7d7;
+}
+
+/* Grid Layout */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Button Styles */
+.btn-dashboard {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.btn-dashboard:hover {
+    background: var(--primary-dark);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(44, 85, 48, 0.2);
+}
+
+.btn-outline-dashboard {
+    border: 1px solid var(--border-light);
+    color: var(--text-dark);
+    background: transparent;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.btn-outline-dashboard:hover {
+    background: var(--bg-light);
+    border-color: var(--text-light);
+    color: var(--text-dark);
+}
+
+/* Environmental Factors */
+.factor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.factor-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-light);
+}
+
+.factor-item:hover {
+    background: white;
+    border-color: var(--primary-light);
+}
+
+.factor-icon {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.factor-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.25rem;
+}
+
+.factor-label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Survival Rate Distribution */
+.distribution-bar {
+    display: flex;
+    height: 32px;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    margin: 1rem 0;
+    border: 1px solid var(--border-light);
+}
+
+.distribution-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.segment-high { background-color: var(--success-color); }
+.segment-medium { background-color: var(--warning-color); }
+.segment-low { background-color: var(--danger-color); }
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.action-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--border-light);
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    color: inherit;
+    text-decoration: none;
+    border-color: var(--primary-light);
+}
+
+.action-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.action-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+}
+
+.action-description {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    line-height: 1.4;
+}
+
+/* Text Utilities */
+.text-muted {
+    color: var(--text-light) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-warning {
+    color: var(--warning-color) !important;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+/* Badge improvements */
+.bg-success { background-color: var(--success-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container-fluid">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1><i class="fas fa-seedling me-2"></i>Seedling Survey Dashboard</h1>
+                    <p>Comprehensive overview of seedling survival and survey data</p>
+                </div>
+                <div class="header-actions">
+                    <a href="/seedling-map/" class="btn-dashboard">
+                        <i class="fas fa-map-marked-alt"></i> View Map
+                    </a>
+                    <a href="/seedling-surveys/" class="btn-outline-dashboard">
+                        <i class="fas fa-list"></i> All Surveys
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Quick Stats -->
+        <div class="stats-grid" id="quickStats">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Survival Analytics -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line me-2"></i>Survival Analytics</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="survivalAnalytics">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Surveys -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-clock me-2"></i>Recent Surveys</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="survey-list" id="recentSurveys">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Environmental Factors -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-leaf me-2"></i>Environmental Factors</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="environmentalFactors">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Species Diversity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tree me-2"></i>Species Diversity</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="speciesDiversity">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Survey Trends -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-bar me-2"></i>Survey Trends</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="surveyTrends">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/seedling-map/" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-map"></i>
+                </div>
+                <div class="action-title">Interactive Map</div>
+                <div class="action-description">View all surveys on an interactive map with boundaries</div>
+            </a>
+            
+            <a href="/api/seedling-surveys/" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="action-title">All Surveys</div>
+                <div class="action-description">Browse and manage all seedling survey records</div>
+            </a>
+            
+            <a href="#" class="action-card" onclick="exportData()">
+                <div class="action-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="action-title">Export Data</div>
+                <div class="action-description">Download survey data in various formats</div>
+            </a>
+            
+            <a href="#" class="action-card" onclick="generateReport()">
+                <div class="action-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="action-title">Generate Report</div>
+                <div class="action-description">Create detailed analysis reports</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+// Global variables
+let dashboardData = null;
+
+$(document).ready(function() {
+    loadDashboardData();
+    
+    // Refresh data every 2 minutes
+    setInterval(loadDashboardData, 120000);
+});
+
+function loadDashboardData() {
+    // Show loading states
+    showLoadingStates();
+    
+    // Load main stats
+    $.ajax({
+        url: "/api/seedling-dashboard/stats/",
+        type: "GET",
+        success: function(response) {
+            if (response.success) {
+                dashboardData = response.stats;
+                renderQuickStats();
+                renderSurvivalAnalytics();
+                renderEnvironmentalFactors();
+                renderSpeciesDiversity();
+                renderSurveyTrends();
+            } else {
+                showError('Failed to load dashboard data');
+            }
+        },
+        error: function() {
+            showError('Error loading dashboard data');
+        }
+    });
+    
+    // Load recent surveys
+    $.ajax({
+        url: "/api/seedling-dashboard/recent-surveys/",
+        type: "GET",
+        success: function(response) {
+            if (response.success) {
+                renderRecentSurveys(response.surveys);
+            }
+        }
+    });
+}
+
+function showLoadingStates() {
+    $('#quickStats').html('<div class="loading-spinner"><div class="spinner"></div></div>');
+    $('#survivalAnalytics').html('<div class="loading-spinner"><div class="spinner"></div></div>');
+    $('#environmentalFactors').html('<div class="loading-spinner"><div class="spinner"></div></div>');
+    $('#speciesDiversity').html('<div class="loading-spinner"><div class="spinner"></div></div>');
+    $('#surveyTrends').html('<div class="loading-spinner"><div class="spinner"></div></div>');
+    $('#recentSurveys').html('<div class="loading-spinner"><div class="spinner"></div></div>');
+}
+
+function renderQuickStats() {
+    if (!dashboardData) return;
+    
+    const stats = dashboardData.overview;
+    const survival = dashboardData.survival_rates;
+    
+    const quickStatsHTML = `
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-number">${stats.total_surveys}</div>
+            <div class="stat-label">Total Surveys</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-seedling"></i>
+            </div>
+            <div class="stat-number">${stats.total_seedlings_alive.toLocaleString()}</div>
+            <div class="stat-label">Seedlings Alive</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number">${stats.communities_covered}</div>
+            <div class="stat-label">Communities</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-number">${survival.average}%</div>
+            <div class="stat-label">Avg Survival Rate</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tree"></i>
+            </div>
+            <div class="stat-number">${stats.unique_species}</div>
+            <div class="stat-label">Unique Species</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <div class="stat-number">${stats.surveys_with_boundary}</div>
+            <div class="stat-label">With Boundaries</div>
+        </div>
+    `;
+    
+    $('#quickStats').html(quickStatsHTML);
+}
+
+function renderSurvivalAnalytics() {
+    if (!dashboardData) return;
+    
+    const survival = dashboardData.survival_rates;
+    const total = survival.high_survival + survival.medium_survival + survival.low_survival;
+    
+    const highPercent = total > 0 ? (survival.high_survival / total) * 100 : 0;
+    const mediumPercent = total > 0 ? (survival.medium_survival / total) * 100 : 0;
+    const lowPercent = total > 0 ? (survival.low_survival / total) * 100 : 0;
+    
+    const analyticsHTML = `
+        <div class="row mb-4">
+            <div class="col-md-4 text-center">
+                <h4 class="text-success">${survival.high_survival}</h4>
+                <p class="text-muted">High Survival (&gt;80%)</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <h4 class="text-warning">${survival.medium_survival}</h4>
+                <p class="text-muted">Medium Survival (50-80%)</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <h4 class="text-danger">${survival.low_survival}</h4>
+                <p class="text-muted">Low Survival (&lt;50%)</p>
+            </div>
+        </div>
+        
+        <div class="distribution-bar">
+            <div class="distribution-segment segment-high" style="width: ${highPercent}%" title="High Survival: ${survival.high_survival} surveys">
+                ${highPercent > 10 ? Math.round(highPercent) + '%' : ''}
+            </div>
+            <div class="distribution-segment segment-medium" style="width: ${mediumPercent}%" title="Medium Survival: ${survival.medium_survival} surveys">
+                ${mediumPercent > 10 ? Math.round(mediumPercent) + '%' : ''}
+            </div>
+            <div class="distribution-segment segment-low" style="width: ${lowPercent}%" title="Low Survival: ${survival.low_survival} surveys">
+                ${lowPercent > 10 ? Math.round(lowPercent) + '%' : ''}
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <small class="text-muted">
+                <i class="fas fa-info-circle"></i>
+                Based on ${survival.calculated_surveys} surveys with complete planting data
+            </small>
+        </div>
+    `;
+    
+    $('#survivalAnalytics').html(analyticsHTML);
+}
+
+function renderEnvironmentalFactors() {
+    if (!dashboardData) return;
+    
+    const factors = dashboardData.environmental_factors;
+    const totalSurveys = dashboardData.overview.total_surveys;
+    
+    const factorsHTML = `
+        <div class="factor-grid">
+            <div class="factor-item">
+                <div class="factor-icon">
+                    <i class="fas fa-cloud-showers-heavy"></i>
+                </div>
+                <div class="factor-count">${factors.extreme_weather}</div>
+                <div class="factor-label">Extreme Weather</div>
+                <small class="text-muted">${Math.round((factors.extreme_weather / totalSurveys) * 100)}%</small>
+            </div>
+            
+            <div class="factor-item">
+                <div class="factor-icon">
+                    <i class="fas fa-bug"></i>
+                </div>
+                <div class="factor-count">${factors.pests}</div>
+                <div class="factor-label">Pests Reported</div>
+                <small class="text-muted">${Math.round((factors.pests / totalSurveys) * 100)}%</small>
+            </div>
+            
+            <div class="factor-item">
+                <div class="factor-icon">
+                    <i class="fas fa-virus"></i>
+                </div>
+                <div class="factor-count">${factors.disease}</div>
+                <div class="factor-label">Disease Signs</div>
+                <small class="text-muted">${Math.round((factors.disease / totalSurveys) * 100)}%</small>
+            </div>
+            
+            <div class="factor-item">
+                <div class="factor-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <div class="factor-count">${factors.fertilizer_used}</div>
+                <div class="factor-label">Fertilizer Used</div>
+                <small class="text-muted">${Math.round((factors.fertilizer_used / totalSurveys) * 100)}%</small>
+            </div>
+        </div>
+    `;
+    
+    $('#environmentalFactors').html(factorsHTML);
+}
+
+function renderSpeciesDiversity() {
+    if (!dashboardData) return;
+    
+    const stats = dashboardData.overview;
+    
+    const diversityHTML = `
+        <div class="text-center mb-3">
+            <h2 class="text-primary">${stats.unique_species}</h2>
+            <p class="text-muted">Unique Tree Species Recorded</p>
+        </div>
+        
+        <div class="mini-chart"></div>
+        
+        <div class="mt-3">
+            <small class="text-muted">
+                <i class="fas fa-leaf"></i>
+                Species diversity across all surveys and communities
+            </small>
+        </div>
+    `;
+    
+    $('#speciesDiversity').html(diversityHTML);
+}
+
+function renderSurveyTrends() {
+    if (!dashboardData) return;
+    
+    const trends = dashboardData.trends;
+    const monthlyData = trends.monthly;
+    
+    let trendsHTML = '';
+    
+    if (monthlyData.length > 0) {
+        const latestMonth = monthlyData[monthlyData.length - 1];
+        trendsHTML = `
+            <div class="text-center mb-3">
+                <h4 class="text-primary">${latestMonth.count}</h4>
+                <p class="text-muted">Surveys in latest month</p>
+            </div>
+            
+            <div class="progress mb-2">
+                <div class="progress-bar bg-success" style="width: ${Math.min(100, (latestMonth.count / 50) * 100)}%"></div>
+            </div>
+            
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-chart-line"></i>
+                    ${monthlyData.length} months of survey data tracked
+                </small>
+            </div>
+        `;
+    } else {
+        trendsHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                <p>No trend data available yet</p>
+            </div>
+        `;
+    }
+    
+    $('#surveyTrends').html(trendsHTML);
+}
+
+function renderRecentSurveys(surveys) {
+    if (!surveys || surveys.length === 0) {
+        $('#recentSurveys').html(`
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-inbox fa-2x mb-2"></i>
+                <p>No recent surveys found</p>
+            </div>
+        `);
+        return;
+    }
+    
+    let surveysHTML = '';
+    
+    surveys.forEach(survey => {
+        let survivalBadge = '';
+        if (survey.survival_rate >= 80) {
+            survivalBadge = `<span class="survival-badge badge-high">${survey.survival_rate}%</span>`;
+        } else if (survey.survival_rate >= 50) {
+            survivalBadge = `<span class="survival-badge badge-medium">${survey.survival_rate}%</span>`;
+        } else {
+            survivalBadge = `<span class="survival-badge badge-low">${survey.survival_rate}%</span>`;
+        }
+        
+        const boundaryIcon = survey.has_boundary ? 
+            '<i class="fas fa-map-marker-alt text-success" title="Has boundary data"></i>' : 
+            '<i class="fas fa-map-marker-alt text-muted" title="No boundary data"></i>';
+        
+        surveysHTML += `
+            <div class="survey-item">
+                <div class="survey-avatar">
+                    ${survey.farmer_name.charAt(0).toUpperCase()}
+                </div>
+                <div class="survey-info">
+                    <div class="survey-farmer">${survey.farmer_name}</div>
+                    <div class="survey-details">
+                        ${survey.community} • ${survey.species_count} species • ${survey.survey_date}
+                    </div>
+                </div>
+                <div class="survey-stats">
+                    ${survivalBadge}
+                    <div class="text-muted small">
+                        ${survey.seedlings_alive} seedlings
+                    </div>
+                    <div>${boundaryIcon}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    $('#recentSurveys').html(surveysHTML);
+}
+
+function showError(message) {
+    // Create a toast notification
+    const toastHTML = `
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+            <div class="toast align-items-center text-white bg-danger border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-exclamation-triangle me-2"></i>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('body').append(toastHTML);
+    $('.toast').toast('show');
+    
+    // Remove toast after hiding
+    $('.toast').on('hidden.bs.toast', function () {
+        $(this).closest('.position-fixed').remove();
+    });
+}
+
+function exportData() {
+    if (!dashboardData) {
+        showError('Please wait for data to load');
+        return;
+    }
+    
+    // Create export data
+    const exportData = {
+        exported_at: new Date().toISOString(),
+        overview: dashboardData.overview,
+        survival_rates: dashboardData.survival_rates,
+        environmental_factors: dashboardData.environmental_factors,
+        trends: dashboardData.trends
+    };
+    
+    // Convert to JSON and download
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `seedling-dashboard-export-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    showSuccess('Data exported successfully!');
+}
+
+function generateReport() {
+    if (!dashboardData) {
+        showError('Please wait for data to load');
+        return;
+    }
+    
+    // Show loading state
+    const originalText = $('.action-card:contains("Generate Report") .action-title').text();
+    $('.action-card:contains("Generate Report") .action-title').html('<div class="spinner-border spinner-border-sm me-2"></div>Generating...');
+    
+    // Simulate report generation
+    setTimeout(() => {
+        showSuccess('Report generated successfully!');
+        $('.action-card:contains("Generate Report") .action-title').text(originalText);
+        
+        // In a real implementation, this would open a modal with the report
+        openReportModal();
+    }, 2000);
+}
+
+function openReportModal() {
+    const reportHTML = `
+        <div class="modal fade" id="reportModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-chart-pie me-2"></i>Seedling Survey Report</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Overview</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Total Surveys:</strong> ${dashboardData.overview.total_surveys}</li>
+                                    <li><strong>Seedlings Alive:</strong> ${dashboardData.overview.total_seedlings_alive.toLocaleString()}</li>
+                                    <li><strong>Communities:</strong> ${dashboardData.overview.communities_covered}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Survival Rates</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Average:</strong> ${dashboardData.survival_rates.average}%</li>
+                                    <li><strong>High Survival:</strong> ${dashboardData.survival_rates.high_survival}</li>
+                                    <li><strong>Medium Survival:</strong> ${dashboardData.survival_rates.medium_survival}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary" onclick="printReport()">
+                                <i class="fas fa-print me-2"></i>Print Report
+                            </button>
+                            <button class="btn btn-success ms-2" onclick="downloadPDF()">
+                                <i class="fas fa-file-pdf me-2"></i>Download PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    $('#reportModal').remove();
+    
+    // Add new modal
+    $('body').append(reportHTML);
+    
+    // Show modal
+    const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+    reportModal.show();
+}
+
+function printReport() {
+    window.print();
+}
+
+function downloadPDF() {
+    showSuccess('PDF download started!');
+    // In a real implementation, this would generate and download a PDF
+}
+
+function showSuccess(message) {
+    const toastHTML = `
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+            <div class="toast align-items-center text-white bg-success border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('body').append(toastHTML);
+    $('.toast').toast('show');
+    
+    $('.toast').on('hidden.bs.toast', function () {
+        $(this).closest('.position-fixed').remove();
+    });
+}
+
+// Add responsive behavior
+$(window).on('resize', function() {
+    // Re-render charts or adjust layouts if needed
+    if (dashboardData) {
+        renderSurveyTrends();
+    }
+});
+</script>
+
+<!-- Add Print Styles -->
+<style>
+@media print {
+    .dashboard-header,
+    .header-actions,
+    .quick-actions,
+    .btn-dashboard,
+    .btn-outline-dashboard,
+    .action-card,
+    .modal-footer {
+        display: none !important;
+    }
+    
+    .dashboard-container {
+        background: white !important;
+    }
+    
+    .dashboard-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    .stat-card {
+        break-inside: avoid;
+    }
+}
+</style>
+{% endblock %}

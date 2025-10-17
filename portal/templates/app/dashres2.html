@@ -1,0 +1,654 @@
+{% load eok %}{% load humanize %}
+
+<!-- <div class="row">
+    <h4 style="margin-left: 45%;color:#288541">Training Log</h4><br>
+</div>
+
+ -->
+
+
+<div class="row" style="margin-bottom: 1%;">
+        <div class="col-lg-2 col-6 mum-box">
+            <div class="small-box">
+                <div class="inner">
+                    <p>Total Trainings</p>
+                    <h3>{{training}}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-6 mum-box">
+            <div class="small-box">
+                <div class="inner">
+                    <p>Trained Farmers</p>
+                    <h3>{{trained_farmers}}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6 mum-box">
+            <div class="small-box">
+                <div class="inner">
+                    <p>Trained Male Farmers</p>
+                    <h3>{{male_trained_farmers}}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6 mum-box">
+            <div class="small-box">
+                <div class="inner">
+                    <p>Trained Female Farmers</p>
+                    <h3>{{female_trained_farmers}}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-6 mum-box">
+            <div class="small-box" style="color:#90ed7d">
+                <div class="inner">
+                    <p> Registered Farmers </p>
+                    <h3>{{total_reg_farmer}}</h3>
+                </div>
+            </div>
+        </div>
+</div>
+
+<div class="row">
+    <h4 style="margin-left: 45%;color:#288541;">Farmer Summary </h4>
+</div>
+<div class="row " style="margin-bottom: 1%;">
+    <div class="col-lg-4">
+        <div class="white_card card_height_100 mb_30 card">
+            <div class="white_card_body p-0">
+                <div id="farm_gender"> </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="white_card card_height_100 mb_30 card">
+            <div class="white_card_body p-0">
+                <div id="farm_category"> </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="white_card card_height_100 mb_30 card">
+           <!--  <div class="white_card_header">
+                <div class="box_header m-0">
+                    <div class="main-title">
+                        <h3 class="m-0">COMMUNITIES AND SPECIES PLANTED</h3>
+                    </div>
+                </div>
+            </div> -->
+            <div class="white_card_body" id="age_prop">
+                
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <h4 style="margin-left: 45%;color:#288541">Seedling Monitoring</h4>
+</div>
+<div class="row " style="margin-bottom: 1%;">
+    <div class="col-lg-4">
+
+        <div class="white_card card_height_100 mb_30 card">
+            <div class="white_card_body p-0">
+                <div id="famer_received"> </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="white_card card_height_100 mb_30 card">
+          
+            <div class="white_card_body p-0">
+                <div id="seedling_survive"> </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#comspe').DataTable({
+        // dom: 'Bfrtip',
+        "lengthChange": false,
+        "pageLength": 4
+
+    });
+});
+
+
+
+
+
+// Highcharts.chart('farm_gender', {
+//     chart: {
+//         plotBackgroundColor: null,
+//         plotBorderWidth: null,
+//         plotShadow: false,
+//         type: 'pie'
+//     },
+//     title: {
+//         text: 'Male Female Proportion'
+//     },
+//     tooltip: {
+//         pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+//     },
+//     accessibility: {
+//         point: {
+//             valueSuffix: '%'
+//         }
+//     },
+//     plotOptions: {
+//         pie: {
+//             allowPointSelect: true,
+//             cursor: 'pointer',
+//             dataLabels: {
+//                 enabled: false
+//             },
+//             showInLegend: true
+//         }
+//     },
+//     series: [{
+//         name: 'Brands',
+//         colorByPoint: true,
+//         data: [{
+//             name: 'Male',
+//             y: {{ male | safe }},
+//             sliced: true,
+//             selected: true
+//         }, {
+//             name: 'Female',
+//             y: {{ female | safe }}
+//         }]
+//     }]
+// });
+
+
+Highcharts.chart('farm_category', {
+    chart: {
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false,
+        type: 'pie'
+    },
+    title: {
+        text: 'Small holder Category Proportion'
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    accessibility: {
+        point: {
+            valueSuffix: '%'
+        }
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: false
+            },
+            showInLegend: true
+        }
+    },
+    series: [{
+        name: 'Brands',
+        colorByPoint: true,
+        data: [
+            {% for cat in cate_arr %} {
+                name: {{ cat | safe }} [0],
+                y: {{ cat | safe }} [1]
+            },
+            {% endfor %}
+        ]
+    }]
+});
+
+
+
+// Highcharts.chart('famer_received', {
+//     chart: {
+//         type: 'column'
+//     },
+//     title: {
+//         text: 'DISTRIBUTION OF SEEDLINGS '
+//     },
+//     // subtitle: {
+//     //     text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+//     // },
+//     xAxis: {
+//         type: 'category',
+//         labels: {
+//             rotation: -45,
+//             style: {
+//                 fontSize: '13px',
+//                 fontFamily: 'Verdana, sans-serif'
+//             }
+//         }
+//     },
+//     yAxis: {
+//         min: 0,
+//         title: {
+//             text: 'Total Farms'
+//         }
+//     },
+//     legend: {
+//         enabled: false
+//     },
+//     tooltip: {
+//         pointFormat: 'Total Farmers: <b>{point.y:.0f} </b>'
+//     },
+//     series: [{
+//         name: 'Total Farmers ',
+//         data: {{ farmer | safe }},
+//         dataLabels: {
+//             enabled: true,
+//             rotation: -90,
+//             color: '#FFFFFF',
+//             align: 'right',
+//             format: '{point.y:.1f}', 
+//             y: 10, // 10 pixels down from the top
+//             style: {
+//                 fontSize: '13px',
+//                 fontFamily: 'Verdana, sans-serif'
+//             }
+//         }
+//     }]
+// });
+
+
+Highcharts.chart('famer_received', {
+    chart: {
+        plotBackgroundColor: null,
+        plotBorderWidth: 0,
+        plotShadow: false
+    },
+
+            colors: [
+                 '#E1FDDF',
+     '#288541',  
+            ],
+    title: {
+        text: 'DISTRIBUTION OF SEEDLINGS',
+        // align: 'center',
+        // verticalAlign: 'middle',
+        y: 60
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    accessibility: {
+        point: {
+            valueSuffix: '%'
+        }
+    },
+    plotOptions: {
+        pie: {
+            dataLabels: {
+                enabled: true,
+                distance: -70,
+                style: {
+                    // fontWeight: 'bold',
+                    color: 'white'
+                }
+            },
+            startAngle: -90,
+            endAngle: 90,
+            center: ['50%', '75%'],
+            size: '110%'
+        }
+    },
+    series: [{
+        type: 'pie',
+        name: 'Total Farmers',
+        innerSize: '50%',
+        data: {{ farmer | safe }}
+    }]
+});
+
+
+
+Highcharts.chart('farm_gender', {
+    chart: {
+        type: 'column'
+    },
+     plotOptions: {
+                column: {
+                    colorByPoint: true
+                }
+            },
+            colors: [
+                '#0263FF',
+                '#B623B9',
+                '#F0870B'
+            ],
+    title: {
+        text: 'Male/Female Distribution'
+    },
+    // subtitle: {
+    //     text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+    // },
+    xAxis: {
+        type: 'category',
+        labels: {
+            rotation: -45,
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    },
+
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Farmers'
+        }
+    },
+    legend: {
+        enabled: false
+    },
+    tooltip: {
+        pointFormat: 'Total Farmers: <b>{point.y:.1f}</b>'
+    },
+    series: [{
+        name: 'Total Farmers',
+        data: [["Male",{{male|safe}}],["Female",{{female|safe}}]],
+        dataLabels: {
+            enabled: true,
+            rotation: -90,
+            color: '#FFFFFF',
+            align: 'right',
+            format: '{point.y:.1f}', // one decimal
+            y: 10, // 10 pixels down from the top
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+    }]
+});
+
+
+
+// Highcharts.chart('age_prop', {
+//     chart: {
+//         type: 'column'
+//     },
+//     title: {
+//         text: 'Male/Female Distribution'
+//     },
+//     // subtitle: {
+//     //     text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+//     // },
+//     xAxis: {
+//         type: 'category',
+//         labels: {
+//             rotation: -45,
+//             style: {
+//                 fontSize: '13px',
+//                 fontFamily: 'Verdana, sans-serif'
+//             }
+//         }
+//     },
+//     yAxis: {
+//         min: 0,
+//         title: {
+//             text: 'Total Farmers'
+//         }
+//     },
+//     legend: {
+//         enabled: false
+//     },
+//     tooltip: {
+//         pointFormat: 'Total Farmers: <b>{point.y:.1f}</b>'
+//     },
+//     series: [{
+//         name: 'Total Farmers',
+//         data: {{ date_arr |safe}},
+//         dataLabels: {
+//             enabled: true,
+//             rotation: -90,
+//             color: '#FFFFFF',
+//             align: 'right',
+//             format: '{point.y:.1f}', // one decimal
+//             y: 10, // 10 pixels down from the top
+//             style: {
+//                 fontSize: '13px',
+//                 fontFamily: 'Verdana, sans-serif'
+//             }
+//         }
+//     }]
+// });
+
+
+
+Highcharts.chart('age_prop', {
+    chart: {
+        type: 'bar'
+    },
+    title: {
+        text: 'Age Proportion'
+    },
+    
+    xAxis: {
+        categories: {{data_label|safe}},
+        title: {
+            text: null
+        }
+    },
+    colors: [
+     
+     '#288541',  
+   ],
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Farmer Cont',
+            align: 'high'
+        },
+        labels: {
+            overflow: 'justify'
+        }
+    },
+    tooltip: {
+        valueSuffix: ''
+    },
+    plotOptions: {
+        bar: {
+            dataLabels: {
+                enabled: true
+            }
+        }
+    },
+    // legend: {
+    //     layout: 'vertical',
+    //     align: 'right',
+    //     verticalAlign: 'top',
+    //     x: -40,
+    //     y: 80,
+    //     floating: true,
+    //     borderWidth: 1,
+    //     backgroundColor:
+    //         Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
+    //     shadow: true
+    // },
+    credits: {
+        enabled: false
+    },
+    series: [{
+        name: 'Farmer Count',
+        data:{{ date_arr |safe}}
+    }, ]
+});
+
+
+// Highcharts.chart('age_prop', {
+//     chart: {
+//         type: 'column',
+//         // options3d: {
+//         //     enabled: true,
+//         //     alpha: 10,
+//         //     depth: 50,
+//         //     viewDistance: 50
+//         // }
+//     },
+//     title: {
+//         text: 'Age Proportion'
+//     },
+//     plotOptions: {
+//         series: {
+//             dataLabels: {
+//                 enabled: true,
+//                 format: '<b>{point.name}</b> ',
+//                 allowOverlap: true,
+//                 y: 10
+//             },
+//             neckWidth: '30%',
+//             neckHeight: '25%',
+//             width: '80%',
+//             height: '80%'
+//         }
+//     },
+//     series: [{
+//         name: 'Total Farmers',
+//         data: {{ date_arr |safe}},
+//     }]
+// });
+
+    
+   // Highcharts.chart('seedling_survive', {
+   //          chart: {
+   //              zoomType: 'x'
+   //          },
+   //          title: {
+   //              text: 'Seedlings Survival Rate Time Series Chart'
+   //          },
+
+
+   //          subtitle: {
+   //              text: document.ontouchstart === undefined ?
+   //                  'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+   //          },
+   //          xAxis: {
+   //              type: 'datetime'
+   //          },
+   //          yAxis: {
+   //              title: {
+   //                  text: ''
+   //              }
+   //          },
+   //          legend: {
+   //              enabled: false
+   //          },
+   //          plotOptions: {
+   //              area: {
+   //                  fillColor: {
+   //                      linearGradient: {
+   //                          x1: 0,
+   //                          y1: 0,
+   //                          x2: 0,
+   //                          y2: 1
+   //                      },
+   //                      stops: [
+   //                          [0, Highcharts.getOptions().colors[0]],
+   //                          [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+   //                      ]
+   //                  },
+   //                  marker: {
+   //                      radius: 2
+   //                  },
+   //                  lineWidth: 1,
+   //                  states: {
+   //                      hover: {
+   //                          lineWidth: 1
+   //                      }
+   //                  },
+   //                  threshold: null
+   //              }
+   //          },
+
+   //          series: [{
+   //              type: 'area',
+   //              name: 'survival rate',
+   //              data: {{seed_result|safe}}
+   //          }]
+   //      });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Highcharts.chart('seedling_survive', {
+    chart: {
+        type: 'areaspline'
+    },
+    title: {
+        text: 'Seedlings Survival Rate Time Series Chart'
+    },
+    // legend: {
+    //     layout: 'vertical',
+    //     align: 'left',
+    //     verticalAlign: 'top',
+    //     x: 150,
+    //     y: 100,
+    //     floating: true,
+    //     borderWidth: 1,
+    //     backgroundColor:
+    //         Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF'
+    // },
+    xAxis: {
+        categories: {{a|safe}},
+        // plotBands: [
+
+        // { // visualize the weekend
+        //     from: 4.5,
+        //     to: 6.5,
+        //     color: 'rgba(68, 170, 213, .2)'
+        // }
+
+
+        // ]
+    },
+    yAxis: {
+        title: {
+            text: 'No. Survived'
+        }
+    },
+    tooltip: {
+        shared: true,
+        valueSuffix: ''
+    },
+    credits: {
+        enabled: false
+    },
+    plotOptions: {
+        areaspline: {
+            fillOpacity: 0.5
+        }
+    },
+    series: [{
+        name: 'Seedling Survive',
+        data: {{b|safe}}
+    }]
+});
+
+
+
+
+
+
+
+
+</script>

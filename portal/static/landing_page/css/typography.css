@@ -1,0 +1,160 @@
+/*
+Vizion-``-Digital Marketing Responsive HTML5 Template
+Author: iqonicthemes.in
+Version: 1.0
+Design and Developed by: iqonicthemes.in
+*/
+
+/*================================================
+[  Table of contents  ]
+================================================
+
+1  Google Font
+2  Import Css
+3  General
+4  Extra class
+5  Text color
+6  Background  color
+7  Heading Title
+8  Form
+9  Button
+10 Owl-carousel
+11 Back to Top
+12 Loader
+13 Scrollme Effect
+
+
+======================================
+[ End table content ]
+======================================*/
+
+/*---------------------------------------------------------------------
+Google Font
+-----------------------------------------------------------------------*/
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700,800,900&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800&display=swap');
+
+/*---------------------------------------------------------------------
+Import Css
+-----------------------------------------------------------------------*/
+@import url("all.min.css");
+@import url("owl.carousel.min.css");
+@import url("ionicons.min.css");
+@import url("magnific-popup.css");
+@import url("wow.css");
+
+/*---------------------------------------------------------------------
+General
+-----------------------------------------------------------------------*/
+*::-moz-selection { background: #185259; color: #fff; text-shadow: none; }
+::-moz-selection { background: #185259; color: #fff; text-shadow: none; }
+::selection { background: #185259; color: #fff; text-shadow: none; }
+body { font-family: 'Open Sans', sans-serif; font-weight: normal; font-style: normal; font-size: 16px; line-height: 2em; color: #666666; }
+a:focus { text-decoration: none !important; }
+a:focus, a:hover { color: #185259; text-decoration: none !important; }
+a, button { outline: medium none !important; color: #185259; }
+h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; font-style: normal; font-weight: 700; color: #1f2a37; margin: 0px; }
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: inherit; }
+label { font-weight: normal; }
+h1 { font-size: 60px; line-height: 1.3em; }
+h2 { font-size: 42px; line-height: 1.3em; }
+h3 { font-size: 36px; line-height: 1.3em; }
+h4 { font-size: 26px; line-height: 1.3em; }
+h5 { font-size: 24px; line-height: 1.3em; }
+h6 { font-size: 18px; line-height: 1.3em; }
+ul { margin: 0px; padding: 0px; }
+hr { margin: 0; padding: 0px; border-bottom: 1px solid #eeeeee; display: inline-block; width: 100%; border-top: 0px; }
+
+/*---------------------------------------------------------------------
+Extra class
+---------------------------------------------------------------------*/
+.overflow-h { overflow: hidden; }
+section { position: relative; background: #ffffff; padding: 100px 0; display: block; width: 100%; clear: both; z-index: 0; }
+.overview-block-ptb { padding: 100px 0; }
+.overview-block-pt { padding: 100px 0 0 0; }
+.overview-block-pb { padding: 0 0 100px 0; }
+ul { margin: 0px; padding: 0px; }
+hr { margin: 0; padding: 0px; border-bottom: 1px solid #36404b; display: block; width: 100%; border-top: 0px; line-height: 1px; }
+
+/*---------------------------------------------------------------------
+Text color
+-----------------------------------------------------------------------*/
+.main-color { color: #185259; }
+.text-white { color: #ffffff; }
+.text-black { color: #000000; }
+.text-gray { color: #666666; }
+.text-blue { color: #1835a9; }
+
+/*---------------------------------------------------------------------
+Background  color
+-----------------------------------------------------------------------*/
+.main-bg { background: #185259; }
+.white-bg { background: #ffffff; }
+.blue-bg { background: #1f2a37; }
+.light-green { background: #f2fef6 }
+
+/*---------------------------------------------------------------------
+Heading Title
+-----------------------------------------------------------------------*/
+.section-title { margin-bottom: 80px; }
+.section-title .title { margin-bottom: 5px; }
+
+/*----------------------------------------------------------------------
+ Form
+-----------------------------------------------------------------------*/
+input, input.form-control, .form-control { width: 100%; border: 1px solid #6f6f6f; height: 52px; padding: 0 20px; margin-bottom: 0px; border-radius: 0; background: #fff; color: #ebebeb; }
+input[type="checkbox"], input.form-control[type="checkbox"] { margin-top: 0.5rem; background: #fff; height: auto; border: 1px solid #33e2a0; border-radius: 0px; }
+
+/*::-webkit-input-placeholder*/
+{ /* Chrome/Opera/Safari */
+color: #ebebeb; }
+::-moz-placeholder { /* Firefox 19+ */
+color: #ebebeb; }
+:-ms-input-placeholder { /* IE 10+ */
+color: #ebebeb; }
+:-moz-placeholder {/*  Firefox 18- */
+color: #ebebeb; }
+textarea.form-control { height: 160px; padding: 15px 30px; }
+input:hover, input.form-control:hover, input:focus, input.form-control:focus, textarea.form-control:hover, textarea.form-control:focus, select:hover, select:focus, select.form-control:focus, textarea:focus, textarea:hover { border: 1px solid #185259; box-shadow: none; outline: none; }
+
+/*----------------------------------------------------------------------
+ Buttons
+-----------------------------------------------------------------------*/
+.button { color: #ffffff; cursor: pointer; padding: 10px 30px; font-weight: 600; font-size: 16px; border: 1px solid #ffffff; position: relative; background: transparent; font-family: 'Open Sans', sans-serif; display: inline-block; }
+.button:hover, .button:focus { background: #ffffff; color: #185259; }
+.btn-bdr { border: 1px solid #4dc26f; color: #4dc26f; }
+.btn-bdr:hover, .button:focus { background: #ffffff; color: #4dc26f; border: 1px solid #ffffff; }
+.btn-green { background: #185259; color: #ffffff; border: none; }
+.link-btn { border: none; color: #000000; padding: 0; float: right; }
+.link-btn:hover { }
+.like-btn { border: none; color: #000000; padding: 0; }
+.like-btn:hover { }
+
+/*----------------------------------------------
+Owl-carousel
+------------------------------------------------*/
+.owl-dots { text-align: center; }
+.owl-carousel button.owl-dot { background: #cacaca; height: 10px; width: 10px; border-radius: 90px; margin-right: 5px; }
+.owl-carousel button.owl-dot.active { background: #4dc26f; }
+
+/*---------------------------------------------------------------------
+Back to Top
+-----------------------------------------------------------------------*/
+#back-to-top .top { z-index: 999; position: fixed; margin: 0px; color: #fff; background: #333333; position: fixed; bottom: 25px; right: 25px; z-index: 999; font-size: 26px; width: 50px; height: 50px; text-align: center; line-height: 50px; border-radius: 90px; -webkit-transition: all .3s ease-in-out; -moz-transition: all .3s ease-in-out; transition: all .3s ease-in-out; }
+#back-to-top .top:hover { background: #185259; color: #fff; -webkit-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1); -moz-box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1); box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1); }
+
+/*---------------------------------------------------------------------
+Loader
+-----------------------------------------------------------------------*/
+#loading { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #ffffff; z-index: 9999; }
+#loading img { width: 150px; }
+
+/*---------------------------------------------------------------------
+Scrollme Effect
+-----------------------------------------------------------------------*/
+.scrolling-effect { position: absolute; top: 14%; left: 6%; transition: all 0.5s ease-out 0s; -moz-transition: all 0.5s ease-out 0s; -webkit-transition: all 0.5s ease-out 0s; z-index: -1; }
+.scrolling-effect.middle { top: 33%; }
+.scrolling-effect.bottam { bottom: 0%; }
+.scrolling-effect.right { right: 0%; left: inherit; }
+.scrolling-effect.left { left: 0%; left: inherit; }
+.scrolling-effect.top { top: -24px; }

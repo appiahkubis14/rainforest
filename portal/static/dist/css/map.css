@@ -1,0 +1,268 @@
+.bgWhite {
+	background-color: #fff;
+}
+
+
+/* #########################################################
+						LEGENED
+###########################################################*/
+
+.mapLegend {
+	position: absolute;
+  top: 1%;
+	right: 2%;
+	width: 280px;
+	height: auto;
+	z-index: 401;
+  overflow-x: hidden;
+}
+
+.toolBar {
+    width: 170px;
+    height: auto;
+    z-index: 100;
+    top: 1vh;
+    padding: 5px;
+}
+
+.legendCont {
+    padding: 0px;
+    border-bottom: 1px solid;
+    border-bottom-color: #ccc;
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    height: auto;
+    width: 280px;
+    margin: 0px auto;
+    height: auto;
+    overflow-y: auto;
+    display: none;
+}
+
+
+
+#toolbar{
+  width: 280px;
+  height: auto;
+  z-index: 100;
+  position: absolute;
+  background-color: #fff;
+  left:0px;
+  top:2vh;
+  border-style: solid;
+    border-width: 1px;
+    border-color: #1a2732;
+    display: block;
+    margin: 3px 15px;
+    overflow-x: auto;
+    
+}
+
+#toolbar >  img:hover{
+box-shadow: 0 0px 3px #997F4C;
+border-radius: 17px;
+}
+
+.toolbaricon{
+  width:35px;
+  cursor:auto;
+  /*float:none !important;*/
+  padding: 0px 5px;
+}
+
+.toolfilter{
+  margin-left: 5px;
+  margin-top: 3px;
+  width:32px;
+  cursor:auto;
+  float:none !important;
+}
+
+#destext{
+  margin-top: 10px;
+  color:#000;
+  float: right;
+  width: 100px;
+  font-size: 13px;
+    text-transform: capitalize;
+    font-weight: 30px;
+    font-family: 'Lato', sans-serif;
+}
+
+
+
+
+/*basemap css class */
+
+#basemap{
+  width: 320px;
+    margin: 10px 15px 0px !important;
+  height: auto;
+  z-index: 3;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 1);
+  left: 0;
+    top: 60px;
+  border-style: solid;
+    border-width: 1px;
+    border-color: #bbbbbb;
+    display: block;
+    overflow-y: auto;
+    box-shadow: 2px 2px 5px #0f0f0f;
+
+
+}
+
+.basemapclass{
+  width: 23.5%;
+    margin: 4%;
+    margin-left: 5%;
+    cursor: auto;
+    border: 2px solid #dff0d800;
+    border-radius: 5px;
+    box-shadow: 0px 0px 4px #3e5766;
+}
+
+#basemap >  img:hover{
+box-shadow: 0 0px 3px #997F4C;
+border-radius: 17px;
+}
+
+.legendcont{
+  padding: 10px;
+  border-bottom: 1px solid;
+  border-bottom-color: #ccc;
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255,1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  height: auto;
+  width:320px;
+  z-index: 3 !important;
+  margin: 6.4vh 15px 0px !important;
+  height: 550px;
+  overflow-y: auto;
+
+}
+
+.submenu {
+  list-style: none;
+  padding: 2px 10px 5px 20px;
+}
+
+
+.submenu>li {
+  padding-left: ;
+}
+
+
+
+.tileDiv {
+    margin: 3px;
+    border: 2px solid #298541;
+}
+
+
+.tileDiv:hover, .tileDivactive {
+    background: #298541;
+    color: #fff;
+    border: 2px solid #fff;
+}
+
+.tileDiv >img {
+    margin-right: 6px;
+    height: 37px;
+    width: 37px;
+}
+
+/*#################################################
+from me
+ ##################################################*/
+
+
+
+.accordion {
+  margin: 0px auto;
+ /*  max-width: 30em; */
+}
+
+.toggle {
+  display: none;
+}
+
+.option {
+  position: relative;
+  margin-bottom: 5px;
+}
+
+.option:last-child, .title {
+  margin-bottom: 0px;
+}
+
+.title,
+.content {
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+.title {
+  background: #298541;
+  padding: 10px;
+  display: block;
+  color: #f5f5f5;
+  font-weight: 500!important;
+}
+
+.title:after, .title:before {
+  content: '';
+  position: absolute;
+  right: 1.25em;
+  top: 1.25em;
+  width: 2px;
+  height: 0.75em;
+  background-color: #fff;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+.title:after {
+  -webkit-transform: rotate(90deg);
+          transform: rotate(90deg);
+}
+
+.content {
+  max-height: 0;
+  overflow: hidden;
+  background-color: #fff;
+}
+.content p {
+  margin: 0;
+  padding: 0.5em 1em 1em;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.toggle:checked + .title, .toggle:checked + .title + .content {
+  box-shadow: 3px 3px 6px #ddd, -3px 3px 6px #ddd;
+}
+.toggle:checked + .title + .content {
+  max-height: 500px;
+}
+.toggle:checked + .title:before {
+  -webkit-transform: rotate(90deg) !important;
+          transform: rotate(90deg) !important;
+}
+
+.txt{ 
+  font-size: 13px;
+  font-weight: 300px;
+ }
+
+ .txt1{ 
+  margin: 6px auto;
+ }
+
+

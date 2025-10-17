@@ -1,0 +1,428 @@
+#app_topnavbar-wrapper {
+    position: fixed;
+    top: 0px;
+    width: 100%;
+    height: 7vh;
+    box-shadow: 3px 5px 10px 0 rgba(49,50,50,.52);
+}
+
+#app_body {
+    /*height: calc(100vh);*/
+    
+    overflow: hidden;
+    position: relative;
+    background-color: #ccc;
+}
+
+#search_box {
+    right: 2%;
+    top: 10%;
+    height: auto;
+    /*max-height: 80%;
+    background-color: rgba(255, 251, 255, 0.2);*/
+    position: absolute;
+    z-index: 999 !important;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+#mapTools {
+    position: absolute;
+    top: 42%;
+    left: 2.5%;
+    width: 40px;
+    height: auto;
+    z-index: 999 !important;
+}
+
+
+
+.mapTools-btn {
+	margin-bottom: 20px!important;
+}
+
+#toolBox,
+#resultBox {
+   /* background-color: #fff;
+    padding: 1px 10px;*/
+}
+
+#resultBox {
+    margin-top: 10px;
+    height: calc(93%);
+}
+
+.searchBox {
+    float: right;
+    width: 80%;
+}
+
+.legendTog {
+    float: left;
+}
+
+.legendTog,
+.searchBox {
+    display: inline-block;
+}
+
+.legendbtn {
+    border-radius: 0px !important;
+}
+
+.searchBox>.input-group>.form-group {
+    padding: 0px !important;
+    margin: 0px !important;
+}
+
+.searchBox>.input-group>.form-group>input {
+    padding: 0px !important;
+    margin: 0px !important;
+}
+
+.input-group-btn .btn.searchbtn {
+    /*padding: 0px!important;*/
+    margin-bottom: 0px !important;
+}
+
+#custom-search-input {
+    margin: 0;
+    margin-top: 10px;
+    padding: 0;
+}
+
+#custom-search-input .search-query {
+    padding-right: 3px;
+    padding-right: 4px \9;
+    padding-left: 3px;
+    padding-left: 4px \9;
+    /* IE7-8 doesn't have border-radius, so don't indent the padding */
+
+    margin-bottom: 0;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+#custom-search-input button {
+    border: 0;
+    background: none;
+    /** belows styles are working good */
+    padding: 2px 5px;
+    margin-top: 2px;
+    position: relative;
+    left: -28px;
+    /* IE7-8 doesn't have border-radius, so don't indent the padding */
+    margin-bottom: 0;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    color: #D9230F;
+}
+
+.search-query:focus+button {
+    z-index: 3;
+}
+
+
+#app_topnavbar-wrapper h2 {
+    margin-left: 200px;
+    color: #fff;
+    font-size: 35px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+@media (min-width:1304px) {
+    #search_box, .easy-autocomplete-container {
+        width: 25%;
+    }
+}
+
+@media only screen and (min-width:1050px) and (max-width:1304px) {
+    #search_box, .easy-autocomplete-container {
+        width: 30%;
+    }
+}
+
+@media only screen and (min-width:800px) and (max-width:1050px) {
+    #search_box, .easy-autocomplete-container {
+        width: 35%;
+    }
+
+    #resultBox {
+        margin-top: 45px;
+        height: calc(93%);
+    }
+
+    #app_topnavbar-wrapper h2 {
+        margin-left: 130px;
+        font-size: 27px;
+        margin-top: 10px;        
+        font-weight: 400;
+    }
+}
+
+@media only screen and (min-width:600px) and (max-width:800px) {
+    #search_box, .easy-autocomplete-container {
+        width: 42%;
+
+    }
+
+    #resultBox {
+        margin-top: 55px;
+        height: calc(93%);
+    }
+
+    #app_topnavbar-wrapper h2 {
+        margin-left: 150px;
+        font-size: 20px;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width:600px) {
+    #search_box {
+        top: 2%;
+        width: 80%;
+        left: 10%;
+    }
+
+    .easy-autocomplete-container {
+        top: 18%!important;
+        left: 10%!important;
+        width: 80%!important;
+    }
+    #resultBox {
+        margin-top: 55px;
+        height: calc(93%);
+    }
+
+
+    #app_topnavbar-wrapper h2 {
+        margin-left: 150px;
+        color: #fff;
+        font-size: 20px;
+        margin-top: 10px;
+    }
+}
+
+
+
+
+
+/*##################################################################
+#
+#                             Accordion
+#
+###################################################################*/
+
+.text {
+    color: #666;
+    line-height: 1.5;
+}
+
+/**
+ * Generic styles for the accordion block
+ * (do not change)
+ */
+.accordion__panel {
+    display: none;
+    overflow: hidden;
+}
+
+.accordion__panel_expanded {
+    display: block;
+}
+
+/**
+ * Theme-specific styles for the accordion block
+ * (feel free to change these)
+ */
+.accordion {
+    margin-bottom: 3em;
+}
+
+h3.accordion__header {
+    margin: 5px auto;
+}
+
+.accordion__group:not(:first-child) {
+    margin-top: 0.5em;
+}
+
+.accordion__trigger {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 1em 1.25em;
+    width: 100%;
+    color: #666;
+    font-weight: 700;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+    background: #eee;
+    border: 0;
+    border-radius: 0.25em;
+    cursor: pointer;
+    padding: 8px 16px;
+}
+
+.accordion__trigger:focus {
+    box-shadow: 0 0 2px 1px rgba(51, 102, 204, 0.5);
+}
+
+.accordion__trigger[aria-expanded="true"] {
+    color: #fff;
+    background: #6699cc;
+}
+
+.accordion__arrow {
+    position: relative;
+    height: 1em;
+    width: 1em;
+    transition: transform 0.2s linear;
+}
+
+.accordion__arrow:after {
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    content: "";
+    height: 0.6em;
+    width: 0.6em;
+    border-bottom: 0.15em solid #666;
+    border-right: 0.15em solid #666;
+    transform: translate(-75%, -50%) rotate(-45deg);
+}
+
+.accordion__trigger[aria-expanded="true"] .accordion__arrow {
+    transform: rotate(90deg);
+}
+
+.accordion__trigger[aria-expanded="true"] .accordion__arrow:after {
+    border-color: #fff;
+}
+
+.accordion__panel_expanded {
+    transition: height 0.25s linear;
+}
+
+.accordion__panel-inner {
+    padding: 0;
+}
+
+
+.accordion__panel-inner ul {
+    list-style: none;
+}
+
+
+.btn-purple {
+	background-color: #373b50!important;
+	color: #fff!important;
+}
+
+.leaflet-left {
+    left: 1.5%!important;
+}
+
+.easy-autocomplete .eac-blue-light .eac-description {
+    width: 100%!important;
+}
+
+
+body #app_wrapper #app_topnavbar-wrapper {
+  background: url(../img/bg.jpg); 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+
+.legendbox {
+    float: right;
+    width: 17px;
+    height: 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+    margin-right: 4px;
+}
+
+
+.reg {
+    background-color: red;    
+}
+
+.district {
+    background-color: #a69;    
+}
+
+.protect {
+    background-color: #aea;    
+}
+
+.platn {
+    background-color: #be6;    
+}
+
+
+  @media screen, print {
+ .reg {
+    background-color: red;    
+}
+
+.district {
+    background-color: #a69;    
+}
+
+.protect {
+    background-color: #aea;    
+}
+
+.platn {
+    background-color: #be6;    
+}
+
+.info {
+    background-color: #fff;    
+}
+
+ /* styles go here */
+}
+ 
+}
+
+
+.reg {
+    background-color: red;    
+}
+
+.district {
+    background-color: #a69;    
+}
+
+.protect {
+    background-color: #aea;    
+}
+
+.platn {
+    background-color: #be6;    
+}
+ /* styles go here */
+}
+
+#tittop {
+    position: absolute;
+    top: 6%;
+    left: 0px;
+    width: 100%;
+    z-index: 9999999999999999;
+    /* text-align: center; */
+    padding: 10px;
+    background: #fff;
+    font-weight: 900;
+    text-transform: capitalize;
+}
+}

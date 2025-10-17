@@ -1,0 +1,17 @@
+*/__pycache__/
+*.pyc
+_test.py
+_test.css
+_test.html
+
+miscellaneous/
+docker-compose.yml
+Dockerfile
+.dev.env
+.textfile.py
+.textfile.txt
+.env
+media/*.jpg
+
+.idea/
+.DS_Store

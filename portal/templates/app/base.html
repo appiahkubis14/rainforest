@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>HCMS</title>
+    <link rel="icon" href="img/logo.png" type="image/png">
+ 
+    <link rel="stylesheet" href="/static/app/css/bootstrap.min.css" />
+    <!-- themefy CSS -->
+    <link rel="stylesheet" href="/static/app/vendors/themefy_icon/themify-icons.css" />
+    <!-- select2 CSS -->
+    <link rel="stylesheet" href="/static/app/vendors/niceselect/css/nice-select.css" />
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="/static/app/vendors/owl_carousel/css/owl.carousel.css" />
+    <!-- gijgo css -->
+    <link rel="stylesheet" href="/static/app/vendors/gijgo/gijgo.min.css" />
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="/static/app/vendors/font_awesome/css/all.min.css" />
+    <link rel="stylesheet" href="/static/app/vendors/tagsinput/tagsinput.css" />
+    <!-- date picker -->
+    <link rel="stylesheet" href="/static/app/vendors/datepicker/date-picker.css" />
+    <!-- scrollabe  -->
+    <link rel="stylesheet" href="/static/app/vendors/scroll/scrollable.css" />
+    <!-- datatable CSS -->
+    <link rel="stylesheet" href="/static/app/vendors/datatable/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="/static/app/vendors/datatable/css/responsive.dataTables.min.css" />
+    <link rel="stylesheet" href="/static/app/vendors/datatable/css/buttons.dataTables.min.css" />
+    <!-- morris css -->
+    <link rel="stylesheet" href="/static/app/vendors/morris/morris.css">
+    <!-- metarial icon css -->
+    <link rel="stylesheet" href="/static/app/vendors/material_icon/material-icons.css" />
+    <!-- menu css  -->
+    <link rel="stylesheet" href="/static/app/css/metisMenu.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="/static/app/css/style.css" />
+
+   <script src="https://use.fontawesome.com/357cc0be5d.js"></script>
+    
+    <link rel="stylesheet" href="/static/app/css/colors/default.css" id="colorSkinCSS">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+
+   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css">
+
+   <link rel="stylesheet" href="/static/app/css/leaflet-measure.css" />
+
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
+
+    {% block css %}
+    {% endblock%}
+
+    <style type="text/css">
+.overlay1 {
+    position: absolute;
+    height: 100vh;
+    z-index: 99999;
+    background: #ffffffba;
+    width: 100%;
+}
+.loader1 {
+    position: relative;
+    width: 15%;
+    margin-left: 40%;
+    height: 20vh;
+    margin-top: 45vh;
+}
+
+    </style>
+
+</head>
+
+<body class="crm_body_bg">
+
+     <div id="overlay_map_analysis" class="overlay1">
+                <div class="col-md-12">
+                    <img class="loader1" src="/static/rootApp/img/eok.gif" />
+                </div>
+            </div>
+
+
+
+    <!-- main content part here -->
+    <!-- sidebar  -->
+    <!-- sidebar part here -->
+    <nav class="sidebar vertical-scroll  ps-container ps-theme-default ps-active-y">
+        <div class="logo d-flex justify-content-between">
+            <!-- <a href="/"><img src="/static/app/img/logo.png" alt=""></a> -->
+            <div class="sidebar_close_icon d-lg-none">
+                <i class="ti-close"></i>
+            </div>
+        </div>
+        <ul id="sidebar_menu">
+            <li class="">
+                <a class="has-arrow" href="#" aria-expanded="false">
+                    <div class="icon_menu">
+                        <!-- <img src="/static/app/img/menu-icon/8.svg" alt=""> -->
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    <span>Tree Registration</span>
+                </a>
+                <ul class="mm-collapse" style="">
+                    <li><a href="/dashboard/" class="active">Dashboard</a></li>
+                    <li><a href="/report/">Report</a></li>
+                    <li><a href="/map/">Map</a></li>
+                </ul>
+            </li>
+            <li><a href="/biomap/">
+                <div class="icon_menu">
+                        <i class="fas fa-tree"></i>
+                        <!-- <img src="/static/app/img/menu-icon/3.svg" alt=""> -->
+                    </div>
+
+                Biomass</a></li>
+            <li class="">
+                <a class="has-arrow" href="#" aria-expanded="false">
+                    <div class="icon_menu">
+                        <i class="fas fa-map"></i>
+                        <!-- <img src="/static/app/img/menu-icon/3.svg" alt=""> -->
+                    </div>
+                    <span>LandUse LandCover</span>
+                </a>
+                <ul class="mm-collapse" style="">
+                    <li><a href="/lulc/" class="active">LandUse LandCover</a></li>
+                </ul>
+            </li>
+
+            <li class="">
+                <a class="has-arrow" href="#" aria-expanded="false">
+                    <div class="icon_menu">
+                        <i class="fas fa-map"></i>
+                        <!-- <img src="/static/app/img/menu-icon/3.svg" alt=""> -->
+                    </div>
+                    <span>Landscape Monitoring</span>
+                </a>
+                <ul class="mm-collapse" style="">
+                    <li><a href="/dashboard2/" class="active">Dashboard</a></li>
+                </ul>
+            </li>
+            <!-- <li class="mm-active">
+                <a class="has-arrow" href="/dashboard/" aria-expanded="false">
+                    <div class="icon_menu">
+                        <img src="/static/app/img/menu-icon/dashboard.svg" alt="">
+                    </div>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="has-arrow" href="/report/" aria-expanded="false">
+                    <div class="icon_menu">
+                        <img src="/static/app/img/menu-icon/2.svg" alt="">
+                    </div>
+                    <span>Report</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="has-arrow" href="/map/" aria-expanded="false">
+                    <div class="icon_menu">
+                        <img src="/static/app/img/menu-icon/5.svg" alt="">
+                    </div>
+                    <span>Map</span>
+                </a>
+            </li> -->
+
+            <!-- <li class="">
+                <a class="has-arrow" href="http://rainlulc.gis4ghagric.net" aria-expanded="false">
+                    <div class="icon_menu">
+                        <img src="/static/app/img/menu-icon/5.svg" alt="">
+                    </div>
+                    <span>LandUse LandCover</span>
+                </a>
+            </li> -->
+        </ul>
+    </nav>
+    <!-- sidebar part end -->
+    <!--/ sidebar  -->
+
+    <section class="main_content dashboard_part large_header_bg">
+        <!-- menu  -->
+        <div class="container-fluid no-gutters">
+            <div class="row">
+                <div class="col-lg-12 p-0 ">
+                    <div class="header_iner d-flex justify-content-between align-items-center">
+                        <div class="sidebar_icon d-lg-none">
+                            <i class="ti-menu"></i>
+                        </div>
+                        <div class="serach_field-area d-flex align-items-center">
+                         <!--    <div class="search_inner">
+                                <form action="#">
+                                    <div class="search_field">
+                                        <input type="text" placeholder="Search here...">
+                                    </div>
+                                    <button type="submit"> <img src="/static/app/img/icon/icon_search.svg" alt=""> </button>
+                                </form>
+                            </div> -->
+                            <span class="f_s_14 f_w_400 ml_25 white_text text_white">Apps</span>
+                        </div>
+                        <div class="header_right d-flex justify-content-between align-items-center">
+                         
+                            <div class="profile_info">
+                                <img src="/static/app/img/client_img.png" alt="#">
+                                <div class="profile_info_iner">
+                                    <div class="profile_author_name">
+                                        <!-- <p>Administrator </p> -->
+                                    {% if user.is_authenticated %}
+
+                                        <h5>{{ user.username }}</h5>
+
+                                    {% else %}
+
+                                     <p>You are not logged in</p>
+                                     {{user.is_authenticated}}
+
+                                     
+                                    {% endif %}
+
+
+                                    </div>
+                                    <div class="profile_info_details">
+                                        <!-- <a href="#">My Profile </a>
+                                        <a href="#">Settings</a> -->
+                                        <a href="#">Log Out </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/ menu  -->
+        <div class="main_content_iner ">
+
+            
+
+            {% block body %}
+            {% endblock%}
+
+
+        </div>
+        <!-- footer part -->
+        <div class="footer_part">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="footer_iner text-center">
+                            <p>2020 © <a href="#"> Copyright</a><a href="#"> <i class=""></i> </a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- main content part end -->
+    <div id="back-top" style="display: none;">
+        <a title="Go to Top" href="#">
+            <i class="ti-angle-up"></i>
+        </a>
+    </div>
+    <!-- footer  -->
+    <script src="/static/app/js/jquery-3.4.1.min.js"></script>
+    <!-- popper js -->
+    <script src="/static/app/js/popper.min.js"></script>
+    <!-- bootstarp js -->
+    <script src="/static/app/js/bootstrap.min.js"></script>
+    <!-- sidebar menu  -->
+    <script src="/static/app/js/metisMenu.js"></script>
+    <!-- waypoints js -->
+    <script src="/static/app/vendors/count_up/jquery.waypoints.min.js"></script>
+    <!-- waypoints js -->
+    <!-- <script src="/static/app/vendors/chartlist/Chart.min.js"></script> -->
+    <!-- counterup js -->
+    <script src="/static/app/vendors/count_up/jquery.counterup.min.js"></script>
+    <!-- nice select -->
+    <script src="/static/app/vendors/niceselect/js/jquery.nice-select.min.js"></script>
+    <!-- owl carousel -->
+    <script src="/static/app/vendors/owl_carousel/js/owl.carousel.min.js"></script>
+    <!-- responsive table -->
+    <script src="/static/app/vendors/datatable/js/jquery.dataTables.min.js"></script>
+    <script src="/static/app/vendors/datatable/js/dataTables.responsive.min.js"></script>
+    <script src="/static/app/vendors/datatable/js/dataTables.buttons.min.js"></script>
+    <script src="/static/app/vendors/datatable/js/buttons.flash.min.js"></script>
+    <script src="/static/app/vendors/datatable/js/jszip.min.js"></script>
+    <script src="/static/app/vendors/datatable/js/pdfmake.min.js"></script>
+    <script src="/static/app/vendors/datatable/js/vfs_fonts.js"></script>
+    <script src="/static/app/vendors/datatable/js/buttons.html5.min.js"></script>
+    <script src="/static/app/vendors/datatable/js/buttons.print.min.js"></script>
+    <script src="/static/app/js/chart.min.js"></script>
+    <!-- progressbar js -->
+    <script src="/static/app/vendors/progressbar/jquery.barfiller.js"></script>
+    <!-- tag input -->
+    <script src="/static/app/vendors/tagsinput/tagsinput.js"></script>
+    <!-- text editor js -->
+    <script src="/static/app/vendors/text_editor/summernote-bs4.js"></script>
+    <script src="/static/app/vendors/am_chart/amcharts.js"></script>
+    <!-- scrollabe  -->
+    <script src="/static/app/vendors/scroll/perfect-scrollbar.min.js"></script>
+    <script src="/static/app/vendors/scroll/scrollable-custom.js"></script>
+ <!--    <script src="/static/app/vendors/chart_am/core.js"></script>
+    <script src="/static/app/vendors/chart_am/charts.js"></script>
+    <script src="/static/app/vendors/chart_am/animated.js"></script>
+    <script src="/static/app/vendors/chart_am/kelly.js"></script>
+    <script src="/static/app/vendors/chart_am/chart-custom.js"></script>
+ -->
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/cylinder.js"></script>
+    <script src="https://code.highcharts.com/modules/funnel3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+
+
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
+    <!-- custom js -->
+    <script src="/static/app/js/custom.js"></script>
+
+     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+
+   <script src="/static/app/js/leaflet-measure.js"></script>
+   
+
+    {% block js %}
+
+    {% endblock%}
+</body>
+
+</html>

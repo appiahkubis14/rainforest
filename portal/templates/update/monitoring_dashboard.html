@@ -1,0 +1,1120 @@
+<!-- templates/update/dashboard.html -->
+{% extends 'update/base.html' %}
+{% load static %}
+
+{% block title %}Farm Management Dashboard{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<style>
+:root {
+    --primary: #2e7d32;
+    --primary-dark: #1b5e20;
+    --primary-light: #4caf50;
+    --secondary: #ff9800;
+    --accent: #2196f3;
+    --text-dark: #2e3715;
+    --text-light: #666;
+    --bg-light: #f8f9fa;
+    --border: #e0e0e0;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+body {
+    background: var(--bg-light);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-dark);
+}
+
+/* Header Styles */
+.dashboard-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.dashboard-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    border-left: 4px solid var(--primary);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.stat-icon.training { background: rgba(46, 125, 50, 0.1); color: var(--primary); }
+.stat-icon.farmers { background: rgba(33, 150, 243, 0.1); color: var(--accent); }
+.stat-icon.seedlings { background: rgba(255, 152, 0, 0.1); color: var(--secondary); }
+.stat-icon.gender { background: rgba(156, 39, 176, 0.1); color: #9c27b0; }
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-trend {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.trend-up { color: var(--primary); }
+.trend-down { color: #f44336; }
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    align-items: center;
+    margin: 2rem 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.section-title i {
+    margin-right: 0.75rem;
+    color: var(--primary);
+}
+
+/* Chart Containers */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.chart-container:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.chart-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chart-body {
+    height: 300px;
+    position: relative;
+}
+
+/* Full-width charts */
+.full-width-chart {
+    grid-column: 1 / -1;
+}
+
+/* Loading States */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-light);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-light);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Community Filter */
+.community-filter {
+    max-width: 300px;
+}
+
+.filter-select {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    background: white;
+    width: 100%;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-title {
+        font-size: 1.75rem;
+    }
+    
+    .chart-body {
+        height: 250px;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.slide-up {
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Highcharts Customization */
+.highcharts-background {
+    fill: transparent !important;
+}
+
+.highcharts-title {
+    font-weight: 600 !important;
+    color: var(--text-dark) !important;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border-top: 3px solid var(--primary);
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.summary-label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div style="display: flex;justify-content: flex-start;align-items: flex-start;">
+            <div class="col-md-8">
+                <h1 class="dashboard-title animate__animated animate__fadeInDown">
+                    <i class="fas fa-tachometer-alt me-3"></i>Farm Management Dashboard
+                </h1>
+                <p class="dashboard-subtitle animate__animated animate__fadeInUp">
+                    Comprehensive overview of farmer training, seedling distribution, and monitoring activities
+                </p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid animate__animated animate__fadeIn">
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <!-- Training Statistics -->
+        <div class="stat-card fade-in">
+            <div class="stat-icon training">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-number" id="totalTrainings">0</div>
+            <div class="stat-label">Total Trainings Conducted</div>
+            <div class="stat-trend trend-up" id="trainingTrend">
+                <i class="fas fa-arrow-up me-1"></i> Updated
+            </div>
+        </div>
+
+        <div class="stat-card fade-in" style="animation-delay: 0.1s;">
+            <div class="stat-icon farmers">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number" id="trainedFarmers">0</div>
+            <div class="stat-label">Farmers Trained</div>
+            <div class="stat-trend trend-up" id="farmersTrend">
+                <i class="fas fa-user-check me-1"></i> Active
+            </div>
+        </div>
+
+        <div class="stat-card fade-in" style="animation-delay: 0.2s;">
+            <div class="stat-icon seedlings">
+                <i class="fas fa-seedling"></i>
+            </div>
+            <div class="stat-number" id="seedlingRecords">0</div>
+            <div class="stat-label">Seedling Monitoring Records</div>
+            <div class="stat-trend trend-up" id="seedlingTrend">
+                <i class="fas fa-chart-line me-1"></i> Growing
+            </div>
+        </div>
+
+        <div class="stat-card fade-in" style="animation-delay: 0.3s;">
+            <div class="stat-icon gender">
+                <i class="fas fa-venus-mars"></i>
+            </div>
+            <div class="stat-number" id="totalFarmers">0</div>
+            <div class="stat-label">Registered Farmers</div>
+            <div class="stat-trend trend-up" id="registrationTrend">
+                <i class="fas fa-user-plus me-1"></i> Registered
+            </div>
+        </div>
+    </div>
+
+    <!-- Farmer Summary Section -->
+    <div class="section-header">
+        <h2 class="section-title">
+            <i class="fas fa-chart-pie"></i>Farmer Demographics
+        </h2>
+    </div>
+
+    <div class="charts-grid">
+        <!-- Gender Distribution -->
+        <div class="chart-container slide-up">
+            <div class="chart-header">
+                <h3 class="chart-title">Gender Distribution</h3>
+            </div>
+            <div class="chart-body">
+                <div id="genderChart" class="h-100"></div>
+            </div>
+        </div>
+
+        <!-- Age Distribution -->
+        <div class="chart-container slide-up" style="animation-delay: 0.1s;">
+            <div class="chart-header">
+                <h3 class="chart-title">Age Distribution</h3>
+            </div>
+            <div class="chart-body">
+                <div id="ageChart" class="h-100"></div>
+            </div>
+        </div>
+
+        <!-- Category Distribution -->
+        <div class="chart-container slide-up" style="animation-delay: 0.2s;">
+            <div class="chart-header">
+                <h3 class="chart-title">Farmer Categories</h3>
+            </div>
+            <div class="chart-body">
+                <div id="categoryChart" class="h-100"></div>
+            </div>
+        </div>
+
+        <!-- Seedling Distribution -->
+        <div class="chart-container slide-up" style="animation-delay: 0.3s;">
+            <div class="chart-header">
+                <h3 class="chart-title">Seedling Distribution</h3>
+            </div>
+            <div class="chart-body">
+                <div id="seedlingDistributionChart" class="h-100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seedling Monitoring Section -->
+    <div class="section-header">
+        <h2 class="section-title">
+            <i class="fas fa-chart-line"></i>Seedling Monitoring
+        </h2>
+    </div>
+
+    <div class="charts-grid">
+        <!-- Survival Rate Timeline -->
+        <div class="chart-container full-width-chart slide-up">
+            <div class="chart-header">
+                <h3 class="chart-title">Seedling Survival Timeline</h3>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-primary" id="exportChart">
+                        <i class="fas fa-download me-1"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <div id="survivalTimelineChart" class="h-100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Summary -->
+    <div class="section-header">
+        <h2 class="section-title">
+            <i class="fas fa-list-alt"></i>Quick Summary
+        </h2>
+    </div>
+
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="summary-value" id="maleFarmers">0</div>
+            <div class="summary-label">Male Farmers</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" id="femaleFarmers">0</div>
+            <div class="summary-label">Female Farmers</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" id="withSeedlings">0</div>
+            <div class="summary-label">With Seedlings</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" id="withoutSeedlings">0</div>
+            <div class="summary-label">Without Seedlings</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<!-- In your base template or head section -->
+<script src="https://cdn.jsdelivr.net/npm/highcharts@11.0.0/highcharts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@11.0.0/modules/exporting.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@11.0.0/modules/export-data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@11.0.0/modules/accessibility.js"></script>
+
+<!-- Alternative CDN as backup -->
+<script>
+// Enhanced Highcharts loading with multiple fallbacks
+window.loadHighcharts = function() {
+    return new Promise((resolve, reject) => {
+        // Check if already loaded
+        if (window.Highcharts) {
+            console.log('Highcharts already loaded');
+            resolve();
+            return;
+        }
+
+        const sources = [
+            'https://cdn.jsdelivr.net/npm/highcharts@11.0.0/highcharts.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.0.0/highcharts.js',
+            'https://code.highcharts.com/highcharts.js',
+            '/static/js/highcharts.js'  // Your local fallback
+        ];
+
+        const tryLoad = (index) => {
+            if (index >= sources.length) {
+                reject(new Error('All Highcharts sources failed'));
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = sources[index];
+            script.onload = () => {
+                console.log('Highcharts loaded from:', sources[index]);
+                resolve();
+            };
+            script.onerror = () => {
+                console.warn('Failed to load from:', sources[index]);
+                tryLoad(index + 1);
+            };
+            document.head.appendChild(script);
+        };
+
+        tryLoad(0);
+    });
+};
+
+// Load Highcharts modules
+window.loadHighchartsModules = function() {
+    const modules = [
+        'exporting.js',
+        'export-data.js', 
+        'accessibility.js'
+    ];
+
+    const baseUrls = [
+        'https://cdn.jsdelivr.net/npm/highcharts@11.0.0/modules/',
+        'https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.0.0/modules/',
+        'https://code.highcharts.com/modules/'
+    ];
+
+    const loadModule = (moduleName) => {
+        return new Promise((resolve) => {
+            const tryLoadModule = (urlIndex) => {
+                if (urlIndex >= baseUrls.length) {
+                    console.warn(`Failed to load module: ${moduleName}`);
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = baseUrls[urlIndex] + moduleName;
+                script.onload = () => {
+                    console.log(`Loaded module: ${moduleName}`);
+                    resolve();
+                };
+                script.onerror = () => {
+                    tryLoadModule(urlIndex + 1);
+                };
+                document.head.appendChild(script);
+            };
+
+            tryLoadModule(0);
+        });
+    };
+
+    return Promise.all(modules.map(loadModule));
+};
+</script>
+
+<!-- Your other scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+<script src="/static/app/js/gauge.js"></script>
+
+<script>
+$(document).ready(function() {
+    let dashboardData = {};
+    let currentCommunity = '';
+    let highchartsLoaded = false;
+
+    // Highcharts error handling function
+    function showHighchartsError() {
+        console.error('Highcharts failed to load');
+        
+        // Disable chart-related functionality
+        $('.chart-container').each(function() {
+            const $container = $(this);
+            $container.html(`
+                <div class="empty-state text-center p-4">
+                    <i class="fas fa-chart-line fa-2x mb-3 text-muted"></i>
+                    <h5>Charts Unavailable</h5>
+                    <p class="text-muted">Chart functionality is currently unavailable.</p>
+                    <button class="btn btn-primary btn-sm" onclick="location.reload()">
+                        <i class="fas fa-redo me-1"></i> Retry
+                    </button>
+                </div>
+            `);
+        });
+        
+        showToast('Chart functionality is temporarily unavailable. Showing data in tables instead.', 'warning');
+    }
+
+    // Initialize dashboard after Highcharts is loaded
+    function initializeDashboardAfterHighcharts() {
+        console.log('Highcharts loaded, initializing dashboard...');
+        highchartsLoaded = true;
+        initializeDashboard();
+    }
+
+    // Load Highcharts and initialize
+    function initializeHighchartsAndDashboard() {
+        loadHighcharts()
+            .then(() => loadHighchartsModules())
+            .then(() => {
+                console.log('All Highcharts components loaded successfully');
+                initializeDashboardAfterHighcharts();
+            })
+            .catch((error) => {
+                console.error('Completely failed to load Highcharts:', error);
+                showHighchartsError();
+                // Still initialize dashboard but without charts
+                initializeDashboard();
+            });
+    }
+
+    // Initialize dashboard
+    function initializeDashboard() {
+        console.log('Dashboard initializing...');
+        loadDashboardData();
+        setupEventListeners();
+        
+        // Load communities after a short delay
+        setTimeout(loadCommunities, 500);
+    }
+
+    // Enhanced chart rendering with safety checks
+    function renderCharts() {
+        if (!window.Highcharts) {
+            console.warn('Highcharts not available, skipping chart rendering');
+            showHighchartsError();
+            return;
+        }
+
+        console.log('Rendering charts...');
+        
+        // Use a small delay to ensure DOM is completely ready
+        setTimeout(() => {
+            try {
+                const charts = [
+                    { id: 'genderChart', renderer: renderGenderChart },
+                    { id: 'ageChart', renderer: renderAgeChart },
+                    { id: 'categoryChart', renderer: renderCategoryChart },
+                    { id: 'seedlingDistributionChart', renderer: renderSeedlingDistributionChart },
+                    { id: 'survivalTimelineChart', renderer: renderSurvivalTimelineChart }
+                ];
+
+                charts.forEach(({ id, renderer }) => {
+                    try {
+                        if (document.getElementById(id)) {
+                            renderer();
+                        } else {
+                            console.warn(`Chart container not found: ${id}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error rendering ${id}:`, error);
+                        showChartError(id, `Failed to load ${id.replace('Chart', ' chart')}`);
+                    }
+                });
+            } catch (error) {
+                console.error('Unexpected error in renderCharts:', error);
+            }
+        }, 200);
+    }
+
+    // Enhanced chart rendering functions with better error handling
+    function renderGenderChart() {
+        if (!window.Highcharts) throw new Error('Highcharts not loaded');
+        
+        const data = dashboardData.charts?.gender_distribution;
+        const container = document.getElementById('genderChart');
+        
+        if (!container) throw new Error('Gender chart container not found');
+
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            showNoDataMessage('genderChart', 'No gender data available');
+            return;
+        }
+
+        const validData = data.filter(item => item && Array.isArray(item) && item.length === 2);
+        
+        if (validData.length === 0) {
+            showNoDataMessage('genderChart', 'No valid gender data');
+            return;
+        }
+
+        Highcharts.chart('genderChart', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent',
+                height: 280
+            },
+            title: { text: 'Gender Distribution' },
+            colors: ['#2e7d32', '#2196f3'],
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b><br>{point.y} ({point.percentage:.1f}%)'
+                    },
+                    showInLegend: true
+                }
+            },
+            series: [{
+                name: 'Farmers',
+                colorByPoint: true,
+                data: validData
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    function renderAgeChart() {
+        if (!window.Highcharts) throw new Error('Highcharts not loaded');
+        
+        const demographics = dashboardData.demographics?.age_distribution;
+        const container = document.getElementById('ageChart');
+        
+        if (!container) throw new Error('Age chart container not found');
+
+        if (!demographics?.data || !demographics?.labels) {
+            showNoDataMessage('ageChart', 'No age distribution data');
+            return;
+        }
+
+        const hasData = demographics.data.some(value => value > 0);
+        if (!hasData) {
+            showNoDataMessage('ageChart', 'No age data available');
+            return;
+        }
+
+        Highcharts.chart('ageChart', {
+            chart: {
+                type: 'column',
+                backgroundColor: 'transparent',
+                height: 280
+            },
+            title: { text: 'Age Distribution' },
+            xAxis: { categories: demographics.labels },
+            yAxis: { title: { text: 'Number of Farmers' } },
+            colors: ['#2e7d32'],
+            plotOptions: {
+                column: {
+                    dataLabels: { enabled: true }
+                }
+            },
+            series: [{
+                name: 'Farmers',
+                data: demographics.data
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    function renderCategoryChart() {
+        if (!window.Highcharts) throw new Error('Highcharts not loaded');
+        
+        const categories = dashboardData.demographics?.categories;
+        const container = document.getElementById('categoryChart');
+        
+        if (!container) throw new Error('Category chart container not found');
+
+        if (!categories || categories.length === 0) {
+            showNoDataMessage('categoryChart', 'No category data available');
+            return;
+        }
+
+        const validCategories = categories.filter(cat => 
+            cat && Array.isArray(cat) && cat.length === 2 && cat[1] > 0
+        );
+
+        if (validCategories.length === 0) {
+            showNoDataMessage('categoryChart', 'No farmer categories data');
+            return;
+        }
+
+        Highcharts.chart('categoryChart', {
+            chart: {
+                type: 'bar',
+                backgroundColor: 'transparent',
+                height: 280
+            },
+            title: { text: 'Farmer Categories' },
+            xAxis: { type: 'category' },
+            yAxis: { title: { text: 'Number of Farmers' } },
+            colors: ['#ff9800'],
+            series: [{
+                name: 'Farmers',
+                data: validCategories
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    function renderSeedlingDistributionChart() {
+        if (!window.Highcharts) throw new Error('Highcharts not loaded');
+        
+        const data = dashboardData.charts?.seedling_distribution;
+        const container = document.getElementById('seedlingDistributionChart');
+        
+        if (!container) throw new Error('Seedling distribution chart container not found');
+
+        if (!data || data.length === 0) {
+            showNoDataMessage('seedlingDistributionChart', 'No seedling distribution data');
+            return;
+        }
+
+        const validData = data.filter(item => item && Array.isArray(item) && item.length === 2);
+
+        if (validData.length === 0) {
+            showNoDataMessage('seedlingDistributionChart', 'No valid seedling data');
+            return;
+        }
+
+        Highcharts.chart('seedlingDistributionChart', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent',
+                height: 280
+            },
+            title: { text: 'Seedling Distribution' },
+            colors: ['#4caf50', '#ff9800'],
+            plotOptions: {
+                pie: {
+                    innerSize: '50%',
+                    dataLabels: { enabled: true }
+                }
+            },
+            series: [{
+                name: 'Farmers',
+                data: validData
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    function renderSurvivalTimelineChart() {
+        if (!window.Highcharts) throw new Error('Highcharts not loaded');
+        
+        const survivalData = dashboardData.charts?.seedling_survival;
+        const container = document.getElementById('survivalTimelineChart');
+        
+        if (!container) throw new Error('Survival timeline chart container not found');
+
+        if (!survivalData?.dates || !survivalData?.survived) {
+            showNoDataMessage('survivalTimelineChart', 'No survival timeline data');
+            return;
+        }
+
+        if (survivalData.dates.length === 0 || survivalData.survived.length === 0) {
+            showNoDataMessage('survivalTimelineChart', 'No survival data available');
+            return;
+        }
+
+        Highcharts.chart('survivalTimelineChart', {
+            chart: {
+                type: 'areaspline',
+                backgroundColor: 'transparent',
+                height: 350
+            },
+            title: { text: 'Seedling Survival Over Time' },
+            xAxis: { categories: survivalData.dates },
+            yAxis: { title: { text: 'Number of Seedlings Survived' } },
+            colors: ['#2e7d32'],
+            plotOptions: {
+                areaspline: {
+                    fillOpacity: 0.3,
+                    marker: { enabled: false }
+                }
+            },
+            series: [{
+                name: 'Seedlings Survived',
+                data: survivalData.survived
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    // Keep all your existing helper functions (they're good)
+    function showNoDataMessage(chartId, message) {
+        const chartElement = document.getElementById(chartId);
+        if (chartElement) {
+            chartElement.innerHTML = `
+                <div class="empty-state text-center p-4">
+                    <i class="fas fa-chart-pie fa-2x mb-3 text-muted"></i>
+                    <div class="text-muted">${message}</div>
+                </div>
+            `;
+        }
+    }
+
+    function showChartError(chartId, message) {
+        const chartElement = document.getElementById(chartId);
+        if (chartElement) {
+            chartElement.innerHTML = `
+                <div class="empty-state text-center p-4">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3 text-danger"></i>
+                    <div class="text-danger">${message}</div>
+                </div>
+            `;
+        }
+    }
+
+    function loadDashboardData(community = '') {
+        showLoadingState();
+        
+        $.ajax({
+            url: '/dashboard-data/',
+            type: 'GET',
+            data: community ? { com: community } : {},
+            success: function(response) {
+                console.log('Dashboard data loaded:', response);
+                dashboardData = ensureDataStructure(response);
+                updateDashboardUI();
+                
+                // Only render charts if Highcharts is available
+                if (window.Highcharts) {
+                    renderCharts();
+                } else {
+                    console.warn('Highcharts not available, skipping chart rendering');
+                }
+                
+                hideLoadingState();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading dashboard data:', error);
+                showErrorState('Failed to load dashboard data');
+            }
+        });
+    }
+
+    // Add this function if it doesn't exist
+    function ensureDataStructure(data) {
+        if (!data) data = {};
+        
+        if (!data.training_stats) data.training_stats = {
+            total_trainings: 0, trained_farmers: 0, male_trained: 0, 
+            female_trained: 0, total_registered_farmers: 0
+        };
+
+        if (!data.farmer_stats) data.farmer_stats = {
+            total_farmers: 0, male_farmers: 0, female_farmers: 0,
+            with_seedlings: 0, without_seedlings: 0
+        };
+
+        if (!data.seedling_stats) data.seedling_stats = {
+            total_monitoring_records: 0, farmers_with_seedlings: 0
+        };
+
+        if (!data.demographics) data.demographics = {
+            age_distribution: { data: [0, 0, 0, 0, 0, 0, 0, 0], labels: ['18-25', '26-30', '31-35', '36-45', '46-55', '56-60', '61-70', '71+'] },
+            categories: []
+        };
+
+        if (!data.charts) data.charts = {
+            gender_distribution: [['Male', 0], ['Female', 0]],
+            seedling_distribution: [['Received Seedlings', 0], ['No Seedlings', 0]],
+            seedling_survival: { dates: [], survived: [] }
+        };
+
+        return data;
+    }
+
+    function updateDashboardUI() {
+        const training = dashboardData.training_stats;
+        const farmers = dashboardData.farmer_stats;
+        const seedlings = dashboardData.seedling_stats;
+        
+        console.log('Updating UI with:', { training, farmers, seedlings });
+        
+        $('#totalTrainings').text(training.total_trainings.toLocaleString());
+        $('#trainedFarmers').text(training.trained_farmers.toLocaleString());
+        $('#seedlingRecords').text(seedlings.total_monitoring_records.toLocaleString());
+        $('#totalFarmers').text(farmers.total_farmers.toLocaleString());
+        
+        $('#maleFarmers').text(farmers.male_farmers.toLocaleString());
+        $('#femaleFarmers').text(farmers.female_farmers.toLocaleString());
+        $('#withSeedlings').text(farmers.with_seedlings.toLocaleString());
+        $('#withoutSeedlings').text(farmers.without_seedlings.toLocaleString());
+
+        updateTrendIndicators();
+    }
+
+    function updateTrendIndicators() {
+        const training = dashboardData.training_stats;
+        const farmers = dashboardData.farmer_stats;
+        
+        $('#trainingTrend').html(training.total_trainings > 0 ? 
+            '<i class="fas fa-arrow-up me-1"></i> Active' : 
+            '<i class="fas fa-minus me-1"></i> No data');
+        
+        $('#farmersTrend').html(farmers.total_farmers > 0 ? 
+            '<i class="fas fa-user-check me-1"></i> Registered' : 
+            '<i class="fas fa-user-times me-1"></i> No farmers');
+        
+        $('#seedlingTrend').html(dashboardData.seedling_stats.total_monitoring_records > 0 ? 
+            '<i class="fas fa-chart-line me-1"></i> Monitoring' : 
+            '<i class="fas fa-seedling me-1"></i> No records');
+        
+        $('#registrationTrend').html(farmers.total_farmers > 0 ? 
+            '<i class="fas fa-user-plus me-1"></i> Registered' : 
+            '<i class="fas fa-user-clock me-1"></i> No data');
+    }
+
+    function showLoadingState() {
+        $('.chart-body').each(function() {
+            const $this = $(this);
+            if ($this.is(':visible') && $this.children().length === 0) {
+                $this.html(`
+                    <div class="loading-container text-center p-4">
+                        <div class="spinner-border text-primary mb-2"></div>
+                        <div>Loading chart data...</div>
+                    </div>
+                `);
+            }
+        });
+    }
+
+    function hideLoadingState() {
+        // Loading states will be replaced by charts or error messages
+    }
+
+    function showErrorState(message) {
+        $('.chart-body').html(`
+            <div class="empty-state text-center p-4">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3 text-danger"></i>
+                <h5>Error</h5>
+                <div class="text-muted mb-3">${message}</div>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-redo me-1"></i> Reload Page
+                </button>
+            </div>
+        `);
+    }
+
+    function showToast(message, type = 'info') {
+        $('.alert.position-fixed').remove();
+        
+        const toast = $(`
+            <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        $('body').append(toast);
+        
+        setTimeout(() => {
+            toast.alert('close');
+        }, 4000);
+    }
+
+    function setupEventListeners() {
+        $('#communityFilter').on('change', function() {
+            currentCommunity = $(this).val();
+            showToast(`Loading data for ${currentCommunity || 'all communities'}...`, 'info');
+            loadDashboardData(currentCommunity);
+        });
+
+        $('#exportChart').on('click', function() {
+            showToast('Export feature will be available soon!', 'info');
+        });
+    }
+
+    function loadCommunities() {
+        // Your community loading logic
+        $('#communityFilter').append(`
+            <option value="community1">Community 1</option>
+            <option value="community2">Community 2</option>
+            <option value="community3">Community 3</option>
+        `);
+    }
+
+    // Start the initialization process
+    console.log('Starting Highcharts and dashboard initialization...');
+    initializeHighchartsAndDashboard();
+});
+</script>
+{% endblock %}

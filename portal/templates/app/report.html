@@ -1,0 +1,73 @@
+{% extends 'update/base.html' %}
+{% block tree_reg %} menu-open {% endblock %}
+{% load static %}
+
+{% block css %}
+
+{% endblock%}
+
+{% block js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js" integrity="sha512-eYSzo+20ajZMRsjxB6L7eyqo5kuXuS2+wEbbOkpaur+sA2shQameiJiWEzCIDwJqaB0a4a6tCuEvCOBHUg3Skg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+ <script src="/static/app/js/report.js"></script>
+
+
+{% endblock%}
+
+{% block body %}
+
+<style type="text/css">
+
+  a.tab-item{
+    color: #288541!important;
+    font-weight: bold;
+  }
+   .tab-item.active{
+    background: #288541!important;
+    color: white!important;
+    font-weight: bold;
+  }
+
+  li {
+    list-style-type: none!important;
+}
+</style>
+    <div class="content-wrapper" style="padding: 10px 30px;" >
+
+         <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+      <a class="tab-item nav-link active" data-toggle="tab" href="#home">Individual</a>
+    </li>
+    <li class="nav-item">
+      <a class="tab-item nav-link" data-toggle="tab" href="#menu1">Group/Company</a>
+    </li>
+    <!-- <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#menu2">Menu 2</a>
+    </li> -->
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div id="home" class=" tab-pane active"><br>
+      
+      <div class="" id="reportgrpres">
+          
+      </div>
+    </div>
+    <div id="menu1" class=" tab-pane fade"><br>
+
+       <div  id="adam">
+          
+     
+        </div>
+   
+  </div>
+       
+       
+    </div>
+{% endblock%}

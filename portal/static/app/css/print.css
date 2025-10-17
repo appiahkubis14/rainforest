@@ -1,0 +1,15 @@
+
+.col-form-label {
+  font-size: 12px;
+}
+
+@media print {
+  .pge-break {page-break-before: always;}
+
+  .head{
+ background-color: #333b3f;
+  color: white;
+  border-width: 1;
+  border-color:  #333b3f;
+}
+}

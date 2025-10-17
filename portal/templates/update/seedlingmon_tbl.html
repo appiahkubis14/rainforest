@@ -1,0 +1,60 @@
+
+<style type="text/css">
+    .eok1{
+        color: green!important;
+    }
+</style>
+<div class="table-responsive m-b-30">
+    <table class="table table-striped" id="spectbl">
+        <thead class="eok" style="background-color: #358542;color: #fff;">
+            <tr>
+                <th scope="col"> Farmer </th>
+                <th scope="col"> Community </th>
+                <th scope="col">Number of Species </th>
+                <th></th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for tree in arr %}
+            <tr>
+                <td scope="row">{{tree.farmer}} </td>
+                <td>{{tree.community  }} </td>
+                <td>{{tree.species}} 
+
+                </td>
+
+                <td>
+                     <i class="fas fa-ellipsis-v  fa-circle exampopover" style='color: green' data-container="body" data-toggle="popover" data-placement="bottom" data-content="<a href='/map/?code={{aa.id}}' > 
+                        <ol>
+                        {% for aa in tree.species_list%}
+                        <a title='Click to view Monitoring' href='/seedlingmondetails/?code={{aa.id}}' ><li  class='eok1'  >{{aa.name}}</li></a><hr>
+                         {% endfor %} </ol>"></i>
+                        
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+ 
+</div>
+
+
+<script type="text/javascript">
+     $('#spectbl').DataTable({
+        // dom: 'Bfrtip',
+        "lengthChange": false,
+        // "pageLength": 4
+
+    });
+
+$(function () {
+  $('.exampopover').popover({
+    html: true,
+    content: function() {
+      return $('#popover-content').html();}
+  })
+})
+   
+</script>

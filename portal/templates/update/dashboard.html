@@ -1,0 +1,1178 @@
+{% extends 'update/base.html' %}
+
+{% load eok %}
+{% block dashboard %} active {% endblock %}
+{% block tree_reg %} menu-open {% endblock %}
+
+{% block css %}
+<style type="text/css">
+    /* Modern Dashboard Styles - Optimized */
+    .dashboard-wrapper {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e8 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border-left: 5px solid #4A7C3A;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        will-change: transform; /* Performance optimization */
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #4A7C3A, #288541);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    .stat-card .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #4A7C3A;
+        margin: 10px 0;
+        line-height: 1;
+    }
+
+    .stat-card .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card .stat-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: rgba(45, 80, 22, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4A7C3A;
+        font-size: 1.5rem;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+        border: 1px solid rgba(0,0,0,0.05);
+        min-height: 400px;
+        will-change: transform; /* Performance optimization */
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2C3E50;
+        margin: 0;
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+
+    .secondary-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+    }
+
+    .data-table-container {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .table-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2C3E50;
+        margin: 0;
+    }
+
+    /* Custom DataTables Styling */
+    #comspe {
+        width: 100% !important;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    #comspe thead th {
+        background: linear-gradient(135deg, #4A7C3A, #288541);
+        color: white;
+        font-weight: 600;
+        padding: 15px 12px;
+        border: none;
+    }
+
+    #comspe tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    #comspe tbody tr:hover {
+        background-color: rgba(232, 245, 232, 0.5) !important;
+        transform: translateX(5px);
+    }
+
+    #comspe tbody td {
+        padding: 12px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Highcharts Customization */
+    .highcharts-background {
+        fill: transparent !important;
+    }
+
+    .highcharts-title {
+        font-weight: 600 !important;
+        color: #2C3E50 !important;
+    }
+
+    /* Chart container specific styles */
+    #ipie, #idash, #community_dash {
+        width: 100%;
+        height: 300px;
+        min-height: 300px;
+    }
+
+    /* DataTables Custom Styling */
+    .dataTables_wrapper {
+        margin-top: 15px;
+    }
+    
+    .dataTables_filter input {
+        border: 1px solid #ddd !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+        margin-left: 10px !important;
+    }
+    
+    .dataTables_paginate .paginate_button {
+        padding: 6px 12px !important;
+        margin: 0 2px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 6px !important;
+    }
+    
+    .dataTables_paginate .paginate_button.current {
+        background: #4A7C3A !important;
+        color: white !important;
+        border-color: #4A7C3A !important;
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 1200px) {
+        .main-grid,
+        .secondary-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+    }
+
+    @media (max-width: 992px) {
+        .dashboard-wrapper {
+            padding: 15px;
+        }
+        
+        .chart-container {
+            padding: 20px;
+            min-height: 350px;
+        }
+        
+        #ipie, #idash, #community_dash {
+            height: 280px;
+            min-height: 280px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            padding: 20px 15px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2rem;
+        }
+        
+        .stat-card .stat-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+        
+        .chart-container {
+            padding: 15px;
+            min-height: 300px;
+        }
+        
+        #ipie, #idash, #community_dash {
+            height: 250px;
+            min-height: 250px;
+        }
+        
+        .dataTables_wrapper .dataTables_filter {
+            float: none !important;
+            text-align: left !important;
+            margin-bottom: 15px !important;
+        }
+        
+        .dataTables_filter input {
+            width: 100% !important;
+            margin-left: 0 !important;
+        }
+        
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .main-grid,
+        .secondary-grid {
+            gap: 15px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-wrapper {
+            padding: 10px;
+        }
+        
+        .chart-container {
+            padding: 15px 10px;
+            min-height: 280px;
+        }
+        
+        #ipie, #idash, #community_dash {
+            height: 220px;
+            min-height: 220px;
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+        }
+        
+        .data-table-container {
+            padding: 15px 10px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .stat-card {
+            padding: 15px 10px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 1.8rem;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Status Indicators */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-active {
+        background: rgba(39, 174, 96, 0.1);
+        color: #27ae60;
+    }
+
+    .status-pending {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+    }
+    
+    /* Error state for debugging */
+    .chart-error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #dc3545;
+        font-weight: 500;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .chart-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #6c757d;
+        font-weight: 500;
+        text-align: center;
+        padding: 20px;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+    }
+
+    /* Performance optimizations */
+    .highcharts-container {
+        transform: translateZ(0); /* GPU acceleration */
+    }
+
+    /* Loading states */
+    .content-loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    /* Optimized transitions */
+    * {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+</style>
+{% endblock%}
+
+{% block body %}
+<div class="dashboard-wrapper">
+    <!-- Stats Overview -->
+    <div class="stats-grid fade-in-up">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-label">Total Farmers</div>
+            <div class="stat-value">{{totalben|default:"0"}}</div>
+            <div class="status-badge status-active">Active</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="stat-label">Individuals</div>
+            <div class="stat-value">{{totalbenindiv|default:"0"}}</div>
+            <div class="status-badge status-active">Registered</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-friends"></i>
+            </div>
+            <div class="stat-label">Groups</div>
+            <div class="stat-value">{{totalbengroup|default:"0"}}</div>
+            <div class="status-badge status-active">Active</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tractor"></i>
+            </div>
+            <div class="stat-label">Total Farms</div>
+            <div class="stat-value">{{totalfarm|default:"0"}}</div>
+            <div class="status-badge status-active">Monitored</div>
+        </div>
+    </div>
+
+    <!-- Main Charts Grid -->
+    <div class="main-grid">
+        <!-- Farm Distribution Chart -->
+        <div class="chart-container fade-in-up">
+            <div class="chart-header">
+                <h3 class="chart-title">Farm Distribution Analysis</h3>
+            </div>
+            <div id="ipie">
+                <div class="chart-placeholder">
+                    <div>
+                        <i class="fas fa-chart-pie fa-3x mb-3" style="color: #ddd;"></i>
+                        <p>Loading farm distribution data...</p>
+                    </div>
+                </div>
+            </div>
+            <div id="ipie-error" class="chart-error" style="display: none;">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Chart data not available
+            </div>
+        </div>
+
+        <!-- Gender Distribution Chart -->
+        <div class="chart-container fade-in-up">
+            <div class="chart-header">
+                <h3 class="chart-title">Gender Distribution</h3>
+            </div>
+            <div id="idash">
+                <div class="chart-placeholder">
+                    <div>
+                        <i class="fas fa-chart-bar fa-3x mb-3" style="color: #ddd;"></i>
+                        <p>Loading gender distribution data...</p>
+                    </div>
+                </div>
+            </div>
+            <div id="idash-error" class="chart-error" style="display: none;">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Chart data not available
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Grid -->
+    <div class="secondary-grid">
+        <!-- Community Distribution -->
+        <div class="chart-container fade-in-up">
+            <div class="chart-header">
+                <h3 class="chart-title">Community Farm Distribution</h3>
+            </div>
+            <div id="community_dash">
+                <div class="chart-placeholder">
+                    <div>
+                        <i class="fas fa-chart-column fa-3x mb-3" style="color: #ddd;"></i>
+                        <p>Loading community distribution data...</p>
+                    </div>
+                </div>
+            </div>
+            <div id="community_dash-error" class="chart-error" style="display: none;">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Chart data not available
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="fade-in-up">
+            <div class="stats-grid" style="grid-template-columns: 1fr; gap: 15px;">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    <div class="stat-label">Total Trees</div>
+                    <div class="stat-value" style="color: #ffcc44;">{{total_tree|default:"0"}}</div>
+                    <div class="status-badge status-active">Planted</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-label">Avg. Tree Age</div>
+                    <div class="stat-value" style="color: #e04d56;">{{average_age|default:"0"}}</div>
+                    <div class="status-badge status-pending">Years</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-vector-square"></i>
+                    </div>
+                    <div class="stat-label">Avg. Farm Size</div>
+                    <div class="stat-value" style="color: #27ae60;">{{avg_farm_size|default:"0"}}</div>
+                    <div class="stat-label">hectares</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Species Table -->
+    <div class="data-table-container fade-in-up">
+        <div class="table-header">
+            <h3 class="table-title">Community Species Overview</h3>
+            <div class="table-actions">
+                <span class="status-badge status-active">{{ commtrees|length|default:"0" }} Communities</span>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="comspe" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Community</th>
+                        <th>Species Count</th>
+                        <th>Dominant Species</th>
+                        <th>Total Farms</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aa in commtrees %}
+                    <tr>
+                        <td>
+                            <strong>{{aa.community|default:"N/A"}}</strong>
+                        </td>
+                        <td>
+                            <span class="status-badge status-active">
+                                {{aa.species | eokremove | default:"0"}}
+                            </span>
+                        </td>
+                        <td>
+                            <i class="fas fa-seedling text-success me-2"></i>
+                            {{aa.dominant_species|default:"N/A"}}
+                        </td>
+                        <td>
+                            <strong>{{aa.total_farms|default:"0"}}</strong>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No community data available
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block js %}
+<!-- Load required libraries with optimized loading -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<!-- Highcharts with optimized loading strategy -->
+<script>
+// Optimized Highcharts loader with performance monitoring
+window.initializeHighcharts = function() {
+    return new Promise((resolve, reject) => {
+        if (window.Highcharts) {
+            console.log('Highcharts already loaded');
+            resolve();
+            return;
+        }
+
+        const startTime = performance.now();
+        const script = document.createElement('script');
+        
+        // Use a single, reliable CDN
+        script.src = 'https://cdn.jsdelivr.net/npm/highcharts@11.0.0/highcharts.js';
+        
+        script.onload = () => {
+            const loadTime = performance.now() - startTime;
+            console.log(`Highcharts loaded in ${loadTime.toFixed(2)}ms`);
+            
+            // Load essential modules in background
+            loadHighchartsModules().then(resolve).catch(resolve);
+        };
+        
+        script.onerror = () => {
+            console.error('Failed to load Highcharts from CDN');
+            reject(new Error('Highcharts loading failed'));
+        };
+        
+        // Set async and defer for better performance
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    });
+};
+
+// Load only essential modules
+window.loadHighchartsModules = function() {
+    const modules = ['exporting.js', 'export-data.js'];
+    const baseUrl = 'https://cdn.jsdelivr.net/npm/highcharts@11.0.0/modules/';
+    
+    const loadModule = (module) => {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = baseUrl + module;
+            script.onload = resolve;
+            script.onerror = resolve; // Don't fail the whole process
+            script.async = true;
+            document.head.appendChild(script);
+        });
+    };
+    
+    return Promise.all(modules.map(loadModule));
+};
+</script>
+
+<!-- Your other scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+<script src="/static/app/js/gauge.js"></script>
+
+<script type="text/javascript">
+// Enhanced loading functions
+function showLoading(message) {
+    // Use your existing blockUI loader
+    $.blockUI({ 
+        message: message ? `<div class="text-center"><img src="/static/rootApp/img/eok.gif" style="width:40%" /><br><small class="text-white">${message}</small></div>` : '<img src="/static/rootApp/img/eok.gif" style="width:40%" />',  
+        css: { 
+            backgroundColor: 'transparent', 
+            color: 'white',
+            border: "transparent",
+            fontSize: '16px'
+        },
+        overlayCSS: {
+            backgroundColor: '#000',
+            opacity: 0.7,
+            cursor: 'wait'
+        }
+    });
+}
+
+function hideLoading() {
+    $.unblockUI();
+}
+
+// Performance monitoring
+const perf = {
+    start: {},
+    marks: {},
+    
+    mark: function(name) {
+        this.marks[name] = performance.now();
+        console.log(`⏱️ ${name} started`);
+    },
+    
+    measure: function(name) {
+        const end = performance.now();
+        const start = this.marks[name];
+        if (start) {
+            const duration = end - start;
+            console.log(`⏱️ ${name} completed in ${duration.toFixed(2)}ms`);
+            return duration;
+        }
+        return 0;
+    }
+};
+
+// Main initialization with performance optimization
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Dashboard initialization started');
+    perf.mark('total_initialization');
+    
+    // Show initial loading
+    showLoading('Initializing dashboard...');
+    
+    // Initialize in stages for better perceived performance
+    setTimeout(() => initializeDashboardStages(), 100);
+});
+
+function initializeDashboardStages() {
+    perf.mark('stage1_datatable');
+    
+    // Stage 1: Initialize DataTable (fast, visible content)
+    initializeDataTable();
+    
+    // Stage 2: Load Highcharts in background
+    setTimeout(() => {
+        perf.mark('stage2_highcharts');
+        loadHighchartsAndCharts();
+    }, 300);
+    
+    // Stage 3: Final optimizations
+    setTimeout(() => {
+        perf.mark('stage3_optimizations');
+        applyFinalOptimizations();
+    }, 1000);
+}
+
+function initializeDataTable() {
+    try {
+        if (typeof $ !== 'undefined' && $.fn.DataTable) {
+            console.log('📊 Initializing DataTable...');
+            
+            $('#comspe').DataTable({
+                "lengthChange": false,
+                "pageLength": 6,
+                "searching": true,
+                "info": false,
+                "language": {
+                    "search": "Search communities:",
+                    "paginate": {
+                        "previous": "<i class='fas fa-chevron-left'></i>",
+                        "next": "<i class='fas fa-chevron-right'></i>"
+                    },
+                    "zeroRecords": "No matching communities found",
+                    "searchPlaceholder": "Type to search..."
+                },
+                "dom": '<"top"f>rt<"bottom"lp><"clear">',
+                "initComplete": function(settings, json) {
+                    console.log('✅ DataTable initialized successfully');
+                    perf.measure('stage1_datatable');
+                    
+                    // Add custom styling to search input
+                    $('.dataTables_filter input')
+                        .addClass('form-control')
+                        .attr('placeholder', 'Search communities...');
+                }
+            });
+        } else {
+            console.warn('⚠️ DataTable not available, skipping initialization');
+        }
+    } catch (error) {
+        console.error('❌ DataTable initialization failed:', error);
+    }
+}
+
+function loadHighchartsAndCharts() {
+    console.log('📈 Loading Highcharts and charts...');
+    
+    showLoading('Loading charts and analytics...');
+    
+    window.initializeHighcharts()
+        .then(() => {
+            console.log('✅ Highcharts loaded successfully');
+            perf.measure('stage2_highcharts');
+            
+            // Initialize charts with a small delay to ensure DOM is ready
+            setTimeout(() => {
+                initializeCharts();
+                perf.measure('total_initialization');
+            }, 200);
+        })
+        .catch((error) => {
+            console.error('❌ Highcharts loading failed:', error);
+            showChartErrors();
+            hideLoading();
+        });
+}
+
+function applyFinalOptimizations() {
+    console.log('⚡ Applying final optimizations...');
+    
+    // Remove any remaining loading states
+    $('.chart-placeholder').fadeOut(300);
+    
+    // Enable smooth transitions
+    $('body').removeClass('content-loading');
+    
+    console.log('✅ Dashboard fully initialized');
+    perf.measure('stage3_optimizations');
+}
+
+// Debug function to check if data is available
+function debugData() {
+    if (console.debug) {
+        console.debug('=== DASHBOARD DATA DEBUG ===');
+        console.debug('Farm Distribution Data:', {
+            natural: {{natural|default:0}},
+            planted: {{planted|default:0}}
+        });
+        
+        console.debug('Gender Distribution Data:', {{farm|safe|default:"[]"}});
+        
+        console.debug('Community Distribution Data:', {{communityfarm|safe|default:"[]"}});
+        
+        console.debug('Total Farmers:', {{totalben|default:0}});
+        console.debug('Total Trees:', {{total_tree|default:0}});
+        console.debug('=== END DEBUG ===');
+    }
+}
+
+// Optimized chart initialization
+function initializeCharts() {
+    console.log('🎨 Initializing charts...');
+    debugData();
+    
+    if (typeof Highcharts === 'undefined') {
+        console.error('❌ Highcharts not available for chart initialization');
+        showChartErrors();
+        hideLoading();
+        return;
+    }
+    
+    let chartsCompleted = 0;
+    const totalCharts = 3;
+    
+    function chartCompleted() {
+        chartsCompleted++;
+        console.log(`📊 Chart ${chartsCompleted}/${totalCharts} completed`);
+        
+        if (chartsCompleted === totalCharts) {
+            console.log('✅ All charts initialized successfully');
+            // Small delay to ensure smooth transition
+            setTimeout(hideLoading, 500);
+        }
+    }
+    
+    // Initialize charts with error handling
+    try {
+        initializeFarmDistributionChart(chartCompleted);
+        initializeGenderDistributionChart(chartCompleted);
+        initializeCommunityDistributionChart(chartCompleted);
+    } catch (error) {
+        console.error('❌ Error during chart initialization:', error);
+        hideLoading();
+    }
+}
+
+function initializeFarmDistributionChart(onComplete) {
+    try {
+        const natural = parseInt('{{natural|default:0}}') || 0;
+        const planted = parseInt('{{planted|default:0}}') || 0;
+        const totalFarms = natural + planted;
+        
+        if (totalFarms > 0) {
+            // Remove placeholder with fade effect
+            $('#ipie .chart-placeholder').fadeOut(300, function() {
+                $(this).remove();
+                
+                Highcharts.chart('ipie', {
+                    chart: {
+                        type: 'pie',
+                        backgroundColor: 'transparent',
+                        style: { fontFamily: 'Inter, sans-serif' }
+                    },
+                    colors: ['#4A7C3A', '#8BC34A'],
+                    title: { text: null },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.1f}%)'
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b><br/>{point.y} farms<br/>({point.percentage:.1f}%)',
+                                distance: -30,
+                                style: {
+                                    fontWeight: '500',
+                                    color: 'white',
+                                    textOutline: 'none'
+                                }
+                            },
+                            showInLegend: true,
+                            borderWidth: 0
+                        }
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        itemStyle: { fontWeight: '500', color: '#2C3E50' }
+                    },
+                    series: [{
+                        name: 'Farms',
+                        colorByPoint: true,
+                        data: [{
+                            name: 'Natural Farms',
+                            y: natural,
+                            sliced: true,
+                            selected: true
+                        }, {
+                            name: 'Planted Farms',
+                            y: planted
+                        }]
+                    }],
+                    credits: { enabled: false }
+                });
+                
+                console.log('✅ Farm distribution chart initialized');
+                onComplete();
+            });
+        } else {
+            showNoDataMessage('ipie', 'No farm distribution data available');
+            onComplete();
+        }
+    } catch (error) {
+        console.error('❌ Farm distribution chart error:', error);
+        showChartError('ipie', 'Failed to load farm distribution');
+        onComplete();
+    }
+}
+
+function initializeGenderDistributionChart(onComplete) {
+    try {
+        let farmData = [];
+        try {
+            const rawFarmData = JSON.parse('{{farm|safe|default:"[]"}}'.replace(/&quot;/g, '"'));
+            
+            if (Array.isArray(rawFarmData)) {
+                farmData = rawFarmData.map(item => {
+                    if (Array.isArray(item) && item.length >= 2) {
+                        return {
+                            name: item[0] || 'Unknown',
+                            y: parseInt(item[1]) || 0
+                        };
+                    } else if (typeof item === 'object' && item !== null) {
+                        return item;
+                    }
+                    return { name: 'Unknown', y: 0 };
+                }).filter(item => item.y > 0);
+            }
+        } catch (e) {
+            console.error('Error parsing gender data:', e);
+        }
+        
+        const hasValidData = farmData.length > 0 && farmData.some(item => item.y > 0);
+        
+        if (hasValidData) {
+            $('#idash .chart-placeholder').fadeOut(300, function() {
+                $(this).remove();
+                
+                Highcharts.chart('idash', {
+                    chart: {
+                        type: 'column',
+                        backgroundColor: 'transparent',
+                        style: { fontFamily: 'Inter, sans-serif' }
+                    },
+                    title: { text: null },
+                    colors: ['#4A7C3A', '#8BC34A', '#A5D6A7'],
+                    xAxis: {
+                        type: 'category',
+                        labels: { style: { fontSize: '12px', fontWeight: '500' } }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: { text: 'Number of Farmers', style: { fontWeight: '500' } },
+                        gridLineColor: 'rgba(0,0,0,0.05)'
+                    },
+                    legend: { enabled: false },
+                    tooltip: {
+                        headerFormat: '<span style="font-size: 13px; font-weight: 600">{point.key}</span><br/>',
+                        pointFormat: 'Total: <b>{point.y:.0f}</b>',
+                        backgroundColor: 'rgba(255,255,255,0.95)',
+                        borderWidth: 0,
+                        borderRadius: 12,
+                        shadow: true
+                    },
+                    plotOptions: {
+                        column: {
+                            colorByPoint: true,
+                            borderRadius: 6,
+                            pointPadding: 0.1,
+                            groupPadding: 0.1
+                        }
+                    },
+                    series: [{
+                        name: 'Farmers',
+                        data: farmData,
+                        dataLabels: {
+                            enabled: true,
+                            rotation: 0,
+                            color: '#2C3E50',
+                            align: 'center',
+                            format: '{point.y:.0f}',
+                            style: {
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                textOutline: 'none'
+                            }
+                        }
+                    }],
+                    credits: { enabled: false }
+                });
+                
+                console.log('✅ Gender distribution chart initialized');
+                onComplete();
+            });
+        } else {
+            showNoDataMessage('idash', 'No gender distribution data available');
+            onComplete();
+        }
+    } catch (error) {
+        console.error('❌ Gender distribution chart error:', error);
+        showChartError('idash', 'Failed to load gender distribution');
+        onComplete();
+    }
+}
+
+function initializeCommunityDistributionChart(onComplete) {
+    try {
+        let communityData = [];
+        try {
+            const rawCommunityData = JSON.parse('{{communityfarm|safe|default:"[]"}}'.replace(/&quot;/g, '"'));
+            communityData = rawCommunityData;
+        } catch (e) {
+            console.error('Error parsing community data:', e);
+        }
+        
+        const hasValidData = communityData && Array.isArray(communityData) && 
+                           communityData.length > 0 && 
+                           communityData.some(item => Array.isArray(item) && item.length >= 2 && parseInt(item[1]) > 0);
+        
+        if (hasValidData) {
+            $('#community_dash .chart-placeholder').fadeOut(300, function() {
+                $(this).remove();
+                
+                // Original community chart style
+                Highcharts.chart('community_dash', {
+                    chart: { type: 'column' },
+                    title: { text: 'FARM DISTRIBUTION BY COMMUNITY' },
+                    plotOptions: { column: { colorByPoint: true } },
+                    colors: ['#B623B9'],
+                    xAxis: {
+                        type: 'category',
+                        labels: {
+                            rotation: -45,
+                            style: { fontSize: '13px', fontFamily: 'Verdana, sans-serif' }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: { text: 'Total Number of Farms' }
+                    },
+                    legend: { enabled: false },
+                    tooltip: {
+                        pointFormat: 'Total no. of Farms : <b>{point.y:.0f}</b>'
+                    },
+                    series: [{
+                        name: 'Community Count',
+                        data: communityData,
+                        dataLabels: {
+                            enabled: true,
+                            rotation: -90,
+                            color: '#FFFFFF',
+                            align: 'right',
+                            format: '{point.y:.0f}',
+                            y: 10,
+                            style: {
+                                fontSize: '13px',
+                                fontFamily: 'Verdana, sans-serif'
+                            }
+                        }
+                    }],
+                    credits: { enabled: false }
+                });
+                
+                console.log('✅ Community distribution chart initialized');
+                onComplete();
+            });
+        } else {
+            showNoDataMessage('community_dash', 'No community distribution data available');
+            onComplete();
+        }
+    } catch (error) {
+        console.error('❌ Community distribution chart error:', error);
+        showChartError('community_dash', 'Failed to load community distribution');
+        onComplete();
+    }
+}
+
+// Helper functions
+function showNoDataMessage(chartId, message) {
+    const container = document.getElementById(chartId);
+    if (container) {
+        container.innerHTML = `
+            <div class="chart-placeholder">
+                <div>
+                    <i class="fas fa-chart-bar fa-2x mb-2" style="color: #6c757d;"></i>
+                    <p class="mb-0">${message}</p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function showChartError(chartId, message) {
+    const container = document.getElementById(chartId);
+    if (container) {
+        container.innerHTML = `
+            <div class="chart-error">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                ${message}
+            </div>
+        `;
+    }
+}
+
+function showChartErrors() {
+    showChartError('ipie', 'Chart data not available');
+    showChartError('idash', 'Chart data not available');
+    showChartError('community_dash', 'Chart data not available');
+}
+
+// Fallback timeout
+setTimeout(() => {
+    if ($('.blockUI').length > 0) {
+        console.warn('⚠️ Dashboard taking too long, forcing completion');
+        hideLoading();
+    }
+}, 10000); // 10 second timeout
+
+// Add responsive behavior for window resize
+let resizeTimeout;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (window.Highcharts) {
+            // Reflow charts on window resize
+            Highcharts.charts.forEach(function(chart) {
+                if (chart) {
+                    chart.reflow();
+                }
+            });
+        }
+    }, 250);
+});
+</script>
+{% endblock %}

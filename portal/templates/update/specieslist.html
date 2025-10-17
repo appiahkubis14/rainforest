@@ -1,0 +1,102 @@
+{% extends 'update/base.html' %}
+{% block species %} active  {% endblock %}
+{% block tree_reg %} menu-open {% endblock %}
+{% load static %}
+
+{% load humanize %}
+
+
+<link rel="stylesheet" type="text/css" href="/static/dist/fancybox/jquery.fancybox-1.3.4.css" media="screen" />
+       
+
+
+   
+
+{% block css %}
+
+
+{% endblock%}
+
+
+{% block body %}
+
+
+
+<div class="content-wrapper" style="padding-top:0.4%">
+<div class="row card" style="margin: 5%;padding: 2%;">
+<div class="row">
+     <div class="col-md-3">
+ </div>  
+    <div class="col-md-5">
+    <input type="text" class="form-control " placeholder="Search by Species Name" name="" id="searchbox">
+    </div>  
+    <div class="col-md-2">
+    <button class="btn btn-success" id="searchbutton">Search</button>
+    </div>  
+</div>	
+
+<div class="row" id="data_cont">
+</div>
+
+</div>
+</div>
+
+
+
+
+{% endblock %}
+
+
+
+{% block js %}
+   
+<script type="text/javascript">
+
+Fancybox.bind("[data-fancybox]", {
+  Thumbs: {
+    Carousel: {
+      Sync : {
+        friction: 0.9
+      }
+    },
+  },
+});
+
+$('#searchbutton').click(function(){
+
+loader()
+$.get("/speciestbl/?search="+$("#searchbox").val(),function(data){
+
+    $("#data_cont").html(data)
+    unload()
+})
+
+
+})
+
+
+loader()
+$.get("/speciestbl/",function(data){
+
+    $("#data_cont").html(data)
+    unload()
+})
+
+</script>
+
+
+
+ <!-- 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+ -->
+<!-- <script src="/static/plugins/jquery/jquery.min.js"></script> -->
+   <!--   <script type="text/javascript" src="/static/dist/fancybox/jquery.mousewheel-3.0.4.pack.js"></script>
+    <script type="text/javascript" src="/static/dist/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+    <script type="text/javascript">
+    	 $("a#example5").fancybox();
+    </script> -->
+
+
+
+
+
+{% endblock %}

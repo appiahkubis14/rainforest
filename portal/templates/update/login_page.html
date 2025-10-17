@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+ 
+    <title>HCMS PORTAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/dist/css/adminlte.min%EF%B9%96v=3.2.0.css">
+    <style type="text/css">
+    body {
+        font-family: "Lato", sans-serif;
+    }
+
+
+
+    .main-head {
+        height: 150px;
+        background: #FFF;
+    }
+
+    .sidenav {
+        height: 100%;
+        background-color: green;
+        background-image: url('/static/dist/img/back.jpeg');
+        background-size: cover;
+        overflow-x: hidden;
+        padding-top: 20px;
+    }
+
+
+    .main {
+        padding: 0px 10px;
+    }
+
+    @media screen and (max-height: 450px) {
+        .sidenav {
+            padding-top: 15px;
+        }
+    }
+
+    @media screen and (max-width: 450px) {
+        .login-form {
+            margin-top: 10%;
+        }
+
+        .register-form {
+            margin-top: 10%;
+        }
+    }
+
+    @media screen and (min-width: 768px) {
+        .main {
+            margin-left: 50%;
+        }
+
+        .sidenav {
+            width: 50%;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+        }
+
+        .login-form {
+            margin-top: 80%;
+        }
+
+        .register-form {
+            margin-top: 20%;
+        }
+    }
+
+
+    .login-main-text {
+        margin-top: 20%;
+        padding: 60px;
+        color: #fff;
+    }
+
+    .login-main-text h2 {
+        font-weight: 300;
+    }
+
+    .btn-black {
+        background-color: #000 !important;
+        color: #fff;
+    }
+
+    .form-group {
+        margin: 3rem 0px;
+    }
+    </style>
+   
+</head>
+
+<body>
+    <div class="sidenav">
+        <!-- <div class="login-main-text">
+            <h2>Application<br> Login Page</h2>
+            <p>Login or register from here to access.</p>
+        </div> -->
+    </div>
+    <div class="main">
+        <div class="container">
+            <div class="row" style="padding-top: 10vh;">
+                <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+                    <img src="/static/dist/img/011.png" alt="AdminLTE Logo" class="img-circle" style=" width: 40%; margin: 5px 30%;">
+                    <h4 style="text-align: center; color: #288541;">Log into your account</h4>
+                    <br><br>
+                    <div class="login-or">
+                        <hr class="hr-or">
+                    </div>
+                    <form role="form">
+                        <div class="form-group">
+                            <!-- <label for="inputUsernameEmail">Username or email</label> -->
+                            <input type="text" class="form-control" id="username" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <!-- <label for="inputPassword">Password</label> -->
+                            <input type="password" class="form-control" id="password" placeholder="Password">
+                        </div>
+                        <div class="checkbox pull-right">
+                            <p style="text-align: center;">
+                                Already have an account? Click here to <a class="pull-right" href="#" style="color: #288541;">Sign up</a>
+                            </p>
+                        </div>
+                        <br><br>
+                        <p style="text-align: center;">
+                            <button type="submit" id="submit" class="btn btn btn-primary" style="width:150px; background:#288541; border:1px solid #288541; padding: 5px 20px; border-radius: 12px;">
+                                Sign In
+                            </button>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- jQuery library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+
+<!-- Popper JS -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+    $('#submit').click(function(e) {
+
+        e.preventDefault();
+        var uname = $("#username").val();
+        var password = $("#password").val();
+        console.log(uname)
+        console.log(password)
+           $.ajax({
+            url: "/loginauthenticate/",
+            type: "POST",
+            data: { "username": uname, "password": password },
+            dataType: "",
+            async: false,
+            success: function(data) {
+                console.log(data)
+                if (data == "pass") {
+                 window.location.replace(/dashboard/)
+                }else{
+                  alert("Wrong Username or Password")
+                    // notification(data["status"], "notify");
+                }
+            }
+        });
+
+    });  
+
+
+     </script>
+</body>
+
+</html>
