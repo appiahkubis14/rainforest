@@ -29,7 +29,6 @@
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
-        will-change: transform; /* Performance optimization */
     }
 
     .stat-card::before {
@@ -86,7 +85,6 @@
         margin-bottom: 25px;
         border: 1px solid rgba(0,0,0,0.05);
         min-height: 400px;
-        will-change: transform; /* Performance optimization */
     }
 
     .chart-header {
@@ -165,16 +163,6 @@
     #comspe tbody td {
         padding: 12px;
         border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-
-    /* Highcharts Customization */
-    .highcharts-background {
-        fill: transparent !important;
-    }
-
-    .highcharts-title {
-        font-weight: 600 !important;
-        color: #2C3E50 !important;
     }
 
     /* Chart container specific styles */
@@ -316,6 +304,16 @@
         .data-table-container {
             padding: 15px 10px;
         }
+        
+        /* Mobile table optimizations */
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        #comspe thead th,
+        #comspe tbody td {
+            padding: 10px 8px;
+        }
     }
 
     @media (max-width: 400px) {
@@ -330,22 +328,34 @@
         .stat-card .stat-label {
             font-size: 0.8rem;
         }
-    }
-
-    /* Animation */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
+        
+        .chart-container {
+            padding: 12px 8px;
         }
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        
+        .chart-title {
+            font-size: 1rem;
         }
     }
 
-    .fade-in-up {
-        animation: fadeInUp 0.6s ease-out;
+    /* Mobile-first responsive utilities */
+    .mobile-stack {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .mobile-hide {
+        display: block;
+    }
+    
+    @media (max-width: 768px) {
+        .mobile-stack {
+            flex-direction: column;
+        }
+        
+        .mobile-hide {
+            display: none;
+        }
     }
 
     /* Status Indicators */
@@ -368,18 +378,7 @@
         color: #f39c12;
     }
     
-    /* Error state for debugging */
-    .chart-error {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: #dc3545;
-        font-weight: 500;
-        text-align: center;
-        padding: 20px;
-    }
-    
+    /* Loading states */
     .chart-placeholder {
         display: flex;
         align-items: center;
@@ -393,20 +392,21 @@
         border-radius: 8px;
     }
 
-    /* Performance optimizations */
-    .highcharts-container {
-        transform: translateZ(0); /* GPU acceleration */
+    .chart-error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #dc3545;
+        font-weight: 500;
+        text-align: center;
+        padding: 20px;
     }
 
-    /* Loading states */
+    /* Performance optimizations */
     .content-loading {
         opacity: 0.7;
         pointer-events: none;
-    }
-
-    /* Optimized transitions */
-    * {
-        transition: opacity 0.3s ease, transform 0.3s ease;
     }
 </style>
 {% endblock%}
@@ -414,7 +414,7 @@
 {% block body %}
 <div class="dashboard-wrapper">
     <!-- Stats Overview -->
-    <div class="stats-grid fade-in-up">
+    <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon">
                 <i class="fas fa-users"></i>
@@ -455,7 +455,7 @@
     <!-- Main Charts Grid -->
     <div class="main-grid">
         <!-- Farm Distribution Chart -->
-        <div class="chart-container fade-in-up">
+        <div class="chart-container">
             <div class="chart-header">
                 <h3 class="chart-title">Farm Distribution Analysis</h3>
             </div>
@@ -467,14 +467,10 @@
                     </div>
                 </div>
             </div>
-            <div id="ipie-error" class="chart-error" style="display: none;">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Chart data not available
-            </div>
         </div>
 
         <!-- Gender Distribution Chart -->
-        <div class="chart-container fade-in-up">
+        <div class="chart-container">
             <div class="chart-header">
                 <h3 class="chart-title">Gender Distribution</h3>
             </div>
@@ -486,17 +482,13 @@
                     </div>
                 </div>
             </div>
-            <div id="idash-error" class="chart-error" style="display: none;">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Chart data not available
-            </div>
         </div>
     </div>
 
     <!-- Secondary Grid -->
     <div class="secondary-grid">
         <!-- Community Distribution -->
-        <div class="chart-container fade-in-up">
+        <div class="chart-container">
             <div class="chart-header">
                 <h3 class="chart-title">Community Farm Distribution</h3>
             </div>
@@ -508,14 +500,10 @@
                     </div>
                 </div>
             </div>
-            <div id="community_dash-error" class="chart-error" style="display: none;">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Chart data not available
-            </div>
         </div>
 
         <!-- Key Metrics -->
-        <div class="fade-in-up">
+        <div>
             <div class="stats-grid" style="grid-template-columns: 1fr; gap: 15px;">
                 <div class="stat-card">
                     <div class="stat-icon">
@@ -548,7 +536,7 @@
     </div>
 
     <!-- Community Species Table -->
-    <div class="data-table-container fade-in-up">
+    <div class="data-table-container">
         <div class="table-header">
             <h3 class="table-title">Community Species Overview</h3>
             <div class="table-actions">
@@ -597,103 +585,17 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
+
 {% block js %}
-<!-- Load required libraries with optimized loading -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Optimized library loading with fallbacks -->
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
-<!-- Highcharts with optimized loading strategy -->
 <script>
-// Optimized Highcharts loader with performance monitoring
-window.initializeHighcharts = function() {
-    return new Promise((resolve, reject) => {
-        if (window.Highcharts) {
-            console.log('Highcharts already loaded');
-            resolve();
-            return;
-        }
-
-        const startTime = performance.now();
-        const script = document.createElement('script');
-        
-        // Use a single, reliable CDN
-        script.src = 'https://cdn.jsdelivr.net/npm/highcharts@11.0.0/highcharts.js';
-        
-        script.onload = () => {
-            const loadTime = performance.now() - startTime;
-            console.log(`Highcharts loaded in ${loadTime.toFixed(2)}ms`);
-            
-            // Load essential modules in background
-            loadHighchartsModules().then(resolve).catch(resolve);
-        };
-        
-        script.onerror = () => {
-            console.error('Failed to load Highcharts from CDN');
-            reject(new Error('Highcharts loading failed'));
-        };
-        
-        // Set async and defer for better performance
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-    });
-};
-
-// Load only essential modules
-window.loadHighchartsModules = function() {
-    const modules = ['exporting.js', 'export-data.js'];
-    const baseUrl = 'https://cdn.jsdelivr.net/npm/highcharts@11.0.0/modules/';
-    
-    const loadModule = (module) => {
-        return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = baseUrl + module;
-            script.onload = resolve;
-            script.onerror = resolve; // Don't fail the whole process
-            script.async = true;
-            document.head.appendChild(script);
-        });
-    };
-    
-    return Promise.all(modules.map(loadModule));
-};
-</script>
-
-<!-- Your other scripts -->
-<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
-<script src="/static/app/js/gauge.js"></script>
-
-<script type="text/javascript">
-// Enhanced loading functions
-function showLoading(message) {
-    // Use your existing blockUI loader
-    $.blockUI({ 
-        message: message ? `<div class="text-center"><img src="/static/rootApp/img/eok.gif" style="width:40%" /><br><small class="text-white">${message}</small></div>` : '<img src="/static/rootApp/img/eok.gif" style="width:40%" />',  
-        css: { 
-            backgroundColor: 'transparent', 
-            color: 'white',
-            border: "transparent",
-            fontSize: '16px'
-        },
-        overlayCSS: {
-            backgroundColor: '#000',
-            opacity: 0.7,
-            cursor: 'wait'
-        }
-    });
-}
-
-function hideLoading() {
-    $.unblockUI();
-}
-
 // Performance monitoring
-const perf = {
-    start: {},
+
+window.dashboardPerf = {
+    startTime: performance.now(),
     marks: {},
     
     mark: function(name) {
@@ -713,37 +615,123 @@ const perf = {
     }
 };
 
-// Main initialization with performance optimization
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Dashboard initialization started');
-    perf.mark('total_initialization');
-    
-    // Show initial loading
-    showLoading('Initializing dashboard...');
-    
-    // Initialize in stages for better perceived performance
-    setTimeout(() => initializeDashboardStages(), 100);
-});
-
-function initializeDashboardStages() {
-    perf.mark('stage1_datatable');
-    
-    // Stage 1: Initialize DataTable (fast, visible content)
-    initializeDataTable();
-    
-    // Stage 2: Load Highcharts in background
-    setTimeout(() => {
-        perf.mark('stage2_highcharts');
-        loadHighchartsAndCharts();
-    }, 300);
-    
-    // Stage 3: Final optimizations
-    setTimeout(() => {
-        perf.mark('stage3_optimizations');
-        applyFinalOptimizations();
-    }, 1000);
+// Load critical resources in parallel
+function loadCriticalResources() {
+    return new Promise((resolve) => {
+        let loaded = 0;
+        const total = 2;
+        
+        function resourceLoaded() {
+            loaded++;
+            if (loaded === total) {
+                console.log('✅ All critical resources loaded');
+                resolve();
+            }
+        }
+        
+        // Load jQuery
+        if (typeof jQuery === 'undefined') {
+            const jqueryScript = document.createElement('script');
+            jqueryScript.src = 'https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js';
+            jqueryScript.onload = resourceLoaded;
+            jqueryScript.onerror = resourceLoaded; // Continue even if fails
+            document.head.appendChild(jqueryScript);
+        } else {
+            resourceLoaded();
+        }
+        
+        // Load DataTables CSS
+        const datatablesCSS = document.createElement('link');
+        datatablesCSS.rel = 'stylesheet';
+        datatablesCSS.href = 'https://cdn.jsdelivr.net/npm/datatables@1.13.6/dist/dataTables.dataTables.min.css';
+        document.head.appendChild(datatablesCSS);
+        resourceLoaded();
+    });
 }
 
+// Optimized Highcharts loader
+function loadHighcharts() {
+    return new Promise((resolve) => {
+        if (window.Highcharts) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/highcharts@11.0.0/highcharts.js';
+        script.async = true;
+        
+        script.onload = () => {
+            // Load essential modules
+            const modules = ['exporting', 'export-data', 'accessibility'];
+            let modulesLoaded = 0;
+            
+            modules.forEach(module => {
+                const moduleScript = document.createElement('script');
+                moduleScript.src = `https://cdn.jsdelivr.net/npm/highcharts@11.0.0/modules/${module}.js`;
+                moduleScript.async = true;
+                moduleScript.onload = () => {
+                    modulesLoaded++;
+                    if (modulesLoaded === modules.length) {
+                        console.log('✅ Highcharts and modules loaded');
+                        resolve();
+                    }
+                };
+                moduleScript.onerror = () => {
+                    modulesLoaded++;
+                    if (modulesLoaded === modules.length) {
+                        console.log('✅ Highcharts loaded (some modules failed)');
+                        resolve();
+                    }
+                };
+                document.head.appendChild(moduleScript);
+            });
+        };
+        
+        script.onerror = () => {
+            console.warn('⚠️ Highcharts failed to load');
+            resolve(); // Continue without charts
+        };
+        
+        document.head.appendChild(script);
+    });
+}
+
+// Main initialization
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Dashboard initialization started');
+    dashboardPerf.mark('total_initialization');
+    
+    // Show loading state
+    showLoading('Initializing dashboard...');
+    
+    // Initialize in optimized stages
+    initializeDashboard();
+});
+
+function initializeDashboard() {
+    // Stage 1: Load critical resources and initialize DataTable
+    loadCriticalResources().then(() => {
+        dashboardPerf.mark('stage1_datatable');
+        initializeDataTable();
+        
+        // Stage 2: Load Highcharts and initialize charts
+        setTimeout(() => {
+            dashboardPerf.mark('stage2_highcharts');
+            loadHighcharts().then(() => {
+                initializeCharts();
+            }).catch(() => {
+                initializeCharts(); // Try even if Highcharts fails
+            });
+        }, 100);
+        
+        // Stage 3: Final optimizations
+        setTimeout(() => {
+            dashboardPerf.mark('stage3_optimizations');
+            finalizeDashboard();
+        }, 500);
+    });
+}
 function initializeDataTable() {
     try {
         if (typeof $ !== 'undefined' && $.fn.DataTable) {
@@ -782,114 +770,44 @@ function initializeDataTable() {
     }
 }
 
-function loadHighchartsAndCharts() {
-    console.log('📈 Loading Highcharts and charts...');
-    
-    showLoading('Loading charts and analytics...');
-    
-    window.initializeHighcharts()
-        .then(() => {
-            console.log('✅ Highcharts loaded successfully');
-            perf.measure('stage2_highcharts');
-            
-            // Initialize charts with a small delay to ensure DOM is ready
-            setTimeout(() => {
-                initializeCharts();
-                perf.measure('total_initialization');
-            }, 200);
-        })
-        .catch((error) => {
-            console.error('❌ Highcharts loading failed:', error);
-            showChartErrors();
-            hideLoading();
-        });
-}
-
-function applyFinalOptimizations() {
-    console.log('⚡ Applying final optimizations...');
-    
-    // Remove any remaining loading states
-    $('.chart-placeholder').fadeOut(300);
-    
-    // Enable smooth transitions
-    $('body').removeClass('content-loading');
-    
-    console.log('✅ Dashboard fully initialized');
-    perf.measure('stage3_optimizations');
-}
-
-// Debug function to check if data is available
-function debugData() {
-    if (console.debug) {
-        console.debug('=== DASHBOARD DATA DEBUG ===');
-        console.debug('Farm Distribution Data:', {
-            natural: {{natural|default:0}},
-            planted: {{planted|default:0}}
-        });
-        
-        console.debug('Gender Distribution Data:', {{farm|safe|default:"[]"}});
-        
-        console.debug('Community Distribution Data:', {{communityfarm|safe|default:"[]"}});
-        
-        console.debug('Total Farmers:', {{totalben|default:0}});
-        console.debug('Total Trees:', {{total_tree|default:0}});
-        console.debug('=== END DEBUG ===');
-    }
-}
-
-// Optimized chart initialization
 function initializeCharts() {
-    console.log('🎨 Initializing charts...');
-    debugData();
-    
     if (typeof Highcharts === 'undefined') {
-        console.error('❌ Highcharts not available for chart initialization');
-        showChartErrors();
-        hideLoading();
+        console.warn('Highcharts not available, showing placeholder charts');
+        showChartPlaceholders();
         return;
     }
     
-    let chartsCompleted = 0;
-    const totalCharts = 3;
-    
-    function chartCompleted() {
-        chartsCompleted++;
-        console.log(`📊 Chart ${chartsCompleted}/${totalCharts} completed`);
-        
-        if (chartsCompleted === totalCharts) {
-            console.log('✅ All charts initialized successfully');
-            // Small delay to ensure smooth transition
-            setTimeout(hideLoading, 500);
-        }
-    }
-    
     // Initialize charts with error handling
-    try {
-        initializeFarmDistributionChart(chartCompleted);
-        initializeGenderDistributionChart(chartCompleted);
-        initializeCommunityDistributionChart(chartCompleted);
-    } catch (error) {
-        console.error('❌ Error during chart initialization:', error);
-        hideLoading();
-    }
+    const chartPromises = [
+        initializeFarmDistributionChart(),
+        initializeGenderDistributionChart(),
+        initializeCommunityDistributionChart()
+    ];
+    
+    // Wait for all charts or timeout
+    Promise.race([
+        Promise.allSettled(chartPromises),
+        new Promise(resolve => setTimeout(resolve, 3000)) // 3s timeout
+    ]).then(() => {
+        console.log('✅ All charts processed');
+        dashboardPerf.measure('stage2_highcharts');
+    });
 }
 
-function initializeFarmDistributionChart(onComplete) {
-    try {
-        const natural = parseInt('{{natural|default:0}}') || 0;
-        const planted = parseInt('{{planted|default:0}}') || 0;
-        const totalFarms = natural + planted;
-        
-        if (totalFarms > 0) {
-            // Remove placeholder with fade effect
-            $('#ipie .chart-placeholder').fadeOut(300, function() {
-                $(this).remove();
+function initializeFarmDistributionChart() {
+    return new Promise((resolve) => {
+        try {
+            const natural = parseInt('{{natural|default:0}}') || 0;
+            const planted = parseInt('{{planted|default:0}}') || 0;
+            const totalFarms = natural + planted;
+            
+            if (totalFarms > 0) {
+                $('#ipie .chart-placeholder').remove();
                 
                 Highcharts.chart('ipie', {
                     chart: {
                         type: 'pie',
-                        backgroundColor: 'transparent',
-                        style: { fontFamily: 'Inter, sans-serif' }
+                        backgroundColor: 'transparent'
                     },
                     colors: ['#4A7C3A', '#8BC34A'],
                     title: { text: null },
@@ -935,55 +853,45 @@ function initializeFarmDistributionChart(onComplete) {
                     }],
                     credits: { enabled: false }
                 });
-                
-                console.log('✅ Farm distribution chart initialized');
-                onComplete();
-            });
-        } else {
-            showNoDataMessage('ipie', 'No farm distribution data available');
-            onComplete();
+            } else {
+                showNoDataMessage('ipie', 'No farm distribution data available');
+            }
+        } catch (error) {
+            console.error('Farm distribution chart error:', error);
+            showChartError('ipie', 'Failed to load chart');
         }
-    } catch (error) {
-        console.error('❌ Farm distribution chart error:', error);
-        showChartError('ipie', 'Failed to load farm distribution');
-        onComplete();
-    }
+        resolve();
+    });
 }
 
-function initializeGenderDistributionChart(onComplete) {
-    try {
-        let farmData = [];
+function initializeGenderDistributionChart() {
+    return new Promise((resolve) => {
         try {
-            const rawFarmData = JSON.parse('{{farm|safe|default:"[]"}}'.replace(/&quot;/g, '"'));
-            
-            if (Array.isArray(rawFarmData)) {
-                farmData = rawFarmData.map(item => {
-                    if (Array.isArray(item) && item.length >= 2) {
-                        return {
-                            name: item[0] || 'Unknown',
-                            y: parseInt(item[1]) || 0
-                        };
-                    } else if (typeof item === 'object' && item !== null) {
-                        return item;
-                    }
-                    return { name: 'Unknown', y: 0 };
-                }).filter(item => item.y > 0);
+            let farmData = [];
+            try {
+                const rawFarmData = JSON.parse('{{farm|safe|default:"[]"}}'.replace(/&quot;/g, '"'));
+                if (Array.isArray(rawFarmData)) {
+                    farmData = rawFarmData.map(item => {
+                        if (Array.isArray(item) && item.length >= 2) {
+                            return {
+                                name: item[0] || 'Unknown',
+                                y: parseInt(item[1]) || 0
+                            };
+                        }
+                        return { name: 'Unknown', y: 0 };
+                    }).filter(item => item.y > 0);
+                }
+            } catch (e) {
+                console.error('Error parsing gender data:', e);
             }
-        } catch (e) {
-            console.error('Error parsing gender data:', e);
-        }
-        
-        const hasValidData = farmData.length > 0 && farmData.some(item => item.y > 0);
-        
-        if (hasValidData) {
-            $('#idash .chart-placeholder').fadeOut(300, function() {
-                $(this).remove();
+            
+            if (farmData.length > 0 && farmData.some(item => item.y > 0)) {
+                $('#idash .chart-placeholder').remove();
                 
                 Highcharts.chart('idash', {
                     chart: {
                         type: 'column',
-                        backgroundColor: 'transparent',
-                        style: { fontFamily: 'Inter, sans-serif' }
+                        backgroundColor: 'transparent'
                     },
                     title: { text: null },
                     colors: ['#4A7C3A', '#8BC34A', '#A5D6A7'],
@@ -1031,40 +939,35 @@ function initializeGenderDistributionChart(onComplete) {
                     }],
                     credits: { enabled: false }
                 });
-                
-                console.log('✅ Gender distribution chart initialized');
-                onComplete();
-            });
-        } else {
-            showNoDataMessage('idash', 'No gender distribution data available');
-            onComplete();
+            } else {
+                showNoDataMessage('idash', 'No gender distribution data available');
+            }
+        } catch (error) {
+            console.error('Gender distribution chart error:', error);
+            showChartError('idash', 'Failed to load chart');
         }
-    } catch (error) {
-        console.error('❌ Gender distribution chart error:', error);
-        showChartError('idash', 'Failed to load gender distribution');
-        onComplete();
-    }
+        resolve();
+    });
 }
 
-function initializeCommunityDistributionChart(onComplete) {
-    try {
-        let communityData = [];
+function initializeCommunityDistributionChart() {
+    return new Promise((resolve) => {
         try {
-            const rawCommunityData = JSON.parse('{{communityfarm|safe|default:"[]"}}'.replace(/&quot;/g, '"'));
-            communityData = rawCommunityData;
-        } catch (e) {
-            console.error('Error parsing community data:', e);
-        }
-        
-        const hasValidData = communityData && Array.isArray(communityData) && 
-                           communityData.length > 0 && 
-                           communityData.some(item => Array.isArray(item) && item.length >= 2 && parseInt(item[1]) > 0);
-        
-        if (hasValidData) {
-            $('#community_dash .chart-placeholder').fadeOut(300, function() {
-                $(this).remove();
+            let communityData = [];
+            try {
+                const rawCommunityData = JSON.parse('{{communityfarm|safe|default:"[]"}}'.replace(/&quot;/g, '"'));
+                communityData = rawCommunityData;
+            } catch (e) {
+                console.error('Error parsing community data:', e);
+            }
+            
+            const hasValidData = communityData && Array.isArray(communityData) && 
+                               communityData.length > 0 && 
+                               communityData.some(item => Array.isArray(item) && item.length >= 2 && parseInt(item[1]) > 0);
+            
+            if (hasValidData) {
+                $('#community_dash .chart-placeholder').remove();
                 
-                // Original community chart style
                 Highcharts.chart('community_dash', {
                     chart: { type: 'column' },
                     title: { text: 'FARM DISTRIBUTION BY COMMUNITY' },
@@ -1103,22 +1006,69 @@ function initializeCommunityDistributionChart(onComplete) {
                     }],
                     credits: { enabled: false }
                 });
-                
-                console.log('✅ Community distribution chart initialized');
-                onComplete();
-            });
-        } else {
-            showNoDataMessage('community_dash', 'No community distribution data available');
-            onComplete();
+            } else {
+                showNoDataMessage('community_dash', 'No community distribution data available');
+            }
+        } catch (error) {
+            console.error('Community distribution chart error:', error);
+            showChartError('community_dash', 'Failed to load chart');
         }
-    } catch (error) {
-        console.error('❌ Community distribution chart error:', error);
-        showChartError('community_dash', 'Failed to load community distribution');
-        onComplete();
+        resolve();
+    });
+}
+
+function finalizeDashboard() {
+    // Hide loading
+    hideLoading();
+    
+    // Measure total performance
+    dashboardPerf.measure('total_initialization');
+    dashboardPerf.measure('stage3_optimizations');
+    
+    console.log('✅ Dashboard fully initialized');
+    
+    // Add responsive behavior
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (window.Highcharts) {
+                Highcharts.charts.forEach(function(chart) {
+                    if (chart) {
+                        setTimeout(() => chart.reflow(), 100);
+                    }
+                });
+            }
+        }, 250);
+    });
+}
+
+// Utility functions
+function showLoading(message) {
+    if (typeof $ !== 'undefined' && $.blockUI) {
+        $.blockUI({ 
+            message: message ? `<div class="text-center"><img src="/static/rootApp/img/eok.gif" style="width:40%" /><br><small class="text-white">${message}</small></div>` : '<img src="/static/rootApp/img/eok.gif" style="width:40%" />',  
+            css: { 
+                backgroundColor: 'transparent', 
+                color: 'white',
+                border: "transparent",
+                fontSize: '16px'
+            },
+            overlayCSS: {
+                backgroundColor: '#000',
+                opacity: 0.7,
+                cursor: 'wait'
+            }
+        });
     }
 }
 
-// Helper functions
+function hideLoading() {
+    if (typeof $ !== 'undefined' && $.unblockUI) {
+        $.unblockUI();
+    }
+}
+
 function showNoDataMessage(chartId, message) {
     const container = document.getElementById(chartId);
     if (container) {
@@ -1145,34 +1095,16 @@ function showChartError(chartId, message) {
     }
 }
 
-function showChartErrors() {
-    showChartError('ipie', 'Chart data not available');
-    showChartError('idash', 'Chart data not available');
-    showChartError('community_dash', 'Chart data not available');
+function showChartPlaceholders() {
+    showChartError('ipie', 'Charts not available');
+    showChartError('idash', 'Charts not available');
+    showChartError('community_dash', 'Charts not available');
 }
 
-// Fallback timeout
+// Fallback timeout - if anything takes too long
 setTimeout(() => {
-    if ($('.blockUI').length > 0) {
-        console.warn('⚠️ Dashboard taking too long, forcing completion');
-        hideLoading();
-    }
-}, 10000); // 10 second timeout
-
-// Add responsive behavior for window resize
-let resizeTimeout;
-window.addEventListener('resize', function() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        if (window.Highcharts) {
-            // Reflow charts on window resize
-            Highcharts.charts.forEach(function(chart) {
-                if (chart) {
-                    chart.reflow();
-                }
-            });
-        }
-    }, 250);
-});
+    hideLoading();
+    console.log('⚠️ Dashboard initialization timeout - forcing completion');
+}, 8000); // 8 second timeout
 </script>
 {% endblock %}

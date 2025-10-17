@@ -839,7 +839,68 @@ body.fullscreen-mode {
 }
 
 
+/* Tree Icon Styles */
+.tree-icon-marker,
+.tree-icon-marker-1,
+.tree-icon-marker-2,
+.tree-icon-marker-3 {
+    background: transparent !important;
+    border: none !important;
+}
 
+.tree-popup-container .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.tree-popup-container .leaflet-popup-content {
+    margin: 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tree-popup {
+    min-width: 200px;
+}
+
+.tree-popup strong {
+    color: #2d5016;
+    display: block;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 5px;
+}
+
+.tree-popup div {
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tree-popup div strong {
+    color: #495057;
+    font-weight: 600;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Tree layer opacity control */
+.tree-layer-opacity {
+    margin-top: 10px;
+}
+
+.tree-layer-opacity label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.tree-layer-opacity input {
+    width: 100%;
+}
 
 </style>
 {% endblock%}
@@ -1046,6 +1107,7 @@ body.fullscreen-mode {
                             </div>
 
                             <!-- Farm Data Layers Section -->
+                            <!-- Farm Data Layers Section -->
                             <div class="control-section">
                                 <div class="section-header" data-toggle="farm-data-section" style="display: flex;gap: 8px;">
                                     <i class="fas fa-tractor"></i>
@@ -1075,6 +1137,15 @@ body.fullscreen-mode {
                                         </h6>
                                         <input type="range" class="form-range farm-opacity-slider" id="farmOpacitySlider" min="0" max="100" value="70">
                                         <small class="text-muted" id="farmOpacityValue">70%</small>
+                                    </div>
+
+                                    <!-- Tree Layers Opacity -->
+                                    <div class="tree-layer-opacity mt-3">
+                                        <label class="opacity-title">
+                                            <i class="fas fa-tree me-1"></i>Tree Icons Opacity
+                                        </label>
+                                        <input type="range" class="form-range tree-opacity-slider" id="treeOpacitySlider" min="0" max="100" value="100">
+                                        <small class="text-muted" id="treeOpacityValue">100%</small>
                                     </div>
                                 </div>
                             </div>
@@ -1490,10 +1561,22 @@ body.fullscreen-mode {
         const fitToBoundsBtn = document.getElementById('fitToBounds');
         const clearSelectionBtn = document.getElementById('clearSelection');
         const fullScreenBtn = document.getElementById('fullScreenBtn');
-        
+
+
         if (refreshMapBtn) {
-            refreshMapBtn.addEventListener('click', refreshMap);
+            refreshMapBtn.addEventListener('click', function(e) {
+                if (e.shiftKey) {
+                    // Shift+click to force refresh from server
+                    clearDataCache();
+                    showToast('Forcing data refresh from server...', 'info');
+                }
+                refreshMap();
+            });
         }
+        
+        // if (refreshMapBtn) {
+        //     refreshMapBtn.addEventListener('click', refreshMap);
+        // }
         
         if (fitToBoundsBtn) {
             fitToBoundsBtn.addEventListener('click', fitToBounds);
@@ -1672,39 +1755,130 @@ body.fullscreen-mode {
     }
 // ==================== FARM DATA FUNCTIONS ====================
 
+
+let cachedFarmData = null;
+let cachedTreeData = null;
+let isDataLoaded = false;
+let dataLoadPromise = null;
+
+
+function preloadAllData() {
+    if (dataLoadPromise) return dataLoadPromise; // Return existing promise if already loading
+    
+    dataLoadPromise = new Promise((resolve, reject) => {
+        console.log('Starting background data preloading...');
+        
+        Promise.all([
+            fetch('/farmboundarylayer/').then(response => response.json()),
+            fetch('/gettrees/').then(response => response.json())
+        ]).then(([farmData, treeData]) => {
+            // Cache the data
+            cachedFarmData = farmData;
+            cachedTreeData = treeData;
+            isDataLoaded = true;
+            
+            console.log('Background data loading completed');
+            console.log('Farm data features:', farmData.features ? farmData.features.length : 0);
+            console.log('Tree data loaded:', treeData ? 'Yes' : 'No');
+            
+            resolve({ farmData, treeData });
+        }).catch(error => {
+            console.error('Background data loading failed:', error);
+            reject(error);
+        });
+    });
+    
+    return dataLoadPromise;
+}
+
 function loadFarmData() {
     showLoading('Loading farm data...');
 
-    {% if code %}
-    // Load specific farm data
-    Promise.all([
-        fetch('/farmboundarylayer/?code={{code}}').then(response => response.json()),
-        fetch('/gettrees/{{code}}/').then(response => response.json())
-    ]).then(([farmData, treeData]) => {
-        hideLoading();
-        processFarmData(farmData, treeData);
-        showToast('Farm data loaded successfully', 'success');
-    }).catch(error => {
-        hideLoading();
-        console.error('Error loading farm data:', error);
-        showToast('Error loading farm data', 'error');
-    });
-    {% else %}
-    // Load all farm data
-    Promise.all([
-        fetch('/farmboundarylayer/').then(response => response.json()),
-        fetch('/gettrees/').then(response => response.json())
-    ]).then(([farmData, treeData]) => {
-        hideLoading();
-        processFarmData(farmData, treeData);
-        showToast('Farm data loaded successfully', 'success');
-    }).catch(error => {
-        hideLoading();
-        console.error('Error loading farm data:', error);
-        showToast('Error loading farm data', 'error');
-    });
-    {% endif %}
+    // Use cached data if available, otherwise load fresh
+    if (isDataLoaded && cachedFarmData && cachedTreeData) {
+        console.log('Using cached data for display');
+        setTimeout(() => {
+            hideLoading();
+            processFarmData(cachedFarmData, cachedTreeData);
+            showToast('Farm data loaded from cache', 'success');
+        }, 100);
+    } else {
+        console.log('Loading fresh data...');
+        {% if code %}
+        // Load specific farm data
+        Promise.all([
+            fetch('/farmboundarylayer/?code={{code}}').then(response => response.json()),
+            fetch('/gettrees/{{code}}/').then(response => response.json())
+        ]).then(([farmData, treeData]) => {
+            hideLoading();
+            processFarmData(farmData, treeData);
+            showToast('Farm data loaded successfully', 'success');
+        }).catch(error => {
+            hideLoading();
+            console.error('Error loading farm data:', error);
+            showToast('Error loading farm data', 'error');
+        });
+        {% else %}
+        // Load all farm data
+        Promise.all([
+            fetch('/farmboundarylayer/').then(response => response.json()),
+            fetch('/gettrees/').then(response => response.json())
+        ]).then(([farmData, treeData]) => {
+            hideLoading();
+            processFarmData(farmData, treeData);
+            showToast('Farm data loaded successfully', 'success');
+        }).catch(error => {
+            hideLoading();
+            console.error('Error loading farm data:', error);
+            showToast('Error loading farm data', 'error');
+        });
+        {% endif %}
+    }
 }
+
+function refreshData() {
+    // Clear cache and reload
+    cachedFarmData = null;
+    cachedTreeData = null;
+    isDataLoaded = false;
+    dataLoadPromise = null;
+    
+    loadFarmData();
+}
+
+// function loadFarmData() {
+//     showLoading('Loading farm data...');
+
+//     {% if code %}
+//     // Load specific farm data
+//     Promise.all([
+//         fetch('/farmboundarylayer/?code={{code}}').then(response => response.json()),
+//         fetch('/gettrees/{{code}}/').then(response => response.json())
+//     ]).then(([farmData, treeData]) => {
+//         hideLoading();
+//         processFarmData(farmData, treeData);
+//         showToast('Farm data loaded successfully', 'success');
+//     }).catch(error => {
+//         hideLoading();
+//         console.error('Error loading farm data:', error);
+//         showToast('Error loading farm data', 'error');
+//     });
+//     {% else %}
+//     // Load all farm data
+//     Promise.all([
+//         fetch('/farmboundarylayer/').then(response => response.json()),
+//         fetch('/gettrees/').then(response => response.json())
+//     ]).then(([farmData, treeData]) => {
+//         hideLoading();
+//         processFarmData(farmData, treeData);
+//         showToast('Farm data loaded successfully', 'success');
+//     }).catch(error => {
+//         hideLoading();
+//         console.error('Error loading farm data:', error);
+//         showToast('Error loading farm data', 'error');
+//     });
+//     {% endif %}
+// }
 
 function processFarmData(farmData, treeData) {
     console.log('Raw farm data:', farmData);
@@ -1751,6 +1925,429 @@ function processFarmData(farmData, treeData) {
     
     renderFarmsOnMap();
 }
+
+
+
+// function processTreeData(treeData) {
+//     // Clear existing tree layer
+//     treeLayer.clearLayers();
+    
+//     console.log('=== TREE DATA STRUCTURE ANALYSIS ===');
+//     console.log('Tree data:', treeData);
+//     console.log('Is array:', Array.isArray(treeData));
+    
+//     if (Array.isArray(treeData)) {
+//         console.log('Array length:', treeData.length);
+//         if (treeData.length > 0) {
+//             console.log('First item type:', treeData[0].type);
+//             console.log('First item has features:', treeData[0].features ? 'Yes' : 'No');
+//             if (treeData[0].features) {
+//                 console.log('Features count:', treeData[0].features.length);
+//             }
+//         }
+//     }
+//     console.log('=== END ANALYSIS ===');
+
+//     let treeFeatures = [];
+    
+//     // Handle the nested structure: [FeatureCollection]
+//     if (Array.isArray(treeData) && treeData.length > 0) {
+//         const firstItem = treeData[0];
+        
+//         // CASE 1: Array containing a FeatureCollection
+//         if (firstItem.type === 'FeatureCollection' && firstItem.features && Array.isArray(firstItem.features)) {
+//             console.log('Tree data: Array containing FeatureCollection with', firstItem.features.length, 'features');
+//             treeFeatures = firstItem.features;
+//         }
+//         // CASE 2: Array of direct features
+//         else if (firstItem.type === 'Feature' && firstItem.geometry) {
+//             console.log('Tree data: Array of direct features, length:', treeData.length);
+//             treeFeatures = treeData;
+//         }
+//         else {
+//             console.warn('Unexpected array structure:', treeData);
+//             return;
+//         }
+//     }
+//     // CASE 3: Direct FeatureCollection (not in array)
+//     else if (treeData && treeData.type === 'FeatureCollection' && treeData.features && Array.isArray(treeData.features)) {
+//         console.log('Tree data: Direct FeatureCollection with', treeData.features.length, 'features');
+//         treeFeatures = treeData.features;
+//     }
+//     else {
+//         console.warn('Tree data not in expected format:', treeData);
+//         return;
+//     }
+    
+//     console.log(`Processing ${treeFeatures.length} tree features`);
+    
+//     let validTrees = 0;
+//     let skippedTrees = 0;
+    
+//     // Create custom tree icon
+//     const treeIcon = L.divIcon({
+//         html: `
+//             <div style="
+//                 background: linear-gradient(135deg, #228B22, #32CD32);
+//                 width: 24px;
+//                 height: 24px;
+//                 border-radius: 50% 50% 50% 0;
+//                 transform: rotate(-45deg);
+//                 display: flex;
+//                 align-items: center;
+//                 justify-content: center;
+//                 box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+//                 border: 2px solid white;
+//             ">
+//                 <div style="
+//                     transform: rotate(45deg);
+//                     color: white;
+//                     font-size: 12px;
+//                     font-weight: bold;
+//                     text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+//                 ">🌲</div>
+//             </div>
+//         `,
+//         className: 'tree-icon-marker',
+//         iconSize: [24, 24],
+//         iconAnchor: [12, 24],
+//         popupAnchor: [0, -24]
+//     });
+
+//     // Alternative tree icons for variety
+//     const treeIcons = [
+//         {
+//             html: `
+//                 <div style="
+//                     background: linear-gradient(135deg, #006400, #228B22);
+//                     width: 22px;
+//                     height: 22px;
+//                     border-radius: 50% 50% 50% 0;
+//                     transform: rotate(-45deg);
+//                     display: flex;
+//                     align-items: center;
+//                     justify-content: center;
+//                     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+//                     border: 2px solid white;
+//                 ">
+//                     <div style="
+//                         transform: rotate(45deg);
+//                         color: white;
+//                         font-size: 10px;
+//                         font-weight: bold;
+//                     ">🌳</div>
+//                 </div>
+//             `,
+//             className: 'tree-icon-marker-1'
+//         },
+//         {
+//             html: `
+//                 <div style="
+//                     background: linear-gradient(135deg, #228B22, #32CD32);
+//                     width: 20px;
+//                     height: 20px;
+//                     border-radius: 50% 50% 50% 0;
+//                     transform: rotate(-45deg);
+//                     display: flex;
+//                     align-items: center;
+//                     justify-content: center;
+//                     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+//                     border: 2px solid white;
+//                 ">
+//                     <div style="
+//                         transform: rotate(45deg);
+//                         color: white;
+//                         font-size: 9px;
+//                         font-weight: bold;
+//                     ">🌴</div>
+//                 </div>
+//             `,
+//             className: 'tree-icon-marker-2'
+//         },
+//         {
+//             html: `
+//                 <div style="
+//                     background: linear-gradient(135deg, #006400, #008000);
+//                     width: 26px;
+//                     height: 26px;
+//                     border-radius: 50% 50% 50% 0;
+//                     transform: rotate(-45deg);
+//                     display: flex;
+//                     align-items: center;
+//                     justify-content: center;
+//                     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+//                     border: 2px solid white;
+//                 ">
+//                     <div style="
+//                         transform: rotate(45deg);
+//                         color: white;
+//                         font-size: 11px;
+//                         font-weight: bold;
+//                     ">🎄</div>
+//                 </div>
+//             `,
+//             className: 'tree-icon-marker-3'
+//         }
+//     ];
+
+//     treeFeatures.forEach((feature, index) => {
+//         // Show progress for large datasets
+//         if (index % 1000 === 0) {
+//             console.log(`Processing tree ${index} of ${treeFeatures.length}`);
+//         }
+        
+//         try {
+//             // This should be a standard GeoJSON Feature
+//             if (feature.type !== 'Feature' || !feature.geometry) {
+//                 console.warn(`Invalid feature at index ${index}:`, feature);
+//                 skippedTrees++;
+//                 return;
+//             }
+            
+//             const geometry = feature.geometry;
+//             const properties = feature.properties || {};
+            
+//             // Only process Point geometries
+//             if (geometry.type !== 'Point') {
+//                 console.warn(`Skipping non-point geometry at index ${index}:`, geometry.type);
+//                 skippedTrees++;
+//                 return;
+//             }
+            
+//             const coords = geometry.coordinates;
+            
+//             // Validate coordinates
+//             if (!Array.isArray(coords) || coords.length < 2 || 
+//                 typeof coords[0] !== 'number' || typeof coords[1] !== 'number') {
+//                 console.warn(`Invalid coordinates at index ${index}:`, coords);
+//                 skippedTrees++;
+//                 return;
+//             }
+            
+//             const lng = coords[0];
+//             const lat = coords[1];
+            
+//             // Validate latitude and longitude ranges
+//             if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+//                 console.warn(`Coordinates out of range at index ${index}:`, [lat, lng]);
+//                 skippedTrees++;
+//                 return;
+//             }
+            
+//             // Choose icon based on tree type or random for variety
+//             const species = (properties.ptn_species || properties.species || properties.tree_species || '').toLowerCase();
+//             let iconConfig;
+            
+//             if (species.includes('palm') || species.includes('coconut')) {
+//                 iconConfig = treeIcons[2]; // Palm tree icon
+//             } else if (species.includes('pine') || species.includes('conifer')) {
+//                 iconConfig = treeIcons[3]; // Christmas tree icon
+//             } else if (species.includes('oak') || species.includes('large')) {
+//                 iconConfig = treeIcons[1]; // Large tree icon
+//             } else {
+//                 // Random icon for variety, but consistent for same tree
+//                 const iconIndex = Math.abs(feature.id || index) % treeIcons.length;
+//                 iconConfig = treeIcons[iconIndex];
+//             }
+            
+//             // Create tree marker with custom icon
+//             const treeIcon = L.divIcon({
+//                 html: iconConfig.html,
+//                 className: iconConfig.className,
+//                 iconSize: [24, 24],
+//                 iconAnchor: [12, 24],
+//                 popupAnchor: [0, -24]
+//             });
+            
+//             const treeMarker = L.marker([lat, lng], {
+//                 icon: treeIcon,
+//                 title: properties.ptn_species || properties.species || 'Tree',
+//                 zIndexOffset: 1000 // Ensure trees appear above other layers
+//             });
+            
+//             // Create popup content
+//             const popupContent = createTreePopupContent(properties, feature.id || index);
+            
+//             // Bind popup
+//             treeMarker.bindPopup(popupContent, {
+//                 className: 'tree-popup-container',
+//                 maxWidth: 300,
+//                 minWidth: 250
+//             });
+            
+//             // Add hover effects
+//             treeMarker.on('mouseover', function(e) {
+//                 this.openPopup();
+//                 // You can add additional hover effects here
+//             });
+            
+//             treeMarker.on('mouseout', function(e) {
+//                 // Optional: auto-close popup on mouseout
+//                 // this.closePopup();
+//             });
+            
+//             // Add to tree layer
+//             treeLayer.addLayer(treeMarker);
+//             validTrees++;
+            
+//         } catch (error) {
+//             console.error(`Error processing tree feature at index ${index}:`, error, feature);
+//             skippedTrees++;
+//         }
+//     });
+    
+//     console.log(`Tree processing complete: ${validTrees} valid, ${skippedTrees} skipped, total ${treeFeatures.length}`);
+    
+//     // If we have valid trees, show the tree layer
+//     if (validTrees > 0) {
+//         if (!map.hasLayer(treeLayer)) {
+//             map.addLayer(treeLayer);
+//         }
+//         showToast(`Loaded ${validTrees} trees with beautiful icons`, 'success');
+        
+//         // Optional: Fit map to show all trees (be careful with 9852 trees!)
+//         if (validTrees > 0 && validTrees < 1000) {
+//             const group = new L.FeatureGroup(treeLayer.getLayers());
+//             map.fitBounds(group.getBounds().pad(0.1));
+//         }
+//     } else {
+//         showToast('No valid tree data found', 'warning');
+//     }
+// }
+
+
+// // Alternative simpler version for large datasets with icons
+// function processTreeDataOptimized(treeData) {
+//     treeLayer.clearLayers();
+    
+//     console.log('Optimized tree processing for large dataset with icons');
+    
+//     let features = [];
+    
+//     // Extract features from the nested structure
+//     if (Array.isArray(treeData) && treeData[0] && treeData[0].features) {
+//         features = treeData[0].features;
+//     } else if (treeData && treeData.features) {
+//         features = treeData.features;
+//     } else {
+//         console.warn('Cannot extract features from tree data');
+//         return;
+//     }
+    
+//     console.log(`Processing ${features.length} tree features`);
+    
+//     let processed = 0;
+//     const batchSize = 1000; // Process in batches to avoid blocking UI
+    
+//     // Simple tree icon for optimized processing
+//     const simpleTreeIcon = L.divIcon({
+//         html: `
+//             <div style="
+//                 background: linear-gradient(135deg, #228B22, #32CD32);
+//                 width: 16px;
+//                 height: 16px;
+//                 border-radius: 50% 50% 50% 0;
+//                 transform: rotate(-45deg);
+//                 display: flex;
+//                 align-items: center;
+//                 justify-content: center;
+//                 box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+//                 border: 1px solid white;
+//             ">
+//                 <div style="
+//                     transform: rotate(45deg);
+//                     color: white;
+//                     font-size: 8px;
+//                 ">🌲</div>
+//             </div>
+//         `,
+//         className: 'tree-icon-optimized',
+//         iconSize: [16, 16],
+//         iconAnchor: [8, 16],
+//         popupAnchor: [0, -16]
+//     });
+    
+//     function processBatch(startIndex) {
+//         const endIndex = Math.min(startIndex + batchSize, features.length);
+        
+//         for (let i = startIndex; i < endIndex; i++) {
+//             const feature = features[i];
+            
+//             // Quick validation and processing
+//             if (feature && feature.geometry && feature.geometry.type === 'Point' && 
+//                 feature.geometry.coordinates && feature.geometry.coordinates.length >= 2) {
+                
+//                 const coords = feature.geometry.coordinates;
+//                 const lat = coords[1];
+//                 const lng = coords[0];
+                
+//                 // Basic coordinate validation
+//                 if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+//                     const marker = L.marker([lat, lng], {
+//                         icon: simpleTreeIcon,
+//                         title: 'Tree',
+//                         zIndexOffset: 1000
+//                     });
+                    
+//                     const props = feature.properties || {};
+//                     marker.bindPopup(createTreePopupContent(props, feature.id || i), {
+//                         className: 'tree-popup-container',
+//                         maxWidth: 250
+//                     });
+//                     treeLayer.addLayer(marker);
+//                     processed++;
+//                 }
+//             }
+//         }
+        
+//         // Continue with next batch or finish
+//         if (endIndex < features.length) {
+//             setTimeout(() => processBatch(endIndex), 0);
+//         } else {
+//             console.log(`Optimized processing complete: ${processed} trees added with icons`);
+//             if (processed > 0 && !map.hasLayer(treeLayer)) {
+//                 map.addLayer(treeLayer);
+//             }
+//             showToast(`Loaded ${processed} trees with beautiful icons`, 'success');
+//         }
+//     }
+    
+//     // Start processing
+//     processBatch(0);
+// }
+
+function initializeOpacityControls() {
+    document.getElementById('baseOpacitySlider').addEventListener('input', function(e) {
+        const opacity = e.target.value / 100;
+        document.getElementById('baseOpacityValue').textContent = `${e.target.value}%`;
+        setBaseMapOpacity(opacity);
+    });
+
+    document.getElementById('farmOpacitySlider').addEventListener('input', function(e) {
+        const opacity = e.target.value / 100;
+        document.getElementById('farmOpacityValue').textContent = `${e.target.value}%`;
+        setFarmLayersOpacity(opacity);
+    });
+
+    // Tree opacity control
+    document.getElementById('treeOpacitySlider').addEventListener('input', function(e) {
+        const opacity = e.target.value / 100;
+        document.getElementById('treeOpacityValue').textContent = `${e.target.value}%`;
+        setTreeLayersOpacity(opacity);
+    });
+}
+
+function setTreeLayersOpacity(opacity) {
+    treeLayer.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+            const icon = layer.getElement();
+            if (icon) {
+                icon.style.opacity = opacity;
+            }
+        }
+    });
+}
+
 function processTreeData(treeData) {
     // Clear existing tree layer
     treeLayer.clearLayers();
@@ -3135,19 +3732,33 @@ function debugTreeData(treeData) {
         showToast('Selection cleared', 'info');
     }
 
+    // function refreshMap() {
+    //     showLoading('Refreshing map data...');
+        
+    //     farmLayers.clearLayers();
+    //     treeLayer.clearLayers();
+    //     treeIconsLayer.clearLayers();
+    //     farmsData = [];
+        
+    //     loadFarmData();
+    //     initializeAdministrativeBoundaries();
+        
+    //     showToast('Map refreshed successfully', 'success');
+    // }
     function refreshMap() {
-        showLoading('Refreshing map data...');
-        
-        farmLayers.clearLayers();
-        treeLayer.clearLayers();
-        treeIconsLayer.clearLayers();
-        farmsData = [];
-        
-        loadFarmData();
-        initializeAdministrativeBoundaries();
-        
-        showToast('Map refreshed successfully', 'success');
-    }
+    showLoading('Refreshing map data...');
+    
+    farmLayers.clearLayers();
+    treeLayer.clearLayers();
+    treeIconsLayer.clearLayers();
+    farmsData = [];
+    
+    // Use the main load function which will use cache if available
+    loadFarmData();
+    initializeAdministrativeBoundaries();
+    
+    showToast('Map refreshed successfully', 'success');
+}
 
 
 
@@ -3381,31 +3992,71 @@ window.selectSearchResult = function(farmId) {
         return div.innerHTML;
     }
 
-    function showToast(message, type = 'info') {
-        document.querySelectorAll('.alert-toast').forEach(toast => toast.remove());
+    // function showToast(message, type = 'info') {
+    //     document.querySelectorAll('.alert-toast').forEach(toast => toast.remove());
         
-        const toast = document.createElement('div');
-        toast.className = `alert alert-${type} alert-dismissible fade show alert-toast`;
-        toast.style.position = 'fixed';
-        toast.style.top = '20px';
-        toast.style.left = '50%';
-        toast.style.transform = 'translateX(-50%)';
-        toast.style.zIndex = '99999';
-        toast.style.minWidth = '300px';
-        toast.style.textAlign = 'center';
-        toast.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+    //     const toast = document.createElement('div');
+    //     toast.className = `alert alert-${type} alert-dismissible fade show alert-toast`;
+    //     toast.style.position = 'fixed';
+    //     toast.style.top = '20px';
+    //     toast.style.left = '50%';
+    //     toast.style.transform = 'translateX(-50%)';
+    //     toast.style.zIndex = '99999';
+    //     toast.style.minWidth = '300px';
+    //     toast.style.textAlign = 'center';
+    //     toast.innerHTML = `
+    //             ${message}
+    //             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    //         `;
 
-        document.body.appendChild(toast);
+    //     document.body.appendChild(toast);
 
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.remove();
-            }
-        }, 3000);
+    //     setTimeout(() => {
+    //         if (toast.parentNode) {
+    //             toast.remove();
+    //         }
+    //     }, 3000);
+    // }
+
+
+    function showToast(message, type = 'info', fromCache = false) {
+    document.querySelectorAll('.alert-toast').forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show alert-toast`;
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.zIndex = '99999';
+    toast.style.minWidth = '300px';
+    toast.style.textAlign = 'center';
+    
+    let toastMessage = message;
+    if (fromCache) {
+        toastMessage += ' <small><em>(from cache)</em></small>';
     }
+    
+    toast.innerHTML = `
+        ${toastMessage}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+// In the cached data section:
+setTimeout(() => {
+    hideLoading();
+    processFarmData(cachedFarmData, cachedTreeData);
+    showToast('Farm data loaded successfully', 'success', true); // Add true for cache indicator
+}, 100);
 
     function showLoading(message) {
     // Use your existing blockUI loader
@@ -3663,6 +4314,41 @@ function lastResortZoom(farm) {
     // If all else fails, show a message
     showToast(`Could not locate farm ${farm.farm_code} on map`, 'error');
 }
+
+// ==================== CACHE MANAGEMENT ====================
+
+function clearDataCache() {
+    cachedFarmData = null;
+    cachedTreeData = null;
+    isDataLoaded = false;
+    dataLoadPromise = null;
+    console.log('Data cache cleared');
+}
+
+function getDataLoadStatus() {
+    return {
+        isDataLoaded,
+        farmData: cachedFarmData ? `Loaded (${cachedFarmData.features ? cachedFarmData.features.length : 0} features)` : 'Not loaded',
+        treeData: cachedTreeData ? 'Loaded' : 'Not loaded'
+    };
+}
+
+// Optional: Periodically refresh cache in background (every 5 minutes)
+function startBackgroundRefresh() {
+    setInterval(() => {
+        if (isDataLoaded) {
+            console.log('Background cache refresh started...');
+            preloadAllData().then(() => {
+                console.log('Background cache refresh completed');
+            }).catch(error => {
+                console.warn('Background cache refresh failed:', error);
+            });
+        }
+    }, 5 * 60 * 1000); // 5 minutes
+}
+
+// Call this after initial load if you want automatic refreshes
+// startBackgroundRefresh();
 
 
 // ==================== DRAGGABLE MODAL FUNCTIONS ====================
